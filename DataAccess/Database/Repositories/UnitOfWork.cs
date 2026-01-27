@@ -56,6 +56,14 @@ namespace AI_Integration.DataAccess.Database.Repositories
         public IAdSessionRepository ADSession { get; private set; }
         public IUploadedFileRepository UploadedFile { get; private set; }
         public IUsersRepository Users { get; private set; } // <--- nuovo
+        public IContentRepository Contents { get; private set; }
+        public IContentImageRepository ContentImages { get; private set; }
+        public IContentLinkRepository ContentLinks { get; private set; }
+        public IPodcastRepository Podcasts { get; private set; }
+        public IEventRepository Events { get; private set; }
+        public IEventLinkRepository EventLinks { get; private set; }
+        public IGalleryRepository Galleries { get; private set; }
+        public IPhotoGalleryRepository PhotoGalleries { get; private set; }
 
         public UnitOfWork(ApplicationDbContext db)
         {
@@ -69,6 +77,14 @@ namespace AI_Integration.DataAccess.Database.Repositories
             ADSession = new AdSessionRepository(db);
             UploadedFile = new UploadedFileRepository(db);
             Users = new UsersRepository(db);
+            Contents = new ContentRepository(db);
+            ContentImages = new ContentImageRepository(db);
+            ContentLinks = new ContentLinkRepository(db);
+            Podcasts = new PodcastRepository(db);
+            Events = new EventRepository(db);
+            EventLinks = new EventLinkRepository(db);
+            Galleries = new GalleryRepository(db);
+            PhotoGalleries = new PhotoGalleryRepository(db);
         }
 
         public void Save()

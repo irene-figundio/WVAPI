@@ -31,6 +31,14 @@ namespace AI_Integration.DataAccess
         public virtual DbSet<UploadedFile> UploadedFiles { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!; // <--- nuovo
         public virtual DbSet<UserStatus> UserStatuses { get; set; } = null!; // <--- nuovo
+        public virtual DbSet<Content> Contents { get; set; } = null!;
+        public virtual DbSet<ContentImage> ContentImages { get; set; } = null!;
+        public virtual DbSet<ContentLink> ContentLinks { get; set; } = null!;
+        public virtual DbSet<Podcast> Podcasts { get; set; } = null!;
+        public virtual DbSet<Event> Events { get; set; } = null!;
+        public virtual DbSet<EventLink> EventLinks { get; set; } = null!;
+        public virtual DbSet<Gallery> Galleries { get; set; } = null!;
+        public virtual DbSet<PhotoGallery> PhotoGalleries { get; set; } = null!;
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -151,7 +159,8 @@ namespace AI_Integration.DataAccess
                 entity.Property(e => e.Id).ValueGeneratedOnAdd(); // Set the primary key
             });
 
-            modelBuilder.Entity<UploadedFile> (entity => {
+            modelBuilder.Entity<UploadedFile>(entity =>
+            {
                 entity.ToTable("UploadedFiles", "dbo");
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd(); // Set the primary key
@@ -159,10 +168,11 @@ namespace AI_Integration.DataAccess
                 entity.Property(e => e.FilePath).HasMaxLength(255); // Set max length for FilePath
                 entity.Property(e => e.UploadDate).HasColumnType("datetime"); // Set type for UploadDate
             });
+
             modelBuilder.Entity<User>()
-    .HasOne(u => u.Status)
-    .WithMany(s => s.Users)
-    .HasForeignKey(u => u.StatusId);
+                .HasOne(u => u.Status)
+                .WithMany(s => s.Users)
+                .HasForeignKey(u => u.StatusId);
 
             modelBuilder.Entity<User>()
                 .HasOne(u => u.CreationUser)
@@ -178,6 +188,100 @@ namespace AI_Integration.DataAccess
                 .HasOne(u => u.DeletionUser)
                 .WithMany(c => c.DeletedUsers)
                 .HasForeignKey(u => u.DeletionUserId);
+
+            modelBuilder.Entity<Content>(e =>
+            {
+                e.ToTable("contents", "dbo");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.Property(x => x.Title).IsRequired().HasMaxLength(255);
+                e.Property(x => x.Text).HasColumnName("content").IsRequired();
+                e.Property(x => x.PublishDate).HasColumnType("date");
+                e.Property(x => x.ContentType).IsRequired().HasMaxLength(20);
+                e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSDATETIME()");
+                e.Property(x => x.UpdatedAt).HasDefaultValueSql("SYSDATETIME()");
+            });
+
+            modelBuilder.Entity<ContentImage>(e =>
+            {
+                e.ToTable("content_images", "dbo");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSDATETIME()");
+                e.HasOne(x => x.Content)
+                 .WithMany(c => c.ContentImages)
+                 .HasForeignKey(x => x.ContentId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ContentLink>(e =>
+            {
+                e.ToTable("content_links", "dbo");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSDATETIME()");
+                e.HasOne(x => x.Content)
+                 .WithMany(c => c.ContentLinks)
+                 .HasForeignKey(x => x.ContentId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Podcast>(e =>
+            {
+                e.ToTable("podcasts", "dbo");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.Property(x => x.Title).IsRequired().HasMaxLength(255);
+                e.Property(x => x.Description).IsRequired();
+                e.Property(x => x.PublishDate).HasColumnType("date");
+                e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSDATETIME()");
+            });
+
+            modelBuilder.Entity<Event>(e =>
+            {
+                e.ToTable("events", "dbo");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.Property(x => x.Title).IsRequired().HasMaxLength(255);
+                e.Property(x => x.Description).IsRequired();
+                e.Property(x => x.EventDate).HasColumnType("date");
+                e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSDATETIME()");
+            });
+
+            modelBuilder.Entity<EventLink>(e =>
+            {
+                e.ToTable("event_links", "dbo");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.HasOne(x => x.Event)
+                 .WithMany(ev => ev.EventLinks)
+                 .HasForeignKey(x => x.EventId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Gallery>(e =>
+            {
+                e.ToTable("galleries", "dbo");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSDATETIME()");
+                e.HasOne(x => x.Event)
+                 .WithOne(ev => ev.Gallery)
+                 .HasForeignKey<Gallery>(x => x.EventId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<PhotoGallery>(e =>
+            {
+                e.ToTable("photo_gallery", "dbo");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSDATETIME()");
+                e.HasOne(x => x.Gallery)
+                 .WithMany(g => g.Photos)
+                 .HasForeignKey(x => x.GalleryId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
 
 
             OnModelCreatingPartial(modelBuilder);
