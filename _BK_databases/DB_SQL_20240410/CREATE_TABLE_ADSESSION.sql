@@ -1,0 +1,30 @@
+USE [Vitinerario]
+GO
+
+/****** Object:  Table [dbo].[AdSession]    Script Date: 10/04/2024 16:55:16 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[AdSession](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[ID_Campaing] [int] NOT NULL,
+	[StartDate] [datetime] NOT NULL,
+	[EndDate] [datetime] NOT NULL,
+ CONSTRAINT [PK_AdSession] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[AdSession]  WITH CHECK ADD  CONSTRAINT [ID_Campaign] FOREIGN KEY([ID_Campaing])
+REFERENCES [dbo].[AdCampaign] ([Id])
+GO
+
+ALTER TABLE [dbo].[AdSession] CHECK CONSTRAINT [ID_Campaign]
+GO
+
+

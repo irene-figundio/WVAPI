@@ -1,0 +1,9 @@
+@AI_Integration_HostAddress = http://localhost:5134
+
+GET {{AI_Integration_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+GET {{AI_Integration_HostAddress}}/video/random
+Accept: application/json
+###
