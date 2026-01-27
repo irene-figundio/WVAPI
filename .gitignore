@@ -52,3 +52,12 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+.env
+.env.local
+.env.production
+.env.development
+*.pem
+*.key
+*.crt
+secrets.*
