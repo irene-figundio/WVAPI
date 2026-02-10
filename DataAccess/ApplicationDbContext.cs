@@ -191,11 +191,11 @@ namespace AI_Integration.DataAccess
 
             modelBuilder.Entity<Content>(e =>
             {
-                e.ToTable("contents", "dbo");
+                e.ToTable("Contents", "dbo");
                 e.HasKey(x => x.Id);
                 e.Property(x => x.Id).ValueGeneratedOnAdd();
                 e.Property(x => x.Title).IsRequired().HasMaxLength(255);
-                e.Property(x => x.Text).HasColumnName("content").IsRequired();
+                e.Property(x => x.Text).IsRequired();
                 e.Property(x => x.PublishDate).HasColumnType("date");
                 e.Property(x => x.ContentType).IsRequired().HasMaxLength(20);
                 e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSDATETIME()");
@@ -204,7 +204,7 @@ namespace AI_Integration.DataAccess
 
             modelBuilder.Entity<ContentImage>(e =>
             {
-                e.ToTable("content_images", "dbo");
+                e.ToTable("ContentImages", "dbo");
                 e.HasKey(x => x.Id);
                 e.Property(x => x.Id).ValueGeneratedOnAdd();
                 e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSDATETIME()");
@@ -216,7 +216,7 @@ namespace AI_Integration.DataAccess
 
             modelBuilder.Entity<ContentLink>(e =>
             {
-                e.ToTable("content_links", "dbo");
+                e.ToTable("ContentLinks", "dbo");
                 e.HasKey(x => x.Id);
                 e.Property(x => x.Id).ValueGeneratedOnAdd();
                 e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSDATETIME()");
@@ -228,7 +228,7 @@ namespace AI_Integration.DataAccess
 
             modelBuilder.Entity<Podcast>(e =>
             {
-                e.ToTable("podcasts", "dbo");
+                e.ToTable("Podcasts", "dbo");
                 e.HasKey(x => x.Id);
                 e.Property(x => x.Id).ValueGeneratedOnAdd();
                 e.Property(x => x.Title).IsRequired().HasMaxLength(255);
@@ -239,7 +239,7 @@ namespace AI_Integration.DataAccess
 
             modelBuilder.Entity<Event>(e =>
             {
-                e.ToTable("events", "dbo");
+                e.ToTable("Events", "dbo");
                 e.HasKey(x => x.Id);
                 e.Property(x => x.Id).ValueGeneratedOnAdd();
                 e.Property(x => x.Title).IsRequired().HasMaxLength(255);
@@ -250,7 +250,7 @@ namespace AI_Integration.DataAccess
 
             modelBuilder.Entity<EventLink>(e =>
             {
-                e.ToTable("event_links", "dbo");
+                e.ToTable("EventLinks", "dbo");
                 e.HasKey(x => x.Id);
                 e.Property(x => x.Id).ValueGeneratedOnAdd();
                 e.HasOne(x => x.Event)
@@ -261,7 +261,7 @@ namespace AI_Integration.DataAccess
 
             modelBuilder.Entity<Gallery>(e =>
             {
-                e.ToTable("galleries", "dbo");
+                e.ToTable("Galleries", "dbo");
                 e.HasKey(x => x.Id);
                 e.Property(x => x.Id).ValueGeneratedOnAdd();
                 e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSDATETIME()");
@@ -273,7 +273,7 @@ namespace AI_Integration.DataAccess
 
             modelBuilder.Entity<PhotoGallery>(e =>
             {
-                e.ToTable("photo_gallery", "dbo");
+                e.ToTable("PhotoGallery", "dbo");
                 e.HasKey(x => x.Id);
                 e.Property(x => x.Id).ValueGeneratedOnAdd();
                 e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSDATETIME()");
