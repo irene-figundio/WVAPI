@@ -61,3 +61,6 @@ nunit-*.xml
 *.key
 *.crt
 secrets.*
+/.vs/AI_Integration
+/appsettings.Development.json
+/appsettings.Production.json
