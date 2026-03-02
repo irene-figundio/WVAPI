@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AI_Integration.DataAccess.Database.Models
 {
@@ -13,7 +14,7 @@ namespace AI_Integration.DataAccess.Database.Models
         [StringLength(255)]
         public string? Caption { get; set; }
         public DateTime? CreatedAt { get; set; }
-
-        public virtual Gallery Gallery { get; set; } = null!;
+        [NotMapped]
+        public virtual Gallery? Gallery { get; set; } = null!;
     }
 }

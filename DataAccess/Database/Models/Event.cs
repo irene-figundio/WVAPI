@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AI_Integration.DataAccess.Database.Models
 {
@@ -17,7 +18,7 @@ namespace AI_Integration.DataAccess.Database.Models
         public string? CoverImage { get; set; }
         public int? GalleryId { get; set; }
         public DateTime? CreatedAt { get; set; }
-
+        [NotMapped]
         public virtual Gallery? Gallery { get; set; }
         public virtual ICollection<EventLink> EventLinks { get; set; } = new List<EventLink>();
     }

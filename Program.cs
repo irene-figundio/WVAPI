@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
@@ -22,7 +23,37 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Vitinerario API", Version = "v1" });
+    c.CustomSchemaIds(type => type.FullName);
+
+    // Configurazione JWT per Swagger
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Inserisci SOLO il token JWT. Non inserire 'Bearer ' davanti."
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 builder.Services.AddCors(options =>
 {   
     options.AddPolicy("AllowAnyOrigin", builder =>
@@ -55,6 +86,7 @@ var key = Encoding.ASCII.GetBytes("Vml0aW5lcmFyaW9AMjAyNCxXZWJBcGlAMjAyNC0hY3JlY
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 var jwt = builder.Configuration.GetSection("Jwt").Get<JwtOptions>() ?? new JwtOptions();
 
+
 // Configura l'autenticazione JWT
 builder.Services.AddAuthentication(options =>
 {
@@ -65,38 +97,34 @@ builder.Services.AddAuthentication(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = false,
-            ValidateAudience = false,
+            ValidateIssuer = true,
+            ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
+            ValidIssuer = "Vitinerario_API",
+            ValidAudience = "Vitinerario_API",
             IssuerSigningKey = new SymmetricSecurityKey(key),
         };
 
         // Aggiungi un evento per gestire la verifica dell'autorizzazione
         options.Events = new JwtBearerEvents
         {
+            OnAuthenticationFailed = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogError("Authentication failed: {Message}", context.Exception.Message);
+                return Task.CompletedTask;
+            },
             OnTokenValidated = context =>
             {
-                // Eseguire la logica di autorizzazione qui
-                // Per esempio, verifica altre informazioni contenute nel token
-                if (context.SecurityToken is JsonWebToken token)
-                {
-                    //controlla eventuali restrizioni specifiche dell'applicazione
-                    var tok = context.SecurityToken as JsonWebToken;
-
-                    // Esempio: verifica se l'utente ha l'autorizzazione ad accedere a una risorsa specifica
-                    if (!IsAuthorized(tok))
-                    {
-                        context.Fail("Unauthorized");
-                    }
-                }
-                else
-                {
-                    // Gestisci il caso in cui SecurityToken non è un JwtSecurityToken
-                    context.Fail("Invalid token");
-                }
-              
-
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogInformation("Token validated for user: {User}", context.Principal?.Identity?.Name);
+                return Task.CompletedTask;
+            },
+            OnChallenge = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogWarning("Authentication challenge triggered: {Error}, {ErrorDescription}", context.Error, context.ErrorDescription);
                 return Task.CompletedTask;
             }
         };

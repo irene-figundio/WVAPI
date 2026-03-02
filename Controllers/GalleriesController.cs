@@ -113,12 +113,8 @@ namespace AI_Integration.Controllers
 
                 // Basic mapping (better to use Automapper or similar, but following pattern)
 
-
-
-
-
                 item.Title = changes.Title ?? item.Title;
-
+                
                 item.EventId = changes.EventId != 0 ? changes.EventId : item.EventId;
 
 
