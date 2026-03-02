@@ -98,6 +98,52 @@ namespace AI_Integration.Controllers
             }
         }
 
+        [HttpGet("type/{contentType}")]
+        public async Task<IActionResult> GetByType(string contentType, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        {
+            var log = WebApiLogHelper.NewLog("GET", $"api/contents/type/{contentType}", "", userAgent, $"List contents by type ({contentType})");
+            var sw = Stopwatch.StartNew();
+            try
+            {
+                var contents = await _unitOfWork.Query<Content>()
+                    .Where(c => c.ContentType.ToLower() == contentType.ToLower())
+                    .OrderByDescending(c => c.PublishDate)
+                    .Select(c => new ContentDto
+                    {
+                        Id = c.Id,
+                        Title = c.Title,
+                        Text = c.Text,
+                        PublishDate = c.PublishDate,
+                        CoverImage = c.CoverImage,
+                        ContentType = c.ContentType,
+                        IsPublished = c.IsPublished ?? true,
+                        Images = c.ContentImages.Select(i => new ContentImageDto
+                        {
+                            Id = i.Id,
+                            ImageUrl = i.ImageUrl,
+                            Caption = i.Caption,
+                            Position = i.Position
+                        }).ToList(),
+                        Links = c.ContentLinks.Select(l => new ContentLinkDto
+                        {
+                            Id = l.Id,
+                            LinkUrl = l.LinkUrl,
+                            Description = l.Description
+                        }).ToList()
+                    }).ToListAsync();
+
+                sw.Stop();
+                await WebApiLogHelper.LogOkAsync(_unitOfWork, log, $"{{ success = true, count = {contents.Count} }}", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return Ok(contents);
+            }
+            catch (Exception ex)
+            {
+                sw.Stop();
+                await WebApiLogHelper.LogErrorAsync(_unitOfWork, log, ex, $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return StatusCode(500, new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
