@@ -1,0 +1,93 @@
+=============================================================
+FLUSSO API PER L'INSERIMENTO DI NEWS E BLOG (Contents)
+=============================================================
+Sia le News che gli Articoli (Blog) utilizzano le stesse tabelle (Contents, ContentImages, ContentLinks). La differenza è nel campo "contentType", che sarà "news" o "blog".
+
+### 1. Inserimento di una News (o Articolo/Blog)
+Endpoint: POST /api/Contents
+Header facoltativo: User-Agent
+Body:
+{
+  "title": "Nuove funzionalità AI",
+  "text": "Siamo felici di annunciare...",
+  "publishDate": "2024-10-01T10:00:00Z",
+  "coverImage": "https://example.com/images/cover.jpg",
+  "contentType": "news",  // usare "blog" per un articolo del blog
+  "isPublished": true,
+  "createdAt": "2024-10-01T10:00:00Z",
+  "updatedAt": "2024-10-01T10:00:00Z"
+}
+La risposta conterrà l'entità creata e il suo `id` (es. `contentId = 1`). Questo `id` andrà usato negli step successivi.
+
+### 2. Inserimento di un'Immagine correlata alla News/Blog
+Endpoint: POST /api/ContentImages
+Body:
+{
+  "contentId": 1,
+  "imageUrl": "https://example.com/images/news-1.jpg",
+  "caption": "Diagramma Architettura AI",
+  "position": 1,
+  "createdAt": "2024-10-01T10:05:00Z"
+}
+
+### 3. Inserimento di un Link correlato alla News/Blog
+Endpoint: POST /api/ContentLinks
+Body:
+{
+  "contentId": 1,
+  "linkUrl": "https://example.com/ai-docs",
+  "description": "Documentazione API",
+  "createdAt": "2024-10-01T10:06:00Z"
+}
+
+=============================================================
+FLUSSO API PER L'INSERIMENTO DI UN EVENTO
+=============================================================
+Gli eventi seguono un flusso simile, ma utilizzando tabelle e API distinte (Events, EventLinks, Galleries, PhotoGallery).
+
+### 1. Inserimento di un Evento
+Endpoint: POST /api/Events
+Body:
+{
+  "title": "AI Summit 2024",
+  "description": "Partecipa alla conferenza AI più grande...",
+  "eventDate": "2024-11-20T09:00:00Z",
+  "coverImage": "https://example.com/images/ai-summit-cover.jpg",
+  "createdAt": "2024-10-01T11:00:00Z"
+}
+La risposta conterrà l'`id` dell'evento creato (es. `eventId = 2`). Da usare nei passi successivi.
+
+### 2. Inserimento di un Link correlato all'Evento
+Endpoint: POST /api/EventLinks
+Body:
+{
+  "eventId": 2,
+  "linkUrl": "https://example.com/tickets",
+  "description": "Acquista i biglietti qui"
+}
+
+### 3. Creazione di una Galleria per l'Evento
+Endpoint: POST /api/Galleries
+Body:
+{
+  "eventId": 2,
+  "title": "Foto Ufficiali AI Summit 2024",
+  "createdAt": "2024-10-01T11:05:00Z"
+}
+La risposta conterrà l'`id` della galleria creata (es. `galleryId = 5`).
+
+(Nota opzionale: se si desidera aggiornare l'Evento appena creato con l'ID della Galleria principale, chiamare:
+ PUT /api/Events/2
+ Body: { "id": 2, "galleryId": 5, ...tutti gli altri campi dell'evento originali... }
+)
+
+### 4. Inserimento di Foto all'interno della Galleria dell'Evento
+Endpoint: POST /api/PhotoGallery
+Body:
+{
+  "galleryId": 5,
+  "imageUrl": "https://example.com/images/speaker-1.jpg",
+  "caption": "Keynote Speaker",
+  "createdAt": "2024-10-01T11:10:00Z"
+}
+Ripetere questo passo per inserire altre foto nella stessa galleria.
