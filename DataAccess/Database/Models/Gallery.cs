@@ -12,6 +12,11 @@ namespace AI_Integration.DataAccess.Database.Models
         [StringLength(255)]
         public string? Title { get; set; }
         public DateTime? CreatedAt { get; set; }
+
+        public int LangID { get; set; }
+        [ForeignKey("LangID")]
+        public virtual Language? Language { get; set; }
+
         [NotMapped]
         public virtual Event? Event { get; set; } = null!;
         public virtual ICollection<PhotoGallery> Photos { get; set; } = new List<PhotoGallery>();

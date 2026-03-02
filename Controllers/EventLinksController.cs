@@ -112,15 +112,9 @@ namespace AI_Integration.Controllers
                 }
 
                 // Basic mapping (better to use Automapper or similar, but following pattern)
-
-
-
                 item.LinkUrl = changes.LinkUrl ?? item.LinkUrl;
                 item.Description = changes.Description ?? item.Description;
-
-
-
-
+                item.LangID = changes.LangID != 0 ? changes.LangID : item.LangID;
 
                 _unitOfWork.Update(item);
                 await _unitOfWork.SaveChangesAsync();

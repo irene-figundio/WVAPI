@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AI_Integration.DataAccess.Database.Models
 {
@@ -19,5 +20,9 @@ namespace AI_Integration.DataAccess.Database.Models
         [StringLength(500)]
         public string? SpotifyUrl { get; set; }
         public DateTime? CreatedAt { get; set; }
+
+        public int LangID { get; set; }
+        [ForeignKey("LangID")]
+        public virtual Language? Language { get; set; }
     }
 }

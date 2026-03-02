@@ -1,9 +1,21 @@
 -- Script for creating tables based on EF Core models in Vitinerario project
 
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Languages')
+BEGIN
+    CREATE TABLE [dbo].[Languages](
+        [Id] [int] IDENTITY(1,1) NOT NULL,
+        [Code] [nvarchar](10) NOT NULL,
+        [Name] [nvarchar](100) NOT NULL,
+        CONSTRAINT [PK_Languages] PRIMARY KEY CLUSTERED ([Id] ASC)
+    )
+END
+GO
+
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AIVideos')
 BEGIN
     CREATE TABLE [dbo].[AIVideos](
         [Id] [int] IDENTITY(1,1) NOT NULL,
+        [LangID] [int] NOT NULL DEFAULT 1,
         [Dir_Path] [nvarchar](max) NULL,
         [Title] [nvarchar](max) NULL,
         [Url_Video] [nvarchar](max) NULL,
@@ -39,6 +51,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AdAnalytics')
 BEGIN
     CREATE TABLE [dbo].[AdAnalytics](
         [Id] [int] IDENTITY(1,1) NOT NULL,
+        [LangID] [int] NOT NULL DEFAULT 1,
         [SessionId] [int] NOT NULL,
         [VideoId] [int] NOT NULL,
         [NumViews] [int] NULL,
@@ -54,6 +67,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AdCampaigns')
 BEGIN
     CREATE TABLE [dbo].[AdCampaigns](
         [Id] [int] IDENTITY(1,1) NOT NULL,
+        [LangID] [int] NOT NULL DEFAULT 1,
         [Name] [nvarchar](max) NOT NULL,
         [Description] [nvarchar](max) NULL,
         [StartDate] [datetime2](7) NOT NULL,
@@ -75,6 +89,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AdSessions')
 BEGIN
     CREATE TABLE [dbo].[AdSessions](
         [Id] [int] IDENTITY(1,1) NOT NULL,
+        [LangID] [int] NOT NULL DEFAULT 1,
         [ID_Campaing] [int] NOT NULL,
         [StartDate] [datetime2](7) NOT NULL,
         [EndDate] [datetime2](7) NOT NULL,
@@ -94,6 +109,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Contents')
 BEGIN
     CREATE TABLE [dbo].[Contents](
         [Id] [int] IDENTITY(1,1) NOT NULL,
+        [LangID] [int] NOT NULL DEFAULT 1,
         [Title] [nvarchar](255) NOT NULL,
         [Text] [nvarchar](max) NOT NULL,
         [PublishDate] [datetime2](7) NOT NULL,
@@ -111,6 +127,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ContentImages')
 BEGIN
     CREATE TABLE [dbo].[ContentImages](
         [Id] [int] IDENTITY(1,1) NOT NULL,
+        [LangID] [int] NOT NULL DEFAULT 1,
         [ContentId] [int] NOT NULL,
         [ImageUrl] [nvarchar](500) NOT NULL,
         [Caption] [nvarchar](255) NULL,
@@ -125,6 +142,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ContentLinks')
 BEGIN
     CREATE TABLE [dbo].[ContentLinks](
         [Id] [int] IDENTITY(1,1) NOT NULL,
+        [LangID] [int] NOT NULL DEFAULT 1,
         [ContentId] [int] NOT NULL,
         [LinkUrl] [nvarchar](500) NOT NULL,
         [Description] [nvarchar](255) NULL,
@@ -138,6 +156,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Events')
 BEGIN
     CREATE TABLE [dbo].[Events](
         [Id] [int] IDENTITY(1,1) NOT NULL,
+        [LangID] [int] NOT NULL DEFAULT 1,
         [Title] [nvarchar](255) NOT NULL,
         [Description] [nvarchar](max) NOT NULL,
         [EventDate] [datetime2](7) NOT NULL,
@@ -153,6 +172,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'EventLinks')
 BEGIN
     CREATE TABLE [dbo].[EventLinks](
         [Id] [int] IDENTITY(1,1) NOT NULL,
+        [LangID] [int] NOT NULL DEFAULT 1,
         [EventId] [int] NOT NULL,
         [LinkUrl] [nvarchar](500) NOT NULL,
         [Description] [nvarchar](255) NULL,
@@ -165,6 +185,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Galleries')
 BEGIN
     CREATE TABLE [dbo].[Galleries](
         [Id] [int] IDENTITY(1,1) NOT NULL,
+        [LangID] [int] NOT NULL DEFAULT 1,
         [EventId] [int] NOT NULL,
         [Title] [nvarchar](255) NULL,
         [CreatedAt] [datetime2](7) NULL,
@@ -177,6 +198,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'PhotoGalleries')
 BEGIN
     CREATE TABLE [dbo].[PhotoGalleries](
         [Id] [int] IDENTITY(1,1) NOT NULL,
+        [LangID] [int] NOT NULL DEFAULT 1,
         [GalleryId] [int] NOT NULL,
         [ImageUrl] [nvarchar](500) NOT NULL,
         [Caption] [nvarchar](255) NULL,
@@ -190,6 +212,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Podcasts')
 BEGIN
     CREATE TABLE [dbo].[Podcasts](
         [Id] [int] IDENTITY(1,1) NOT NULL,
+        [LangID] [int] NOT NULL DEFAULT 1,
         [Title] [nvarchar](255) NOT NULL,
         [Description] [nvarchar](max) NOT NULL,
         [PublishDate] [datetime2](7) NOT NULL,
@@ -206,6 +229,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'UploadedFiles')
 BEGIN
     CREATE TABLE [dbo].[UploadedFiles](
         [Id] [int] IDENTITY(1,1) NOT NULL,
+        [LangID] [int] NOT NULL DEFAULT 1,
         [FileName] [nvarchar](max) NOT NULL,
         [FilePath] [nvarchar](max) NOT NULL,
         [FileType] [nvarchar](max) NOT NULL,
@@ -222,6 +246,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Users')
 BEGIN
     CREATE TABLE [dbo].[Users](
         [Id] [int] IDENTITY(1,1) NOT NULL,
+        [LangID] [int] NOT NULL DEFAULT 1,
         [Username] [nvarchar](max) NOT NULL,
         [Password] [nvarchar](max) NOT NULL,
         [Email] [nvarchar](max) NOT NULL,
@@ -249,6 +274,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'UserStatuses')
 BEGIN
     CREATE TABLE [dbo].[UserStatuses](
         [Id] [int] IDENTITY(1,1) NOT NULL,
+        [LangID] [int] NOT NULL DEFAULT 1,
         [Name] [nvarchar](max) NOT NULL,
         [ResourceKey] [nvarchar](max) NOT NULL,
         CONSTRAINT [PK_UserStatuses] PRIMARY KEY CLUSTERED ([Id] ASC)

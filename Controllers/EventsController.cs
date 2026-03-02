@@ -196,6 +196,7 @@ namespace AI_Integration.Controllers
                 @event.EventDate = changes.EventDate != default ? changes.EventDate : @event.EventDate;
                 @event.CoverImage = changes.CoverImage ?? @event.CoverImage;
                 @event.GalleryId = changes.GalleryId ?? @event.GalleryId;
+                @event.LangID = changes.LangID != 0 ? changes.LangID : @event.LangID;
 
                 _unitOfWork.Update(@event);
                 await _unitOfWork.SaveChangesAsync();

@@ -115,12 +115,7 @@ namespace AI_Integration.Controllers
                 item.ImageUrl = changes.ImageUrl ?? item.ImageUrl;
                 item.Caption = changes.Caption ?? item.Caption;
                 item.Position = changes.Position ?? item.Position;
-
-
-
-
-
-
+                item.LangID = changes.LangID != 0 ? changes.LangID : item.LangID;
 
                 _unitOfWork.Update(item);
                 await _unitOfWork.SaveChangesAsync();

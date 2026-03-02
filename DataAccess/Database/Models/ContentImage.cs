@@ -16,6 +16,10 @@ namespace AI_Integration.DataAccess.Database.Models
         public int? Position { get; set; }
         public DateTime? CreatedAt { get; set; }
 
+        public int LangID { get; set; }
+        [ForeignKey("LangID")]
+        public virtual Language? Language { get; set; }
+
         [NotMapped]
         public virtual Content? Content { get; set; } = null!;
     }

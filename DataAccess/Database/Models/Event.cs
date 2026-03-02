@@ -18,6 +18,11 @@ namespace AI_Integration.DataAccess.Database.Models
         public string? CoverImage { get; set; }
         public int? GalleryId { get; set; }
         public DateTime? CreatedAt { get; set; }
+
+        public int LangID { get; set; }
+        [ForeignKey("LangID")]
+        public virtual Language? Language { get; set; }
+
         [NotMapped]
         public virtual Gallery? Gallery { get; set; }
         public virtual ICollection<EventLink> EventLinks { get; set; } = new List<EventLink>();

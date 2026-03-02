@@ -12,6 +12,11 @@ namespace AI_Integration.DataAccess.Database.Models
         public string LinkUrl { get; set; } = null!;
         [StringLength(255)]
         public string? Description { get; set; }
+
+        public int LangID { get; set; }
+        [ForeignKey("LangID")]
+        public virtual Language? Language { get; set; }
+
         [NotMapped]
         public virtual Event? Event { get; set; } = null!;
     }

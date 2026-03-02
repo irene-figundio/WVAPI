@@ -26,13 +26,16 @@ namespace AI_Integration.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> Get([FromQuery] int langId = 1, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("GET", "api/podcasts", "", userAgent, "List podcasts");
+            var log = WebApiLogHelper.NewLog("GET", "api/podcasts", $"langId={langId}", userAgent, "List podcasts");
             var sw = Stopwatch.StartNew();
             try
             {
-                var podcasts = await _unitOfWork.Query<Podcast>().OrderByDescending(p => p.PublishDate).ToListAsync();
+                var podcasts = await _unitOfWork.Query<Podcast>()
+                    .Where(p => p.LangID == langId)
+                    .OrderByDescending(p => p.PublishDate)
+                    .ToListAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, $"{{ success = true, count = {podcasts.Count} }}", $"ElapsedMs={sw.ElapsedMilliseconds}");
                 return Ok(podcasts);
@@ -46,13 +49,15 @@ namespace AI_Integration.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById(int id, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> GetById(int id, [FromQuery] int langId = 1, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("GET", $"api/podcasts/{id}", "", userAgent, "Get podcast by id");
+            var log = WebApiLogHelper.NewLog("GET", $"api/podcasts/{id}", $"langId={langId}", userAgent, "Get podcast by id");
             var sw = Stopwatch.StartNew();
             try
             {
-                var podcast = await _unitOfWork.GetByIdAsync<Podcast>(id);
+                var podcast = await _unitOfWork.Query<Podcast>()
+                    .Where(p => p.Id == id && p.LangID == langId)
+                    .FirstOrDefaultAsync();
                 if (podcast == null)
                 {
                     sw.Stop();
@@ -112,6 +117,7 @@ namespace AI_Integration.Controllers
                 podcast.CoverImage = changes.CoverImage ?? podcast.CoverImage;
                 podcast.YoutubeUrl = changes.YoutubeUrl ?? podcast.YoutubeUrl;
                 podcast.SpotifyUrl = changes.SpotifyUrl ?? podcast.SpotifyUrl;
+                podcast.LangID = changes.LangID != 0 ? changes.LangID : podcast.LangID;
 
                 _unitOfWork.Update(podcast);
                 await _unitOfWork.SaveChangesAsync();

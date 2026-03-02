@@ -238,6 +238,7 @@ namespace AI_Integration.Controllers
                 content.CoverImage = changes.CoverImage ?? content.CoverImage;
                 content.ContentType = changes.ContentType ?? content.ContentType;
                 content.IsPublished = changes.IsPublished ?? content.IsPublished;
+                content.LangID = changes.LangID != 0 ? changes.LangID : content.LangID;
                 content.UpdatedAt = DateTime.Now;
 
                 _unitOfWork.Update(content);
