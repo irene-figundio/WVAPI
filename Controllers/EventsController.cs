@@ -53,18 +53,26 @@ namespace AI_Integration.Controllers
             public string Description { get; set; } = null!;
             public DateTime EventDate { get; set; }
             public string? CoverImage { get; set; }
+            public DateTime? BookingEndDate { get; set; }
+            public string? Location { get; set; }
+            public string? Organizer { get; set; }
+            public string? ContactInfo { get; set; }
+            public decimal Price { get; set; }
+            public bool IsOnline { get; set; }
+            public int LangID { get; set; }
             public List<EventLinkDto> Links { get; set; } = new();
             public GalleryDto? Gallery { get; set; }
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> Get([FromQuery] int langId = 1, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("GET", "api/events", "", userAgent, "List events (DTO)");
+            var log = WebApiLogHelper.NewLog("GET", "api/events", $"langId={langId}", userAgent, "List events (DTO)");
             var sw = Stopwatch.StartNew();
             try
             {
                 var events = await _unitOfWork.Query<Event>()
+                    .Where(e => e.LangID == langId)
                     .OrderByDescending(e => e.EventDate)
                     .Select(e => new EventDto
                     {
@@ -73,6 +81,13 @@ namespace AI_Integration.Controllers
                         Description = e.Description,
                         EventDate = e.EventDate,
                         CoverImage = e.CoverImage,
+                        BookingEndDate = e.BookingEndDate,
+                        Location = e.Location,
+                        Organizer = e.Organizer,
+                        ContactInfo = e.ContactInfo,
+                        Price = e.Price,
+                        IsOnline = e.IsOnline,
+                        LangID = e.LangID,
                         Links = e.EventLinks.Select(l => new EventLinkDto
                         {
                             Id = l.Id,
@@ -104,14 +119,14 @@ namespace AI_Integration.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById(int id, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> GetById(int id, [FromQuery] int langId = 1, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("GET", $"api/events/{id}", "", userAgent, "Get event by id (DTO)");
+            var log = WebApiLogHelper.NewLog("GET", $"api/events/{id}", $"langId={langId}", userAgent, "Get event by id (DTO)");
             var sw = Stopwatch.StartNew();
             try
             {
                 var dto = await _unitOfWork.Query<Event>()
-                    .Where(e => e.Id == id)
+                    .Where(e => e.Id == id && e.LangID == langId)
                     .Select(e => new EventDto
                     {
                         Id = e.Id,
@@ -119,6 +134,13 @@ namespace AI_Integration.Controllers
                         Description = e.Description,
                         EventDate = e.EventDate,
                         CoverImage = e.CoverImage,
+                        BookingEndDate = e.BookingEndDate,
+                        Location = e.Location,
+                        Organizer = e.Organizer,
+                        ContactInfo = e.ContactInfo,
+                        Price = e.Price,
+                        IsOnline = e.IsOnline,
+                        LangID = e.LangID,
                         Links = e.EventLinks.Select(l => new EventLinkDto
                         {
                             Id = l.Id,
@@ -197,6 +219,13 @@ namespace AI_Integration.Controllers
                 @event.CoverImage = changes.CoverImage ?? @event.CoverImage;
                 @event.GalleryId = changes.GalleryId ?? @event.GalleryId;
                 @event.LangID = changes.LangID != 0 ? changes.LangID : @event.LangID;
+
+                @event.BookingEndDate = changes.BookingEndDate ?? @event.BookingEndDate;
+                @event.Location = changes.Location ?? @event.Location;
+                @event.Organizer = changes.Organizer ?? @event.Organizer;
+                @event.ContactInfo = changes.ContactInfo ?? @event.ContactInfo;
+                @event.Price = changes.Price;
+                @event.IsOnline = changes.IsOnline;
 
                 _unitOfWork.Update(@event);
                 await _unitOfWork.SaveChangesAsync();

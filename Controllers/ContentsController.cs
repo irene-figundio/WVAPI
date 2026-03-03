@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AI_Integration.Helpers;
-using Abp.Collections.Extensions;
 
 namespace AI_Integration.Controllers
 {
@@ -55,13 +54,14 @@ namespace AI_Integration.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> Get([FromQuery] int langId = 1, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("GET", "api/contents", "", userAgent, "List contents (DTO)");
+            var log = WebApiLogHelper.NewLog("GET", "api/contents", $"langId={langId}", userAgent, "List contents (DTO)");
             var sw = Stopwatch.StartNew();
             try
             {
                 var contents = await _unitOfWork.Query<Content>()
+                    .Where(c => c.LangID == langId)
                     .OrderByDescending(c => c.PublishDate)
                     .Select(c => new ContentDto
                     {
@@ -99,17 +99,15 @@ namespace AI_Integration.Controllers
             }
         }
 
-        [HttpGet("{LangId}/type/{contentType}")]
-        public async Task<IActionResult> GetByType(string contentType,string LangId, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        [HttpGet("type/{contentType}")]
+        public async Task<IActionResult> GetByType(string contentType, [FromQuery] int langId = 1, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("GET", $"api/contents/type/{contentType}", "", userAgent, $"List contents by type ({contentType})");
+            var log = WebApiLogHelper.NewLog("GET", $"api/contents/type/{contentType}", $"langId={langId}", userAgent, $"List contents by type ({contentType})");
             var sw = Stopwatch.StartNew();
-            var codeLangId = string.IsNullOrEmpty(LangId) ? "EN" : LangId;
             try
             {
-                var idLang = await _unitOfWork.Query<Language>().Where(l => l.Code.ToLower() == codeLangId.ToLower()).Select(l => l.Id).FirstOrDefaultAsync();
                 var contents = await _unitOfWork.Query<Content>()
-                    .Where(c => c.ContentType.ToLower() == contentType.ToLower() && c.LangID == idLang)
+                    .Where(c => c.ContentType.ToLower() == contentType.ToLower() && c.LangID == langId)
                     .OrderByDescending(c => c.PublishDate)
                     .Select(c => new ContentDto
                     {
@@ -148,14 +146,14 @@ namespace AI_Integration.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById(int id, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> GetById(int id, [FromQuery] int langId = 1, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("GET", $"api/contents/{id}", "", userAgent, "Get content by id (DTO)");
+            var log = WebApiLogHelper.NewLog("GET", $"api/contents/{id}", $"langId={langId}", userAgent, "Get content by id (DTO)");
             var sw = Stopwatch.StartNew();
             try
             {
                 var dto = await _unitOfWork.Query<Content>()
-                    .Where(c => c.Id == id)
+                    .Where(c => c.Id == id && c.LangID == langId)
                     .Select(c => new ContentDto
                     {
                         Id = c.Id,
