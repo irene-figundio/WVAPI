@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AI_Integration.Helpers;
+using Abp.Collections.Extensions;
 
 namespace AI_Integration.Controllers
 {
@@ -98,15 +99,17 @@ namespace AI_Integration.Controllers
             }
         }
 
-        [HttpGet("type/{contentType}")]
-        public async Task<IActionResult> GetByType(string contentType, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        [HttpGet("{LangId}/type/{contentType}")]
+        public async Task<IActionResult> GetByType(string contentType,string LangId, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
             var log = WebApiLogHelper.NewLog("GET", $"api/contents/type/{contentType}", "", userAgent, $"List contents by type ({contentType})");
             var sw = Stopwatch.StartNew();
+            var codeLangId = string.IsNullOrEmpty(LangId) ? "EN" : LangId;
             try
             {
+                var idLang = await _unitOfWork.Query<Language>().Where(l => l.Code.ToLower() == codeLangId.ToLower()).Select(l => l.Id).FirstOrDefaultAsync();
                 var contents = await _unitOfWork.Query<Content>()
-                    .Where(c => c.ContentType.ToLower() == contentType.ToLower())
+                    .Where(c => c.ContentType.ToLower() == contentType.ToLower() && c.LangID == idLang)
                     .OrderByDescending(c => c.PublishDate)
                     .Select(c => new ContentDto
                     {
