@@ -4,7 +4,7 @@
     <ActiveDebugProfile>IIS Express</ActiveDebugProfile>
     <Controller_SelectedScaffolderID>MvcControllerEmptyScaffolder</Controller_SelectedScaffolderID>
     <Controller_SelectedScaffolderCategoryPath>root/Common/MVC/Controller</Controller_SelectedScaffolderCategoryPath>
-    <NameOfLastUsedPublishProfile>C:\PROGETTI\006 - Vitinerario AI\001 - WebAPI\vitinerario-ai-web-api\Properties\PublishProfiles\FolderProfile.pubxml</NameOfLastUsedPublishProfile>
+    <NameOfLastUsedPublishProfile>C:\PROGETTI\006 - Vitinerario AI\001 - WebAPI\000 - Jules\WVAPI\Properties\PublishProfiles\FolderProfile2.pubxml</NameOfLastUsedPublishProfile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
