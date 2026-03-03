@@ -118,7 +118,23 @@ BEGIN
         [IsPublished] [bit] NULL,
         [CreatedAt] [datetime2](7) NULL,
         [UpdatedAt] [datetime2](7) NULL,
+        [Subtitle] [nvarchar](500) NULL,
+        [CategoryId] [int] NULL,
+        [Preview] [nvarchar](max) NULL,
+        [HeroImage] [nvarchar](500) NULL,
         CONSTRAINT [PK_Contents] PRIMARY KEY CLUSTERED ([Id] ASC)
+    )
+END
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ContentCategories')
+BEGIN
+    CREATE TABLE [dbo].[ContentCategories](
+        [Id] [int] IDENTITY(1,1) NOT NULL,
+        [Name] [nvarchar](255) NOT NULL,
+        [Description] [nvarchar](max) NULL,
+        [LangID] [int] NOT NULL DEFAULT 1,
+        CONSTRAINT [PK_ContentCategories] PRIMARY KEY CLUSTERED ([Id] ASC)
     )
 END
 GO
@@ -169,7 +185,23 @@ BEGIN
         [ContactInfo] [nvarchar](255) NULL,
         [Price] [decimal](18, 2) NOT NULL DEFAULT 0,
         [IsOnline] [bit] NOT NULL DEFAULT 0,
+        [Subtitle] [nvarchar](500) NULL,
+        [CategoryId] [int] NULL,
+        [Coordinates] [nvarchar](100) NULL,
+        [HeroImage] [nvarchar](500) NULL,
         CONSTRAINT [PK_Events] PRIMARY KEY CLUSTERED ([Id] ASC)
+    )
+END
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'EventCategories')
+BEGIN
+    CREATE TABLE [dbo].[EventCategories](
+        [Id] [int] IDENTITY(1,1) NOT NULL,
+        [Name] [nvarchar](255) NOT NULL,
+        [Description] [nvarchar](max) NULL,
+        [LangID] [int] NOT NULL DEFAULT 1,
+        CONSTRAINT [PK_EventCategories] PRIMARY KEY CLUSTERED ([Id] ASC)
     )
 END
 GO

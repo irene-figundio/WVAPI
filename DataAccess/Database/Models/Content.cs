@@ -20,6 +20,16 @@ namespace AI_Integration.DataAccess.Database.Models
         [Required]
         [StringLength(20)]
         public string ContentType { get; set; } = null!;
+
+        [StringLength(500)]
+        public string? Subtitle { get; set; }
+
+        public int? CategoryId { get; set; }
+
+        public string? Preview { get; set; }
+
+        [StringLength(500)]
+        public string? HeroImage { get; set; }
         public bool? IsPublished { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

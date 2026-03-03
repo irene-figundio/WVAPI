@@ -16,6 +16,18 @@ namespace AI_Integration.DataAccess.Database.Models
         public DateTime EventDate { get; set; }
         [StringLength(500)]
         public string? CoverImage { get; set; }
+
+        [StringLength(500)]
+        public string? Subtitle { get; set; }
+
+        public int? CategoryId { get; set; }
+
+        [StringLength(100)]
+        public string? Coordinates { get; set; }
+
+        [StringLength(500)]
+        public string? HeroImage { get; set; }
+
         public int? GalleryId { get; set; }
         public DateTime? CreatedAt { get; set; }
 
