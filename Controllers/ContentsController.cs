@@ -40,6 +40,15 @@ namespace AI_Integration.Controllers
             public string? Description { get; set; }
         }
 
+        public sealed class ExpertDto
+        {
+            public int Id { get; set; }
+            public string Name { get; set; } = null!;
+            public string? Bio { get; set; }
+            public string? PhotoUrl { get; set; }
+            public string? Email { get; set; }
+        }
+
         public sealed class ContentDto
         {
             public int Id { get; set; }
@@ -51,6 +60,7 @@ namespace AI_Integration.Controllers
             public bool IsPublished { get; set; }
             public List<ContentImageDto> Images { get; set; } = new();
             public List<ContentLinkDto> Links { get; set; } = new();
+            public List<ExpertDto> Authors { get; set; } = new();
         }
 
         [HttpGet]
@@ -84,6 +94,14 @@ namespace AI_Integration.Controllers
                             Id = l.Id,
                             LinkUrl = l.LinkUrl,
                             Description = l.Description
+                        }).ToList(),
+                        Authors = c.ContentExperts.Select(ce => new ExpertDto
+                        {
+                            Id = ce.Expert.Id,
+                            Name = ce.Expert.Name,
+                            Bio = ce.Expert.Bio,
+                            PhotoUrl = ce.Expert.PhotoUrl,
+                            Email = ce.Expert.Email
                         }).ToList()
                     }).ToListAsync();
 
@@ -130,6 +148,14 @@ namespace AI_Integration.Controllers
                             Id = l.Id,
                             LinkUrl = l.LinkUrl,
                             Description = l.Description
+                        }).ToList(),
+                        Authors = c.ContentExperts.Select(ce => new ExpertDto
+                        {
+                            Id = ce.Expert.Id,
+                            Name = ce.Expert.Name,
+                            Bio = ce.Expert.Bio,
+                            PhotoUrl = ce.Expert.PhotoUrl,
+                            Email = ce.Expert.Email
                         }).ToList()
                     }).ToListAsync();
 
@@ -175,6 +201,14 @@ namespace AI_Integration.Controllers
                             Id = l.Id,
                             LinkUrl = l.LinkUrl,
                             Description = l.Description
+                        }).ToList(),
+                        Authors = c.ContentExperts.Select(ce => new ExpertDto
+                        {
+                            Id = ce.Expert.Id,
+                            Name = ce.Expert.Name,
+                            Bio = ce.Expert.Bio,
+                            PhotoUrl = ce.Expert.PhotoUrl,
+                            Email = ce.Expert.Email
                         }).ToList()
                     }).FirstOrDefaultAsync();
 
