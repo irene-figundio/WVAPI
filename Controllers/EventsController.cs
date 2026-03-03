@@ -46,6 +46,15 @@ namespace AI_Integration.Controllers
             public string? Description { get; set; }
         }
 
+        public sealed class ExpertDto
+        {
+            public int Id { get; set; }
+            public string Name { get; set; } = null!;
+            public string? Bio { get; set; }
+            public string? PhotoUrl { get; set; }
+            public string? Email { get; set; }
+        }
+
         public sealed class EventDto
         {
             public int Id { get; set; }
@@ -62,6 +71,7 @@ namespace AI_Integration.Controllers
             public int LangID { get; set; }
             public List<EventLinkDto> Links { get; set; } = new();
             public GalleryDto? Gallery { get; set; }
+            public List<ExpertDto> Authors { get; set; } = new();
         }
 
         [HttpGet]
@@ -104,7 +114,15 @@ namespace AI_Integration.Controllers
                                 ImageUrl = p.ImageUrl,
                                 Caption = p.Caption
                             }).ToList()
-                        }
+                        },
+                        Authors = e.EventExperts.Select(ee => new ExpertDto
+                        {
+                            Id = ee.Expert.Id,
+                            Name = ee.Expert.Name,
+                            Bio = ee.Expert.Bio,
+                            PhotoUrl = ee.Expert.PhotoUrl,
+                            Email = ee.Expert.Email
+                        }).ToList()
                     }).ToListAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, $"{{ success = true, count = {events.Count} }}", $"ElapsedMs={sw.ElapsedMilliseconds}");
@@ -157,7 +175,15 @@ namespace AI_Integration.Controllers
                                 ImageUrl = p.ImageUrl,
                                 Caption = p.Caption
                             }).ToList()
-                        }
+                        },
+                        Authors = e.EventExperts.Select(ee => new ExpertDto
+                        {
+                            Id = ee.Expert.Id,
+                            Name = ee.Expert.Name,
+                            Bio = ee.Expert.Bio,
+                            PhotoUrl = ee.Expert.PhotoUrl,
+                            Email = ee.Expert.Email
+                        }).ToList()
                     }).FirstOrDefaultAsync();
 
                 if (dto == null)
