@@ -39,6 +39,10 @@ namespace AI_Integration.DataAccess
         public virtual DbSet<EventLink> EventLinks { get; set; } = null!;
         public virtual DbSet<Gallery> Galleries { get; set; } = null!;
         public virtual DbSet<PhotoGallery> PhotoGalleries { get; set; } = null!;
+        public virtual DbSet<Language> Languages { get; set; } = null!;
+        public virtual DbSet<Expert> Experts { get; set; } = null!;
+        public virtual DbSet<EventExpert> EventExperts { get; set; } = null!;
+        public virtual DbSet<ContentExpert> ContentExperts { get; set; } = null!;
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
