@@ -29,5 +29,6 @@ namespace AI_Integration.DataAccess.Database.Models
 
         public virtual ICollection<ContentImage> ContentImages { get; set; } = new List<ContentImage>();
         public virtual ICollection<ContentLink> ContentLinks { get; set; } = new List<ContentLink>();
+        public virtual ICollection<ContentExpert> ContentExperts { get; set; } = new List<ContentExpert>();
     }
 }
