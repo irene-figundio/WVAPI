@@ -58,6 +58,10 @@ namespace AI_Integration.Controllers
             public string? CoverImage { get; set; }
             public string ContentType { get; set; } = null!;
             public bool IsPublished { get; set; }
+            public string? Subtitle { get; set; }
+            public int? CategoryId { get; set; }
+            public string? Preview { get; set; }
+            public string? HeroImage { get; set; }
             public List<ContentImageDto> Images { get; set; } = new();
             public List<ContentLinkDto> Links { get; set; } = new();
             public List<ExpertDto> Authors { get; set; } = new();
@@ -82,6 +86,10 @@ namespace AI_Integration.Controllers
                         CoverImage = c.CoverImage,
                         ContentType = c.ContentType,
                         IsPublished = c.IsPublished ?? true,
+                        Subtitle = c.Subtitle,
+                        CategoryId = c.CategoryId,
+                        Preview = c.Preview,
+                        HeroImage = c.HeroImage,
                         Images = c.ContentImages.Select(i => new ContentImageDto
                         {
                             Id = i.Id,
@@ -136,6 +144,10 @@ namespace AI_Integration.Controllers
                         CoverImage = c.CoverImage,
                         ContentType = c.ContentType,
                         IsPublished = c.IsPublished ?? true,
+                        Subtitle = c.Subtitle,
+                        CategoryId = c.CategoryId,
+                        Preview = c.Preview,
+                        HeroImage = c.HeroImage,
                         Images = c.ContentImages.Select(i => new ContentImageDto
                         {
                             Id = i.Id,
@@ -189,6 +201,10 @@ namespace AI_Integration.Controllers
                         CoverImage = c.CoverImage,
                         ContentType = c.ContentType,
                         IsPublished = c.IsPublished ?? true,
+                        Subtitle = c.Subtitle,
+                        CategoryId = c.CategoryId,
+                        Preview = c.Preview,
+                        HeroImage = c.HeroImage,
                         Images = c.ContentImages.Select(i => new ContentImageDto
                         {
                             Id = i.Id,
@@ -273,6 +289,10 @@ namespace AI_Integration.Controllers
                 content.CoverImage = changes.CoverImage ?? content.CoverImage;
                 content.ContentType = changes.ContentType ?? content.ContentType;
                 content.IsPublished = changes.IsPublished ?? content.IsPublished;
+                content.Subtitle = changes.Subtitle ?? content.Subtitle;
+                content.CategoryId = changes.CategoryId ?? content.CategoryId;
+                content.Preview = changes.Preview ?? content.Preview;
+                content.HeroImage = changes.HeroImage ?? content.HeroImage;
                 content.LangID = changes.LangID != 0 ? changes.LangID : content.LangID;
                 content.UpdatedAt = DateTime.Now;
 
