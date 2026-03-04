@@ -106,10 +106,6 @@ namespace AI_Integration.Controllers
                         CategoryId = e.CategoryId,
                         Coordinates = e.Coordinates,
                         HeroImage = e.HeroImage,
-                        Subtitle = e.Subtitle,
-                        CategoryId = e.CategoryId,
-                        Coordinates = e.Coordinates,
-                        HeroImage = e.HeroImage,
                         Links = e.EventLinks.Select(l => new EventLinkDto
                         {
                             Id = l.Id,
