@@ -71,7 +71,7 @@ namespace AI_Integration.Controllers
             public int LangID { get; set; }
             public List<EventLinkDto> Links { get; set; } = new();
             public GalleryDto? Gallery { get; set; }
-            public List<ExpertDto> Experts { get; set; } = new();
+            public List<ExpertDto> Authors { get; set; } = new();
         }
 
         [HttpGet]
@@ -115,7 +115,7 @@ namespace AI_Integration.Controllers
                                 Caption = p.Caption
                             }).ToList()
                         },
-                        Experts = e.EventExperts.Select(ee => new ExpertDto
+                        Authors = e.EventExperts.Select(ee => new ExpertDto
                         {
                             Id = ee.Expert.Id,
                             Name = ee.Expert.Name,
@@ -176,7 +176,7 @@ namespace AI_Integration.Controllers
                                 Caption = p.Caption
                             }).ToList()
                         },
-                        Experts = e.EventExperts.Select(ee => new ExpertDto
+                        Authors = e.EventExperts.Select(ee => new ExpertDto
                         {
                             Id = ee.Expert.Id,
                             Name = ee.Expert.Name,
