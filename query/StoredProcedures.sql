@@ -407,3 +407,335 @@ BEGIN
     END CATCH
 END;
 GO
+
+-----------------------------------------------------------------------------
+-- 10. sp_CreaLanguage
+-----------------------------------------------------------------------------
+CREATE OR ALTER PROCEDURE [dbo].[sp_CreaLanguage]
+    @Code NVARCHAR(10),
+    @Name NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO [dbo].[Languages] ([Code], [Name])
+        VALUES (@Code, @Name);
+
+        SELECT SCOPE_IDENTITY() AS LanguageId;
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+
+-----------------------------------------------------------------------------
+-- 11. sp_CreaAIVideo
+-----------------------------------------------------------------------------
+CREATE OR ALTER PROCEDURE [dbo].[sp_CreaAIVideo]
+    @Dir_Path NVARCHAR(MAX) = NULL,
+    @Title NVARCHAR(MAX) = NULL,
+    @Url_Video NVARCHAR(MAX) = NULL,
+    @Play_Priority INT = NULL,
+    @IsLandscape BIT = NULL,
+    @ID_Session INT,
+    @Creation_User INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO [dbo].[AIVideos]
+        ([Dir_Path], [Title], [Url_Video], [Play_Priority], [IsLandscape], [ID_Session], [DataCreation], [Creation_User])
+        VALUES
+        (@Dir_Path, @Title, @Url_Video, @Play_Priority, @IsLandscape, @ID_Session, GETDATE(), @Creation_User);
+
+        SELECT SCOPE_IDENTITY() AS AIVideoId;
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+
+-----------------------------------------------------------------------------
+-- 12. sp_CreaAPIToken
+-----------------------------------------------------------------------------
+CREATE OR ALTER PROCEDURE [dbo].[sp_CreaAPIToken]
+    @Token NVARCHAR(MAX),
+    @Platform NVARCHAR(MAX),
+    @DataExpiration DATETIME2
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO [dbo].[APITokens] ([DataCreation], [Token], [Platform], [DataExpiration])
+        VALUES (GETDATE(), @Token, @Platform, @DataExpiration);
+
+        SELECT SCOPE_IDENTITY() AS APITokenId;
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+
+-----------------------------------------------------------------------------
+-- 13. sp_CreaAdAnalytics
+-----------------------------------------------------------------------------
+CREATE OR ALTER PROCEDURE [dbo].[sp_CreaAdAnalytics]
+    @SessionId INT,
+    @VideoId INT,
+    @NumViews INT = NULL,
+    @NumClick INT = NULL,
+    @Platform NVARCHAR(MAX),
+    @SendDate DATETIME2,
+    @LangID INT = 1
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO [dbo].[AdAnalytics]
+        ([SessionId], [VideoId], [NumViews], [NumClick], [Platform], [SendDate], [LangID])
+        VALUES
+        (@SessionId, @VideoId, @NumViews, @NumClick, @Platform, @SendDate, @LangID);
+
+        SELECT SCOPE_IDENTITY() AS AdAnalyticsId;
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+
+-----------------------------------------------------------------------------
+-- 14. sp_CreaAdCampaign
+-----------------------------------------------------------------------------
+CREATE OR ALTER PROCEDURE [dbo].[sp_CreaAdCampaign]
+    @Name NVARCHAR(MAX),
+    @Description NVARCHAR(MAX) = NULL,
+    @StartDate DATETIME2,
+    @EndDate DATETIME2,
+    @Budget DECIMAL(18,2) = NULL,
+    @Creation_User INT = NULL,
+    @LangID INT = 1
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO [dbo].[AdCampaigns]
+        ([Name], [Description], [StartDate], [EndDate], [Budget], [CreationTime], [Creation_User], [LangID])
+        VALUES
+        (@Name, @Description, @StartDate, @EndDate, @Budget, GETDATE(), @Creation_User, @LangID);
+
+        SELECT SCOPE_IDENTITY() AS AdCampaignId;
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+
+-----------------------------------------------------------------------------
+-- 15. sp_CreaAdSession
+-----------------------------------------------------------------------------
+CREATE OR ALTER PROCEDURE [dbo].[sp_CreaAdSession]
+    @ID_Campaing INT,
+    @StartDate DATETIME2,
+    @EndDate DATETIME2,
+    @Creation_User INT = NULL,
+    @LangID INT = 1
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO [dbo].[AdSessions]
+        ([ID_Campaing], [StartDate], [EndDate], [CreationTime], [Creation_User], [LangID])
+        VALUES
+        (@ID_Campaing, @StartDate, @EndDate, GETDATE(), @Creation_User, @LangID);
+
+        SELECT SCOPE_IDENTITY() AS AdSessionId;
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+
+-----------------------------------------------------------------------------
+-- 16. sp_CreaContentLink
+-----------------------------------------------------------------------------
+CREATE OR ALTER PROCEDURE [dbo].[sp_CreaContentLink]
+    @ContentId INT,
+    @LinkUrl NVARCHAR(500),
+    @Description NVARCHAR(255) = NULL,
+    @LangID INT = 1
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO [dbo].[ContentLinks]
+        ([ContentId], [LinkUrl], [Description], [CreatedAt], [LangID])
+        VALUES
+        (@ContentId, @LinkUrl, @Description, GETDATE(), @LangID);
+
+        SELECT SCOPE_IDENTITY() AS ContentLinkId;
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+
+-----------------------------------------------------------------------------
+-- 17. sp_CreaEventLink
+-----------------------------------------------------------------------------
+CREATE OR ALTER PROCEDURE [dbo].[sp_CreaEventLink]
+    @EventId INT,
+    @LinkUrl NVARCHAR(500),
+    @Description NVARCHAR(255) = NULL,
+    @LangID INT = 1
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO [dbo].[EventLinks]
+        ([EventId], [LinkUrl], [Description], [LangID])
+        VALUES
+        (@EventId, @LinkUrl, @Description, @LangID);
+
+        SELECT SCOPE_IDENTITY() AS EventLinkId;
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+
+-----------------------------------------------------------------------------
+-- 18. sp_CreaUploadedFile
+-----------------------------------------------------------------------------
+CREATE OR ALTER PROCEDURE [dbo].[sp_CreaUploadedFile]
+    @FileName NVARCHAR(MAX),
+    @FilePath NVARCHAR(MAX),
+    @FileType NVARCHAR(MAX),
+    @FileSize BIGINT,
+    @OpenAIFileId NVARCHAR(MAX) = NULL,
+    @VectorStoreId NVARCHAR(MAX) = NULL,
+    @LangID INT = 1
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO [dbo].[UploadedFiles]
+        ([FileName], [FilePath], [FileType], [FileSize], [OpenAIFileId], [VectorStoreId], [UploadDate], [LangID])
+        VALUES
+        (@FileName, @FilePath, @FileType, @FileSize, @OpenAIFileId, @VectorStoreId, GETDATE(), @LangID);
+
+        SELECT SCOPE_IDENTITY() AS UploadedFileId;
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+
+-----------------------------------------------------------------------------
+-- 19. sp_CreaUser
+-----------------------------------------------------------------------------
+CREATE OR ALTER PROCEDURE [dbo].[sp_CreaUser]
+    @Username NVARCHAR(MAX),
+    @Password NVARCHAR(MAX),
+    @Email NVARCHAR(MAX),
+    @StatusId INT,
+    @SuperAdmin BIT = 0,
+    @CreationUserId INT = NULL,
+    @LangID INT = 1
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO [dbo].[Users]
+        ([Username], [Password], [Email], [StatusId], [StatusTime], [CreationTime], [CreationUserId], [IsDeleted], [SuperAdmin], [VerificationToken], [LangID])
+        VALUES
+        (@Username, @Password, @Email, @StatusId, GETDATE(), GETDATE(), @CreationUserId, 0, @SuperAdmin, NEWID(), @LangID);
+
+        SELECT SCOPE_IDENTITY() AS UserId;
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+
+-----------------------------------------------------------------------------
+-- 20. sp_CreaUserStatus
+-----------------------------------------------------------------------------
+CREATE OR ALTER PROCEDURE [dbo].[sp_CreaUserStatus]
+    @Name NVARCHAR(MAX),
+    @ResourceKey NVARCHAR(MAX),
+    @LangID INT = 1
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO [dbo].[UserStatuses] ([Name], [ResourceKey], [LangID])
+        VALUES (@Name, @ResourceKey, @LangID);
+
+        SELECT SCOPE_IDENTITY() AS UserStatusId;
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+
+-----------------------------------------------------------------------------
+-- 21. sp_CreaWebAPILog
+-----------------------------------------------------------------------------
+CREATE OR ALTER PROCEDURE [dbo].[sp_CreaWebAPILog]
+    @RequestMethod NVARCHAR(MAX),
+    @RequestUrl NVARCHAR(MAX),
+    @RequestBody NVARCHAR(MAX),
+    @ResponseBody NVARCHAR(MAX),
+    @ResponseCode INT,
+    @ResponseMessage NVARCHAR(MAX),
+    @UserAgent NVARCHAR(MAX),
+    @AdditionalInfo NVARCHAR(MAX)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO [dbo].[WebAPILogs]
+        ([DateTimeStamp], [RequestMethod], [RequestUrl], [RequestBody], [ResponseBody], [ResponseCode], [ResponseMessage], [UserAgent], [AdditionalInfo])
+        VALUES
+        (GETDATE(), @RequestMethod, @RequestUrl, @RequestBody, @ResponseBody, @ResponseCode, @ResponseMessage, @UserAgent, @AdditionalInfo);
+
+        SELECT SCOPE_IDENTITY() AS WebAPILogId;
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+
+-----------------------------------------------------------------------------
+-- 22. sp_CreaWineAI
+-----------------------------------------------------------------------------
+CREATE OR ALTER PROCEDURE [dbo].[sp_CreaWineAI]
+    @Question NVARCHAR(MAX),
+    @Answer NVARCHAR(MAX),
+    @Dispositivo NVARCHAR(MAX)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO [dbo].[WineAIs] ([CreationDate], [Question], [Answer], [Dispositivo])
+        VALUES (GETDATE(), @Question, @Answer, @Dispositivo);
+
+        SELECT SCOPE_IDENTITY() AS WineAIId;
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
