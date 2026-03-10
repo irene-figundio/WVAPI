@@ -61,6 +61,10 @@ namespace AI_Integration.Controllers
             public string Title { get; set; } = null!;
             public string Description { get; set; } = null!;
             public DateTime EventDate { get; set; }
+            public DateTime? StartDate { get; set; }
+            public TimeSpan? StartTime { get; set; }
+            public DateTime? EndDate { get; set; }
+            public TimeSpan? EndTime { get; set; }
             public string? CoverImage { get; set; }
             public DateTime? BookingEndDate { get; set; }
             public string? Location { get; set; }
@@ -90,6 +94,10 @@ namespace AI_Integration.Controllers
                         Title = e.Title,
                         Description = e.Description,
                         EventDate = e.EventDate,
+                        StartDate = e.StartDate,
+                        StartTime = e.StartTime,
+                        EndDate = e.EndDate,
+                        EndTime = e.EndTime,
                         CoverImage = e.CoverImage,
                         BookingEndDate = e.BookingEndDate,
                         Location = e.Location,
@@ -151,6 +159,10 @@ namespace AI_Integration.Controllers
                         Title = e.Title,
                         Description = e.Description,
                         EventDate = e.EventDate,
+                        StartDate = e.StartDate,
+                        StartTime = e.StartTime,
+                        EndDate = e.EndDate,
+                        EndTime = e.EndTime,
                         CoverImage = e.CoverImage,
                         BookingEndDate = e.BookingEndDate,
                         Location = e.Location,
@@ -242,6 +254,10 @@ namespace AI_Integration.Controllers
                 @event.Title = changes.Title ?? @event.Title;
                 @event.Description = changes.Description ?? @event.Description;
                 @event.EventDate = changes.EventDate != default ? changes.EventDate : @event.EventDate;
+                @event.StartDate = changes.StartDate ?? @event.StartDate;
+                @event.StartTime = changes.StartTime ?? @event.StartTime;
+                @event.EndDate = changes.EndDate ?? @event.EndDate;
+                @event.EndTime = changes.EndTime ?? @event.EndTime;
                 @event.CoverImage = changes.CoverImage ?? @event.CoverImage;
                 @event.GalleryId = changes.GalleryId ?? @event.GalleryId;
                 @event.LangID = changes.LangID != 0 ? changes.LangID : @event.LangID;

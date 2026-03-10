@@ -14,6 +14,12 @@ namespace AI_Integration.DataAccess.Database.Models
         [Required]
         public string Description { get; set; } = null!;
         public DateTime EventDate { get; set; }
+
+        public DateTime? StartDate { get; set; }
+        public TimeSpan? StartTime { get; set; }
+        public DateTime? EndDate { get; set; }
+        public TimeSpan? EndTime { get; set; }
+
         [StringLength(500)]
         public string? CoverImage { get; set; }
         public int? GalleryId { get; set; }
