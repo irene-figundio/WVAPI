@@ -11,6 +11,19 @@ BEGIN
 END
 GO
 
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Partners')
+BEGIN
+    CREATE TABLE [dbo].[Partners](
+        [Id] [int] IDENTITY(1,1) NOT NULL,
+        [Description] [nvarchar](max) NULL,
+        [LinkUrl] [nvarchar](500) NULL,
+        [ImageUrl] [nvarchar](500) NULL,
+        [IsActive] [bit] NOT NULL DEFAULT 1,
+        CONSTRAINT [PK_Partners] PRIMARY KEY CLUSTERED ([Id] ASC)
+    )
+END
+GO
+
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AIVideos')
 BEGIN
     CREATE TABLE [dbo].[AIVideos](
