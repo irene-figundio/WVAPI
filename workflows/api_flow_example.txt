@@ -75,7 +75,11 @@ Content-Type: application/json
 {
   "title": "Festival del Vino a Verona",
   "description": "Tre giorni dedicati alla scoperta dei vini veneti.",
-  "eventDate": "2024-12-01T09:00:00Z",
+  "eventDate": "2024-12-01T00:00:00Z",
+  "startDate": "2024-12-01T00:00:00Z",
+  "startTime": "09:00:00",
+  "endDate": "2024-12-03T00:00:00Z",
+  "endTime": "18:00:00",
   "coverImage": "https://example.com/images/verona_vino.jpg",
   "bookingEndDate": "2024-11-20T23:59:59Z",
   "location": "Piazza Bra, Verona",

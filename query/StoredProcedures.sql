@@ -244,6 +244,10 @@ CREATE OR ALTER PROCEDURE [dbo].[sp_CreaEvent]
     @Title NVARCHAR(255),
     @Description NVARCHAR(MAX),
     @EventDate DATETIME2,
+    @StartDate DATETIME2 = NULL,
+    @StartTime TIME = NULL,
+    @EndDate DATETIME2 = NULL,
+    @EndTime TIME = NULL,
     @CoverImage NVARCHAR(500) = NULL,
     @BookingEndDate DATETIME2 = NULL,
     @Location NVARCHAR(500) = NULL,
@@ -258,12 +262,12 @@ BEGIN
     BEGIN TRY
         INSERT INTO [dbo].[Events]
         (
-            [Title], [Description], [EventDate], [CoverImage], [CreatedAt],
+            [Title], [Description], [EventDate], [StartDate], [StartTime], [EndDate], [EndTime], [CoverImage], [CreatedAt],
             [BookingEndDate], [Location], [Organizer], [ContactInfo], [Price], [IsOnline], [LangID]
         )
         VALUES
         (
-            @Title, @Description, @EventDate, @CoverImage, GETDATE(),
+            @Title, @Description, @EventDate, @StartDate, @StartTime, @EndDate, @EndTime, @CoverImage, GETDATE(),
             @BookingEndDate, @Location, @Organizer, @ContactInfo, @Price, @IsOnline, @LangID
         );
 
