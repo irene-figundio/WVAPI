@@ -69,6 +69,10 @@ namespace AI_Integration.Controllers
             public decimal Price { get; set; }
             public bool IsOnline { get; set; }
             public int LangID { get; set; }
+            public string? Subtitle { get; set; }
+            public int? CategoryId { get; set; }
+            public string? Coordinates { get; set; }
+            public string? HeroImage { get; set; }
             public List<EventLinkDto> Links { get; set; } = new();
             public GalleryDto? Gallery { get; set; }
             public List<ExpertDto> Authors { get; set; } = new();
@@ -98,6 +102,10 @@ namespace AI_Integration.Controllers
                         Price = e.Price,
                         IsOnline = e.IsOnline,
                         LangID = e.LangID,
+                        Subtitle = e.Subtitle,
+                        CategoryId = e.CategoryId,
+                        Coordinates = e.Coordinates,
+                        HeroImage = e.HeroImage,
                         Links = e.EventLinks.Select(l => new EventLinkDto
                         {
                             Id = l.Id,
@@ -159,6 +167,10 @@ namespace AI_Integration.Controllers
                         Price = e.Price,
                         IsOnline = e.IsOnline,
                         LangID = e.LangID,
+                        Subtitle = e.Subtitle,
+                        CategoryId = e.CategoryId,
+                        Coordinates = e.Coordinates,
+                        HeroImage = e.HeroImage,
                         Links = e.EventLinks.Select(l => new EventLinkDto
                         {
                             Id = l.Id,
@@ -252,6 +264,10 @@ namespace AI_Integration.Controllers
                 @event.ContactInfo = changes.ContactInfo ?? @event.ContactInfo;
                 @event.Price = changes.Price;
                 @event.IsOnline = changes.IsOnline;
+                @event.Subtitle = changes.Subtitle ?? @event.Subtitle;
+                @event.CategoryId = changes.CategoryId ?? @event.CategoryId;
+                @event.Coordinates = changes.Coordinates ?? @event.Coordinates;
+                @event.HeroImage = changes.HeroImage ?? @event.HeroImage;
 
                 _unitOfWork.Update(@event);
                 await _unitOfWork.SaveChangesAsync();
