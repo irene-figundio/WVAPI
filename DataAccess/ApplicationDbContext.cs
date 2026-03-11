@@ -46,6 +46,7 @@ namespace AI_Integration.DataAccess
         public virtual DbSet<Partner> Partners { get; set; } = null!;
 
         public virtual DbSet<GalleryCreationResult> GalleryCreationResults { get; set; } = null!;
+        public virtual DbSet<ContentImagesCreationResult> ContentImagesCreationResults { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -290,6 +291,7 @@ namespace AI_Integration.DataAccess
             });
 
             modelBuilder.Entity<GalleryCreationResult>().HasNoKey();
+            modelBuilder.Entity<ContentImagesCreationResult>().HasNoKey();
 
             OnModelCreatingPartial(modelBuilder);
         }

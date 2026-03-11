@@ -23,4 +23,14 @@ namespace AI_Integration.DataAccess.Database.Models
         [NotMapped]
         public virtual Content? Content { get; set; } = null!;
     }
+
+    public class ContentImagesCreationResult
+    {
+        public int NumeroArticolo { get; set; }
+        public int ContentIdIT { get; set; }
+        public int ContentIdEN { get; set; }
+        public int NumeroImmaginiPerLingua { get; set; }
+        public int TotaleRecordInseriti { get; set; }
+        public string BaseUrlUsato { get; set; } = null!;
+    }
 }
