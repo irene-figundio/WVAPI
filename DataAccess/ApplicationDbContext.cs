@@ -45,6 +45,7 @@ namespace AI_Integration.DataAccess
         public virtual DbSet<ContentExpert> ContentExperts { get; set; } = null!;
         public virtual DbSet<Partner> Partners { get; set; } = null!;
 
+        public virtual DbSet<GalleryCreationResult> GalleryCreationResults { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -288,6 +289,7 @@ namespace AI_Integration.DataAccess
                  .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<GalleryCreationResult>().HasNoKey();
 
             OnModelCreatingPartial(modelBuilder);
         }

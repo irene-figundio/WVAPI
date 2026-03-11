@@ -21,4 +21,12 @@ namespace AI_Integration.DataAccess.Database.Models
         public virtual Event? Event { get; set; } = null!;
         public virtual ICollection<PhotoGallery> Photos { get; set; } = new List<PhotoGallery>();
     }
+
+    public class GalleryCreationResult
+    {
+        public int GalleryIdCreata { get; set; }
+        public int EventId { get; set; }
+        public int NumeroImmaginiInserite { get; set; }
+        public string LinkBaseUsato { get; set; } = null!;
+    }
 }

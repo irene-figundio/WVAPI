@@ -25,6 +25,56 @@ namespace AI_Integration.Controllers
             _unitOfWork = unitOfWork;
         }
 
+        public sealed class CreateGalleryRequestDto
+        {
+            public int EventId { get; set; }
+            public string GalleryTitle { get; set; } = null!;
+            public int LangID { get; set; }
+            public int NumeroImmagini { get; set; }
+            public string LinkBaseUgualePerTutte { get; set; } = null!;
+        }
+
+        [HttpPost("CreateGallery")]
+        public async Task<IActionResult> CreateGallery([FromBody] CreateGalleryRequestDto request, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        {
+            var log = WebApiLogHelper.NewLog("POST", "api/galleries/CreateGallery", request?.ToString(), userAgent, "Execute sp_CreaGalleryEInserisciFoto");
+            var sw = Stopwatch.StartNew();
+
+            if (request == null) return BadRequest(new { success = false, message = "Payload required" });
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
+            {
+                var sql = "EXEC [dbo].[sp_CreaGalleryEInserisciFoto] @EventId={0}, @GalleryTitle={1}, @LangID={2}, @NumeroImmagini={3}, @LinkBaseUgualePerTutte={4}";
+
+                var results = await _unitOfWork.Context.GalleryCreationResults
+                    .FromSqlRaw(sql,
+                        request.EventId,
+                        request.GalleryTitle,
+                        request.LangID,
+                        request.NumeroImmagini,
+                        request.LinkBaseUgualePerTutte)
+                    .ToListAsync();
+
+                sw.Stop();
+                await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
+
+                var result = results.FirstOrDefault();
+                if (result != null)
+                {
+                    return Ok(new { success = true, data = result });
+                }
+
+                return Ok(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                sw.Stop();
+                await WebApiLogHelper.LogErrorAsync(_unitOfWork, log, ex, $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery] int langId = 1, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {

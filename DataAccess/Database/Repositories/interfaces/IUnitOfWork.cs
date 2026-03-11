@@ -24,6 +24,8 @@ namespace AI_Integration.DataAccess.Database.Repositories.interfaces
         IGalleryRepository Galleries { get; }
         IPhotoGalleryRepository PhotoGalleries { get; }
 
+        ApplicationDbContext Context { get; }
+
         void Save();
         IRepository<T> Repository<T>() where T : class;
         IQueryable<T> Query<T>(bool asNoTracking = true) where T : class;
