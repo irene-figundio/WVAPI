@@ -121,7 +121,8 @@ GO
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Contents')
 BEGIN
     CREATE TABLE [dbo].[Contents](
-        [Id] [int] IDENTITY(1,1) NOT NULL,
+        [Guid] [uniqueidentifier] NOT NULL DEFAULT NEWID(),
+        [Id] [int] NOT NULL,
         [LangID] [int] NOT NULL DEFAULT 1,
         [Title] [nvarchar](255) NOT NULL,
         [Text] [nvarchar](max) NOT NULL,
@@ -131,7 +132,7 @@ BEGIN
         [IsPublished] [bit] NULL,
         [CreatedAt] [datetime2](7) NULL,
         [UpdatedAt] [datetime2](7) NULL,
-        CONSTRAINT [PK_Contents] PRIMARY KEY CLUSTERED ([Id] ASC)
+        CONSTRAINT [PK_Contents] PRIMARY KEY CLUSTERED ([Guid] ASC)
     )
 END
 GO
@@ -141,7 +142,7 @@ BEGIN
     CREATE TABLE [dbo].[ContentImages](
         [Id] [int] IDENTITY(1,1) NOT NULL,
         [LangID] [int] NOT NULL DEFAULT 1,
-        [ContentId] [int] NOT NULL,
+        [ContentId] [uniqueidentifier] NOT NULL,
         [ImageUrl] [nvarchar](500) NOT NULL,
         [Caption] [nvarchar](255) NULL,
         [Position] [int] NULL,
@@ -156,7 +157,7 @@ BEGIN
     CREATE TABLE [dbo].[ContentLinks](
         [Id] [int] IDENTITY(1,1) NOT NULL,
         [LangID] [int] NOT NULL DEFAULT 1,
-        [ContentId] [int] NOT NULL,
+        [ContentId] [uniqueidentifier] NOT NULL,
         [LinkUrl] [nvarchar](500) NOT NULL,
         [Description] [nvarchar](255) NULL,
         [CreatedAt] [datetime2](7) NULL,
@@ -168,7 +169,8 @@ GO
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Events')
 BEGIN
     CREATE TABLE [dbo].[Events](
-        [Id] [int] IDENTITY(1,1) NOT NULL,
+        [Guid] [uniqueidentifier] NOT NULL DEFAULT NEWID(),
+        [Id] [int] NOT NULL,
         [LangID] [int] NOT NULL DEFAULT 1,
         [Title] [nvarchar](255) NOT NULL,
         [Description] [nvarchar](max) NOT NULL,
@@ -186,7 +188,7 @@ BEGIN
         [ContactInfo] [nvarchar](255) NULL,
         [Price] [decimal](18, 2) NOT NULL DEFAULT 0,
         [IsOnline] [bit] NOT NULL DEFAULT 0,
-        CONSTRAINT [PK_Events] PRIMARY KEY CLUSTERED ([Id] ASC)
+        CONSTRAINT [PK_Events] PRIMARY KEY CLUSTERED ([Guid] ASC)
     )
 END
 GO
@@ -210,7 +212,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'EventExperts')
 BEGIN
     CREATE TABLE [dbo].[EventExperts](
         [Id] [int] IDENTITY(1,1) NOT NULL,
-        [EventId] [int] NOT NULL,
+        [EventId] [uniqueidentifier] NOT NULL,
         [ExpertId] [int] NOT NULL,
         CONSTRAINT [PK_EventExperts] PRIMARY KEY CLUSTERED ([Id] ASC)
     )
@@ -221,7 +223,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ContentExperts')
 BEGIN
     CREATE TABLE [dbo].[ContentExperts](
         [Id] [int] IDENTITY(1,1) NOT NULL,
-        [ContentId] [int] NOT NULL,
+        [ContentId] [uniqueidentifier] NOT NULL,
         [ExpertId] [int] NOT NULL,
         CONSTRAINT [PK_ContentExperts] PRIMARY KEY CLUSTERED ([Id] ASC)
     )
@@ -233,7 +235,7 @@ BEGIN
     CREATE TABLE [dbo].[EventLinks](
         [Id] [int] IDENTITY(1,1) NOT NULL,
         [LangID] [int] NOT NULL DEFAULT 1,
-        [EventId] [int] NOT NULL,
+        [EventId] [uniqueidentifier] NOT NULL,
         [LinkUrl] [nvarchar](500) NOT NULL,
         [Description] [nvarchar](255) NULL,
         CONSTRAINT [PK_EventLinks] PRIMARY KEY CLUSTERED ([Id] ASC)
@@ -246,7 +248,7 @@ BEGIN
     CREATE TABLE [dbo].[Galleries](
         [Id] [int] IDENTITY(1,1) NOT NULL,
         [LangID] [int] NOT NULL DEFAULT 1,
-        [EventId] [int] NOT NULL,
+        [EventId] [uniqueidentifier] NOT NULL,
         [Title] [nvarchar](255) NULL,
         [CreatedAt] [datetime2](7) NULL,
         CONSTRAINT [PK_Galleries] PRIMARY KEY CLUSTERED ([Id] ASC)

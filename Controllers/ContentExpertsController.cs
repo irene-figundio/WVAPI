@@ -23,30 +23,33 @@ namespace AI_Integration.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Add([FromBody] ContentExpert item, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        [HttpPost("CollegaExpert")]
+        public async Task<IActionResult> CollegaExpert([FromBody] ContentExpert item, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("POST", "api/contentexperts", item?.ToString(), userAgent, "Link expert to content");
+            var log = WebApiLogHelper.NewLog("POST", "api/contentexperts/CollegaExpert", item?.ToString(), userAgent, "Link expert to content via SP");
             var sw = Stopwatch.StartNew();
             if (item == null) return BadRequest();
             if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                // Check if connection already exists to prevent duplicates
-                var existing = await _unitOfWork.Query<ContentExpert>()
-                    .FirstOrDefaultAsync(ce => ce.ContentId == item.ContentId && ce.ExpertId == item.ExpertId);
+                var sql = "EXEC [dbo].[sp_CollegaExpertAContent] @ContentId={0}, @ExpertId={1}";
+                var results = await _unitOfWork.Context.ContentExpertCreationResults.FromSqlRaw(sql,
+                    item.ContentId,
+                    item.ExpertId
+                ).ToListAsync();
 
-                if (existing != null)
-                {
-                    sw.Stop();
-                    return BadRequest(new { success = false, message = "This expert is already linked to this content." });
-                }
-
-                await _unitOfWork.InsertAsync(item);
-                await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                return Ok(new { success = true, id = item.Id });
+
+                var result = results.FirstOrDefault();
+                if (result != null)
+                {
+                    if (result.ContentExpertId == 0)
+                        return BadRequest(new { success = false, message = "This expert is already linked to this content." });
+
+                    return Ok(new { success = true, id = result.ContentExpertId });
+                }
+                return Ok(new { success = true });
             }
             catch (Exception ex)
             {

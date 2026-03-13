@@ -7,6 +7,8 @@ namespace AI_Integration.DataAccess.Database.Models
 {
     public class Content
     {
+        [Key]
+        public Guid Guid { get; set; }
         public int Id { get; set; }
         public int LangID { get; set; }
         [Required]

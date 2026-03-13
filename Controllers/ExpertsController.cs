@@ -78,21 +78,32 @@ namespace AI_Integration.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Add([FromBody] Expert expert, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        [HttpPost("CreateExpert")]
+        public async Task<IActionResult> CreateExpert([FromBody] Expert expert, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("POST", "api/experts", expert?.ToString(), userAgent, "Create expert");
+            var log = WebApiLogHelper.NewLog("POST", "api/experts/CreateExpert", expert?.ToString(), userAgent, "Create expert via SP");
             var sw = Stopwatch.StartNew();
             if (expert == null) return BadRequest(new { success = false, message = "Expert info is required." });
             if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                expert.CreatedAt = DateTime.Now;
-                await _unitOfWork.InsertAsync(expert);
-                await _unitOfWork.SaveChangesAsync();
+                var sql = "EXEC [dbo].[sp_CreaExpert] @Name={0}, @Bio={1}, @PhotoUrl={2}, @Email={3}, @LangID={4}";
+                var results = await _unitOfWork.Context.ExpertCreationResults.FromSqlRaw(sql,
+                    expert.Name,
+                    expert.Bio ?? (object)DBNull.Value,
+                    expert.PhotoUrl ?? (object)DBNull.Value,
+                    expert.Email ?? (object)DBNull.Value,
+                    expert.LangID != 0 ? expert.LangID : 1
+                ).ToListAsync();
+
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                return Ok(new { success = true, id = expert.Id });
+                var result = results.FirstOrDefault();
+                if (result != null)
+                {
+                    return Ok(new { success = true, id = result.ExpertId });
+                }
+                return Ok(new { success = true });
             }
             catch (Exception ex)
             {

@@ -76,21 +76,34 @@ namespace AI_Integration.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Add([FromBody] Podcast podcast, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        [HttpPost("CreatePodcast")]
+        public async Task<IActionResult> CreatePodcast([FromBody] Podcast podcast, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("POST", "api/podcasts", podcast?.ToString(), userAgent, "Create podcast");
+            var log = WebApiLogHelper.NewLog("POST", "api/podcasts/CreatePodcast", podcast?.ToString(), userAgent, "Create podcast via SP");
             var sw = Stopwatch.StartNew();
             if (podcast == null) return BadRequest(new { success = false, message = "Podcast info is required." });
             if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                podcast.CreatedAt = DateTime.Now;
-                await _unitOfWork.InsertAsync(podcast);
-                await _unitOfWork.SaveChangesAsync();
+                var sql = "EXEC [dbo].[sp_CreaPodcast] @Title={0}, @Description={1}, @PublishDate={2}, @CoverImage={3}, @YoutubeUrl={4}, @SpotifyUrl={5}, @LangID={6}";
+                var results = await _unitOfWork.Context.PodcastCreationResults.FromSqlRaw(sql,
+                    podcast.Title,
+                    podcast.Description,
+                    podcast.PublishDate,
+                    podcast.CoverImage ?? (object)DBNull.Value,
+                    podcast.YoutubeUrl ?? (object)DBNull.Value,
+                    podcast.SpotifyUrl ?? (object)DBNull.Value,
+                    podcast.LangID != 0 ? podcast.LangID : 1
+                ).ToListAsync();
+
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                return Ok(new { success = true, id = podcast.Id });
+                var result = results.FirstOrDefault();
+                if (result != null)
+                {
+                    return Ok(new { success = true, id = result.PodcastId });
+                }
+                return Ok(new { success = true });
             }
             catch (Exception ex)
             {

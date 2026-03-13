@@ -6,7 +6,7 @@ namespace AI_Integration.DataAccess.Database.Models
     public class EventLink
     {
         public int Id { get; set; }
-        public int EventId { get; set; }
+        public Guid EventId { get; set; }
         [Required]
         [StringLength(500)]
         public string LinkUrl { get; set; } = null!;

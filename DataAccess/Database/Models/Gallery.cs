@@ -8,7 +8,7 @@ namespace AI_Integration.DataAccess.Database.Models
     public class Gallery
     {
         public int Id { get; set; }
-        public int EventId { get; set; }
+        public Guid EventId { get; set; }
         [StringLength(255)]
         public string? Title { get; set; }
         public DateTime? CreatedAt { get; set; }
@@ -25,7 +25,7 @@ namespace AI_Integration.DataAccess.Database.Models
     public class GalleryCreationResult
     {
         public int GalleryIdCreata { get; set; }
-        public int EventId { get; set; }
+        public Guid EventId { get; set; }
         public int NumeroImmaginiInserite { get; set; }
         public string LinkBaseUsato { get; set; } = null!;
     }

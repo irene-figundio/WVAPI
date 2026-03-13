@@ -71,21 +71,31 @@ namespace AI_Integration.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("add")]
         public async Task<IActionResult> Add([FromBody] ContentLink item, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("POST", "api/contentlinks", item?.ToString(), userAgent, "Create contentlink");
+            var log = WebApiLogHelper.NewLog("POST", "api/contentlinks/add", item?.ToString(), userAgent, "Create contentlink via SP");
             var sw = Stopwatch.StartNew();
             if (item == null) return BadRequest();
             if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                item.CreatedAt = DateTime.Now;
-                await _unitOfWork.InsertAsync(item);
-                await _unitOfWork.SaveChangesAsync();
+                var sql = "EXEC [dbo].[sp_CreaContentLink] @ContentId={0}, @LinkUrl={1}, @Description={2}, @LangID={3}";
+                var results = await _unitOfWork.Context.ContentLinkCreationResults.FromSqlRaw(sql,
+                    item.ContentId,
+                    item.LinkUrl,
+                    item.Description ?? (object)DBNull.Value,
+                    item.LangID != 0 ? item.LangID : 1
+                ).ToListAsync();
+
                 sw.Stop();
-                await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                return Ok(new { success = true, id = item.Id });
+                var result = results.FirstOrDefault();
+                if (result != null)
+                {
+                    await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                    return Ok(new { success = true, id = result.ContentLinkId });
+                }
+                return Ok(new { success = true });
             }
             catch (Exception ex)
             {

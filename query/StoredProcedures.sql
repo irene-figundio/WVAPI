@@ -10,7 +10,7 @@ GO
 -- 1. sp_CreaGalleryEInserisciFoto (FORNITA DALL'UTENTE)
 -----------------------------------------------------------------------------
 CREATE OR ALTER PROCEDURE [dbo].[sp_CreaGalleryEInserisciFoto]
-    @EventId INT,
+    @EventId UNIQUEIDENTIFIER,
     @GalleryTitle NVARCHAR(255),
     @LangID INT,
     @NumeroImmagini INT,
@@ -48,7 +48,7 @@ BEGIN
         (
             SELECT 1
             FROM [dbo].[Events]
-            WHERE [Id] = @EventId
+            WHERE [Guid] = @EventId
         )
             THROW 50006, 'Evento non trovato nella tabella Events.', 1;
 
@@ -115,8 +115,8 @@ GO
 -----------------------------------------------------------------------------
 CREATE OR ALTER PROCEDURE [dbo].[sp_CreaContentImages]
     @NArt INT,
-    @ContentID_IT INT,
-    @ContentID_EN INT,
+    @ContentID_IT UNIQUEIDENTIFIER,
+    @ContentID_EN UNIQUEIDENTIFIER,
     @NumeroImmagini INT,
     @BaseUrl NVARCHAR(500)
 AS
@@ -147,10 +147,10 @@ BEGIN
         IF RIGHT(@BaseUrlPulito, 1) = '/'
             SET @BaseUrlPulito = LEFT(@BaseUrlPulito, LEN(@BaseUrlPulito) - 1);
 
-        IF NOT EXISTS (SELECT 1 FROM [dbo].[Contents] WHERE [Id] = @ContentID_IT)
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[Contents] WHERE [Guid] = @ContentID_IT)
             THROW 51006, 'ContentID_IT non trovato nella tabella Contents.', 1;
 
-        IF NOT EXISTS (SELECT 1 FROM [dbo].[Contents] WHERE [Id] = @ContentID_EN)
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[Contents] WHERE [Guid] = @ContentID_EN)
             THROW 51007, 'ContentID_EN non trovato nella tabella Contents.', 1;
 
         BEGIN TRANSACTION;
@@ -224,12 +224,15 @@ AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
-        INSERT INTO [dbo].[Contents]
-        ([Title], [Text], [PublishDate], [CoverImage], [ContentType], [IsPublished], [CreatedAt], [UpdatedAt], [LangID])
-        VALUES
-        (@Title, @Text, @PublishDate, @CoverImage, @ContentType, @IsPublished, GETDATE(), GETDATE(), @LangID);
+        DECLARE @NewId UNIQUEIDENTIFIER = NEWID();
+        DECLARE @NextIntId INT = ISNULL((SELECT MAX(Id) FROM [dbo].[Contents]), 0) + 1;
 
-        SELECT SCOPE_IDENTITY() AS ContentId;
+        INSERT INTO [dbo].[Contents]
+        ([Guid], [Id], [Title], [Text], [PublishDate], [CoverImage], [ContentType], [IsPublished], [CreatedAt], [UpdatedAt], [LangID])
+        VALUES
+        (@NewId, @NextIntId, @Title, @Text, @PublishDate, @CoverImage, @ContentType, @IsPublished, GETDATE(), GETDATE(), @LangID);
+
+        SELECT @NewId AS ContentGuid, @NextIntId AS ContentId;
     END TRY
     BEGIN CATCH
         THROW;
@@ -260,18 +263,21 @@ AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
+        DECLARE @NewId UNIQUEIDENTIFIER = NEWID();
+        DECLARE @NextIntId INT = ISNULL((SELECT MAX(Id) FROM [dbo].[Events]), 0) + 1;
+
         INSERT INTO [dbo].[Events]
         (
-            [Title], [Description], [EventDate], [StartDate], [StartTime], [EndDate], [EndTime], [CoverImage], [CreatedAt],
+            [Guid], [Id], [Title], [Description], [EventDate], [StartDate], [StartTime], [EndDate], [EndTime], [CoverImage], [CreatedAt],
             [BookingEndDate], [Location], [Organizer], [ContactInfo], [Price], [IsOnline], [LangID]
         )
         VALUES
         (
-            @Title, @Description, @EventDate, @StartDate, @StartTime, @EndDate, @EndTime, @CoverImage, GETDATE(),
+            @NewId, @NextIntId, @Title, @Description, @EventDate, @StartDate, @StartTime, @EndDate, @EndTime, @CoverImage, GETDATE(),
             @BookingEndDate, @Location, @Organizer, @ContactInfo, @Price, @IsOnline, @LangID
         );
 
-        SELECT SCOPE_IDENTITY() AS EventId;
+        SELECT @NewId AS EventGuid, @NextIntId AS EventId;
     END TRY
     BEGIN CATCH
         THROW;
@@ -309,7 +315,7 @@ GO
 -- 6. sp_CollegaExpertAContent
 -----------------------------------------------------------------------------
 CREATE OR ALTER PROCEDURE [dbo].[sp_CollegaExpertAContent]
-    @ContentId INT,
+    @ContentId UNIQUEIDENTIFIER,
     @ExpertId INT
 AS
 BEGIN
@@ -336,7 +342,7 @@ GO
 -- 7. sp_CollegaExpertAEvent
 -----------------------------------------------------------------------------
 CREATE OR ALTER PROCEDURE [dbo].[sp_CollegaExpertAEvent]
-    @EventId INT,
+    @EventId UNIQUEIDENTIFIER,
     @ExpertId INT
 AS
 BEGIN
@@ -569,7 +575,7 @@ GO
 -- 16. sp_CreaContentLink
 -----------------------------------------------------------------------------
 CREATE OR ALTER PROCEDURE [dbo].[sp_CreaContentLink]
-    @ContentId INT,
+    @ContentId UNIQUEIDENTIFIER,
     @LinkUrl NVARCHAR(500),
     @Description NVARCHAR(255) = NULL,
     @LangID INT = 1
@@ -594,7 +600,7 @@ GO
 -- 17. sp_CreaEventLink
 -----------------------------------------------------------------------------
 CREATE OR ALTER PROCEDURE [dbo].[sp_CreaEventLink]
-    @EventId INT,
+    @EventId UNIQUEIDENTIFIER,
     @LinkUrl NVARCHAR(500),
     @Description NVARCHAR(255) = NULL,
     @LangID INT = 1

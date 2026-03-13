@@ -7,6 +7,8 @@ namespace AI_Integration.DataAccess.Database.Models
 {
     public class Event
     {
+        [Key]
+        public Guid Guid { get; set; }
         public int Id { get; set; }
         [Required]
         [StringLength(255)]

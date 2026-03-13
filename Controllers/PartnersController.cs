@@ -71,20 +71,31 @@ namespace AI_Integration.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Add([FromBody] Partner partner, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        [HttpPost("CreatePartner")]
+        public async Task<IActionResult> CreatePartner([FromBody] Partner partner, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("POST", "api/partners", partner?.ToString(), userAgent, "Create partner");
+            var log = WebApiLogHelper.NewLog("POST", "api/partners/CreatePartner", partner?.ToString(), userAgent, "Create partner via SP");
             var sw = Stopwatch.StartNew();
             if (partner == null) return BadRequest(new { success = false, message = "Partner info is required." });
             if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                await _unitOfWork.InsertAsync(partner);
-                await _unitOfWork.SaveChangesAsync();
+                var sql = "EXEC [dbo].[sp_CreaPartner] @Description={0}, @LinkUrl={1}, @ImageUrl={2}, @IsActive={3}";
+                var results = await _unitOfWork.Context.PartnerCreationResults.FromSqlRaw(sql,
+                    partner.Description ?? (object)DBNull.Value,
+                    partner.LinkUrl ?? (object)DBNull.Value,
+                    partner.ImageUrl ?? (object)DBNull.Value,
+                    partner.IsActive
+                ).ToListAsync();
+
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                return Ok(new { success = true, id = partner.Id });
+                var result = results.FirstOrDefault();
+                if (result != null)
+                {
+                    return Ok(new { success = true, id = result.PartnerId });
+                }
+                return Ok(new { success = true });
             }
             catch (Exception ex)
             {

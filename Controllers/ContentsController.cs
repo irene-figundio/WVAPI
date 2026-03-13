@@ -51,6 +51,7 @@ namespace AI_Integration.Controllers
 
         public sealed class ContentDto
         {
+            public Guid Guid { get; set; }
             public int Id { get; set; }
             public string Title { get; set; } = null!;
             public string Text { get; set; } = null!;
@@ -75,6 +76,7 @@ namespace AI_Integration.Controllers
                     .OrderByDescending(c => c.PublishDate)
                     .Select(c => new ContentDto
                     {
+                        Guid = c.Guid,
                         Id = c.Id,
                         Title = c.Title,
                         Text = c.Text,
@@ -129,6 +131,7 @@ namespace AI_Integration.Controllers
                     .OrderByDescending(c => c.PublishDate)
                     .Select(c => new ContentDto
                     {
+                        Guid = c.Guid,
                         Id = c.Id,
                         Title = c.Title,
                         Text = c.Text,
@@ -171,17 +174,18 @@ namespace AI_Integration.Controllers
             }
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById(int id, [FromQuery] int langId = 1, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById(Guid id, [FromQuery] int langId = 1, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
             var log = WebApiLogHelper.NewLog("GET", $"api/contents/{id}", $"langId={langId}", userAgent, "Get content by id (DTO)");
             var sw = Stopwatch.StartNew();
             try
             {
                 var dto = await _unitOfWork.Query<Content>()
-                    .Where(c => c.Id == id && c.LangID == langId)
+                    .Where(c => c.Guid == id && c.LangID == langId)
                     .Select(c => new ContentDto
                     {
+                        Guid = c.Guid,
                         Id = c.Id,
                         Title = c.Title,
                         Text = c.Text,
@@ -231,22 +235,34 @@ namespace AI_Integration.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Add([FromBody] Content content, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        [HttpPost("CreateContent")]
+        public async Task<IActionResult> CreateContent([FromBody] Content content, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("POST", "api/contents", content?.ToString(), userAgent, "Create content");
+            var log = WebApiLogHelper.NewLog("POST", "api/contents/CreateContent", content?.ToString(), userAgent, "Create content via SP");
             var sw = Stopwatch.StartNew();
             if (content == null) return BadRequest(new { success = false, message = "Content info is required." });
             if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                content.CreatedAt = DateTime.Now;
-                content.UpdatedAt = DateTime.Now;
-                await _unitOfWork.InsertAsync(content);
-                await _unitOfWork.SaveChangesAsync();
+                var sql = "EXEC [dbo].[sp_CreaContent] @Title={0}, @Text={1}, @PublishDate={2}, @CoverImage={3}, @ContentType={4}, @IsPublished={5}, @LangID={6}";
+                var results = await _unitOfWork.Context.ContentCreationResults.FromSqlRaw(sql,
+                    content.Title,
+                    content.Text,
+                    content.PublishDate,
+                    content.CoverImage ?? (object)DBNull.Value,
+                    content.ContentType,
+                    content.IsPublished ?? true,
+                    content.LangID != 0 ? content.LangID : 1
+                ).ToListAsync();
+
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                return Ok(new { success = true, id = content.Id });
+                var result = results.FirstOrDefault();
+                if (result != null)
+                {
+                    return Ok(new { success = true, guid = result.ContentGuid, id = result.ContentId });
+                }
+                return Ok(new { success = true });
             }
             catch (Exception ex)
             {
@@ -256,8 +272,8 @@ namespace AI_Integration.Controllers
             }
         }
 
-        [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, [FromBody] Content changes, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> Put(Guid id, [FromBody] Content changes, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
             var log = WebApiLogHelper.NewLog("PUT", $"api/contents/{id}", changes?.ToString(), userAgent, "Update content");
             var sw = Stopwatch.StartNew();
@@ -267,6 +283,7 @@ namespace AI_Integration.Controllers
                 var content = await _unitOfWork.GetByIdAsync<Content>(id);
                 if (content == null) return NotFound(new { success = false, message = "Content not found." });
 
+                content.Id = changes.Id != 0 ? changes.Id : content.Id;
                 content.Title = changes.Title ?? content.Title;
                 content.Text = changes.Text ?? content.Text;
                 content.PublishDate = changes.PublishDate != default ? changes.PublishDate : content.PublishDate;
@@ -290,8 +307,8 @@ namespace AI_Integration.Controllers
             }
         }
 
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> Delete(Guid id, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
             var log = WebApiLogHelper.NewLog("DELETE", $"api/contents/{id}", "", userAgent, "Delete content");
             var sw = Stopwatch.StartNew();

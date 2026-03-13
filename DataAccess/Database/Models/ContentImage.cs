@@ -7,7 +7,7 @@ namespace AI_Integration.DataAccess.Database.Models
     public class ContentImage
     {
         public int Id { get; set; }
-        public int ContentId { get; set; }
+        public Guid ContentId { get; set; }
         [Required]
         [StringLength(500)]
         public string ImageUrl { get; set; } = null!;
@@ -27,8 +27,8 @@ namespace AI_Integration.DataAccess.Database.Models
     public class ContentImagesCreationResult
     {
         public int NumeroArticolo { get; set; }
-        public int ContentIdIT { get; set; }
-        public int ContentIdEN { get; set; }
+        public Guid ContentIdIT { get; set; }
+        public Guid ContentIdEN { get; set; }
         public int NumeroImmaginiPerLingua { get; set; }
         public int TotaleRecordInseriti { get; set; }
         public string BaseUrlUsato { get; set; } = null!;

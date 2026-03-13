@@ -27,7 +27,7 @@ namespace AI_Integration.Controllers
 
         public sealed class CreateGalleryRequestDto
         {
-            public int EventId { get; set; }
+            public Guid EventId { get; set; }
             public string GalleryTitle { get; set; } = null!;
             public int LangID { get; set; }
             public int NumeroImmagini { get; set; }
@@ -168,7 +168,7 @@ namespace AI_Integration.Controllers
                 // Basic mapping (better to use Automapper or similar, but following pattern)
 
                 item.Title = changes.Title ?? item.Title;
-                item.EventId = changes.EventId != 0 ? changes.EventId : item.EventId;
+                item.EventId = changes.EventId != Guid.Empty ? changes.EventId : item.EventId;
                 item.LangID = changes.LangID != 0 ? changes.LangID : item.LangID;
 
                 _unitOfWork.Update(item);

@@ -57,6 +57,7 @@ namespace AI_Integration.Controllers
 
         public sealed class EventDto
         {
+            public Guid Guid { get; set; }
             public int Id { get; set; }
             public string Title { get; set; } = null!;
             public string Description { get; set; } = null!;
@@ -90,6 +91,7 @@ namespace AI_Integration.Controllers
                     .OrderByDescending(e => e.EventDate)
                     .Select(e => new EventDto
                     {
+                        Guid = e.Guid,
                         Id = e.Id,
                         Title = e.Title,
                         Description = e.Description,
@@ -144,17 +146,18 @@ namespace AI_Integration.Controllers
             }
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById(int id, [FromQuery] int langId = 1, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById(Guid id, [FromQuery] int langId = 1, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
             var log = WebApiLogHelper.NewLog("GET", $"api/events/{id}", $"langId={langId}", userAgent, "Get event by id (DTO)");
             var sw = Stopwatch.StartNew();
             try
             {
                 var dto = await _unitOfWork.Query<Event>()
-                    .Where(e => e.Id == id && e.LangID == langId)
+                    .Where(e => e.Guid == id && e.LangID == langId)
                     .Select(e => new EventDto
                     {
+                        Guid = e.Guid,
                         Id = e.Id,
                         Title = e.Title,
                         Description = e.Description,
@@ -216,21 +219,43 @@ namespace AI_Integration.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Add([FromBody] Event @event, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        [HttpPost("CreateEvent")]
+        public async Task<IActionResult> CreateEvent([FromBody] Event @event, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("POST", "api/events", @event?.ToString(), userAgent, "Create event");
+            var log = WebApiLogHelper.NewLog("POST", "api/events/CreateEvent", @event?.ToString(), userAgent, "Create event via SP");
             var sw = Stopwatch.StartNew();
             if (@event == null) return BadRequest(new { success = false, message = "Event info is required." });
             if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                @event.CreatedAt = DateTime.Now;
-                await _unitOfWork.InsertAsync(@event);
-                await _unitOfWork.SaveChangesAsync();
+                var sql = "EXEC [dbo].[sp_CreaEvent] @Title={0}, @Description={1}, @EventDate={2}, @StartDate={3}, @StartTime={4}, @EndDate={5}, @EndTime={6}, @CoverImage={7}, @BookingEndDate={8}, @Location={9}, @Organizer={10}, @ContactInfo={11}, @Price={12}, @IsOnline={13}, @LangID={14}";
+                var results = await _unitOfWork.Context.EventCreationResults.FromSqlRaw(sql,
+                    @event.Title,
+                    @event.Description,
+                    @event.EventDate,
+                    @event.StartDate ?? (object)DBNull.Value,
+                    @event.StartTime ?? (object)DBNull.Value,
+                    @event.EndDate ?? (object)DBNull.Value,
+                    @event.EndTime ?? (object)DBNull.Value,
+                    @event.CoverImage ?? (object)DBNull.Value,
+                    @event.BookingEndDate ?? (object)DBNull.Value,
+                    @event.Location ?? (object)DBNull.Value,
+                    @event.Organizer ?? (object)DBNull.Value,
+                    @event.ContactInfo ?? (object)DBNull.Value,
+                    @event.Price,
+                    @event.IsOnline,
+                    @event.LangID != 0 ? @event.LangID : 1
+                ).ToListAsync();
+
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                return Ok(new { success = true, id = @event.Id });
+
+                var result = results.FirstOrDefault();
+                if (result != null)
+                {
+                    return Ok(new { success = true, guid = result.EventGuid, id = result.EventId });
+                }
+                return Ok(new { success = true });
             }
             catch (Exception ex)
             {
@@ -240,8 +265,8 @@ namespace AI_Integration.Controllers
             }
         }
 
-        [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, [FromBody] Event changes, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> Put(Guid id, [FromBody] Event changes, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
             var log = WebApiLogHelper.NewLog("PUT", $"api/events/{id}", changes?.ToString(), userAgent, "Update event");
             var sw = Stopwatch.StartNew();
@@ -251,6 +276,7 @@ namespace AI_Integration.Controllers
                 var @event = await _unitOfWork.GetByIdAsync<Event>(id);
                 if (@event == null) return NotFound(new { success = false, message = "Event not found." });
 
+                @event.Id = changes.Id != 0 ? changes.Id : @event.Id;
                 @event.Title = changes.Title ?? @event.Title;
                 @event.Description = changes.Description ?? @event.Description;
                 @event.EventDate = changes.EventDate != default ? changes.EventDate : @event.EventDate;
@@ -283,8 +309,8 @@ namespace AI_Integration.Controllers
             }
         }
 
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> Delete(Guid id, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
             var log = WebApiLogHelper.NewLog("DELETE", $"api/events/{id}", "", userAgent, "Delete event");
             var sw = Stopwatch.StartNew();

@@ -100,7 +100,7 @@ namespace AI_Integration.Controllers
                 RequestUrl = "api/users",
                 RequestBody = req?.Username ?? "",
                 UserAgent = userAgent,
-                AdditionalInfo = "Create user"
+                AdditionalInfo = "Create user via SP"
             };
 
             if (req == null || string.IsNullOrWhiteSpace(req.Username)

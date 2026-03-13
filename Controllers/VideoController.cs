@@ -316,7 +316,28 @@ namespace AI_Integration.Controllers
                 }
 
                 // Persistenza: generici
-                await _unitOfWork.InsertAsync(video);
+                var sql = "EXEC [dbo].[sp_CreaAIVideo] @Dir_Path={0}, @Title={1}, @Url_Video={2}, @Play_Priority={3}, @IsLandscape={4}, @ID_Session={5}, @Creation_User={6}";
+                var results = await _unitOfWork.Context.AIVideoCreationResults.FromSqlRaw(sql,
+                    video.Dir_Path ?? (object)DBNull.Value,
+                    video.Title ?? (object)DBNull.Value,
+                    video.Url_Video ?? (object)DBNull.Value,
+                    video.Play_Priority ?? (object)DBNull.Value,
+                    video.IsLandscape ?? (object)DBNull.Value,
+                    video.ID_Session,
+                    video.Creation_User ?? (object)DBNull.Value
+                ).ToListAsync();
+
+                var result = results.FirstOrDefault();
+                if (result != null)
+                {
+                    log.ResponseBody = "{ success = true, message = 'Video Added successfully.', id = " + result.AIVideoId + " }";
+                    log.ResponseCode = 200;
+                    log.ResponseMessage = "OK";
+                    await _unitOfWork.InsertAsync(log);
+                    await _unitOfWork.SaveChangesAsync();
+                    return Ok(new { success = true, id = result.AIVideoId });
+                }
+
                 log.ResponseBody = "{ success = true, message = 'Video Added successfully.' }";
                 log.ResponseCode = 200;
                 log.ResponseMessage = "OK";
@@ -324,7 +345,7 @@ namespace AI_Integration.Controllers
                 await _unitOfWork.InsertAsync(log);
                 await _unitOfWork.SaveChangesAsync();
 
-                return Ok(new { success = true, message = "Video Added successfully." });
+                return Ok(new { success = true });
             }
             catch (Exception ex)
             {

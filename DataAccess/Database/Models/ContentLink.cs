@@ -7,7 +7,7 @@ namespace AI_Integration.DataAccess.Database.Models
     public class ContentLink
     {
         public int Id { get; set; }
-        public int ContentId { get; set; }
+        public Guid ContentId { get; set; }
         [Required]
         [StringLength(500)]
         public string LinkUrl { get; set; } = null!;

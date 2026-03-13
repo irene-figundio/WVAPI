@@ -7,7 +7,7 @@ namespace AI_Integration.DataAccess.Database.Models
     {
         public int Id { get; set; }
 
-        public int EventId { get; set; }
+        public Guid EventId { get; set; }
         [ForeignKey("EventId")]
         public virtual Event? Event { get; set; }
 

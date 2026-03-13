@@ -7,7 +7,7 @@ namespace AI_Integration.DataAccess.Database.Models
     {
         public int Id { get; set; }
 
-        public int ContentId { get; set; }
+        public Guid ContentId { get; set; }
         [ForeignKey("ContentId")]
         public virtual Content? Content { get; set; }
 

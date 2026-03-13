@@ -165,10 +165,25 @@ namespace AI_Integration.Controllers
 
             try
             {
-                await _unitOfWork.InsertAsync(session);
-                await _unitOfWork.SaveChangesAsync();
+                var sql = "EXEC [dbo].[sp_CreaAdSession] @ID_Campaing={0}, @StartDate={1}, @EndDate={2}, @Creation_User={3}, @LangID={4}";
+                var results = await _unitOfWork.Context.AdSessionCreationResults.FromSqlRaw(sql,
+                    session.ID_Campaing,
+                    session.StartDate,
+                    session.EndDate,
+                    session.Creation_User ?? (object)DBNull.Value,
+                    1
+                ).ToListAsync();
 
                 sw.Stop();
+                var result = results.FirstOrDefault();
+                if (result != null)
+                {
+                    await WebApiLogHelper.LogOkAsync(_unitOfWork, log,
+                        $"{{ success = true, id = {result.AdSessionId} }}",
+                        $"ElapsedMs={sw.ElapsedMilliseconds}");
+                    return Ok(new { success = true, id = result.AdSessionId });
+                }
+
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log,
                     "{ success = true, message = 'Session added successfully.' }",
                     $"ElapsedMs={sw.ElapsedMilliseconds}");

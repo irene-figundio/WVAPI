@@ -28,8 +28,8 @@ namespace AI_Integration.Controllers
         public sealed class CreateContentImagesRequestDto
         {
             public int NArt { get; set; }
-            public int ContentID_IT { get; set; }
-            public int ContentID_EN { get; set; }
+            public Guid ContentID_IT { get; set; }
+            public Guid ContentID_EN { get; set; }
             public int NumeroImmagini { get; set; }
             public string BaseUrl { get; set; } = null!;
         }

@@ -23,30 +23,33 @@ namespace AI_Integration.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Add([FromBody] EventExpert item, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        [HttpPost("CollegaExpert")]
+        public async Task<IActionResult> CollegaExpert([FromBody] EventExpert item, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("POST", "api/eventexperts", item?.ToString(), userAgent, "Link expert to event");
+            var log = WebApiLogHelper.NewLog("POST", "api/eventexperts/CollegaExpert", item?.ToString(), userAgent, "Link expert to event via SP");
             var sw = Stopwatch.StartNew();
             if (item == null) return BadRequest();
             if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                // Check if connection already exists to prevent duplicates
-                var existing = await _unitOfWork.Query<EventExpert>()
-                    .FirstOrDefaultAsync(ee => ee.EventId == item.EventId && ee.ExpertId == item.ExpertId);
+                var sql = "EXEC [dbo].[sp_CollegaExpertAEvent] @EventId={0}, @ExpertId={1}";
+                var results = await _unitOfWork.Context.EventExpertCreationResults.FromSqlRaw(sql,
+                    item.EventId,
+                    item.ExpertId
+                ).ToListAsync();
 
-                if (existing != null)
-                {
-                    sw.Stop();
-                    return BadRequest(new { success = false, message = "This expert is already linked to this event." });
-                }
-
-                await _unitOfWork.InsertAsync(item);
-                await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                return Ok(new { success = true, id = item.Id });
+
+                var result = results.FirstOrDefault();
+                if (result != null)
+                {
+                    if (result.EventExpertId == 0)
+                        return BadRequest(new { success = false, message = "This expert is already linked to this event." });
+
+                    return Ok(new { success = true, id = result.EventExpertId });
+                }
+                return Ok(new { success = true });
             }
             catch (Exception ex)
             {
