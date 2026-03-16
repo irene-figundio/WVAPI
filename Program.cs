@@ -23,13 +23,34 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen();
+
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+
 builder.Services.AddCors(options =>
-{   
-    options.AddPolicy("AllowAnyOrigin", builder =>
+{
+    options.AddPolicy("CorsPolicy", policy =>
     {
-        builder.AllowAnyOrigin()
-               .AllowAnyHeader()
-               .AllowAnyMethod();
+        if (allowedOrigins.Length > 0)
+        {
+            policy.WithOrigins(allowedOrigins)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        }
+        else if (builder.Environment.IsDevelopment())
+        {
+            // Fallback for local development if no origins are configured.
+            // In production, origins MUST be configured in appsettings.json
+            policy.SetIsOriginAllowed(origin =>
+            {
+                if (Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+                {
+                    return uri.Host == "localhost";
+                }
+                return false;
+            })
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+        }
     });
 });
 
@@ -152,7 +173,7 @@ if (app.Environment.IsDevelopment())
     app.UseAuthentication();
 }
 app.UseRouting();
-app.UseCors("AllowAnyOrigin");
+app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
 
