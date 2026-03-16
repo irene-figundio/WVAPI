@@ -57,7 +57,7 @@ namespace AI_Integration.Helpers
                     string timestamp = matches[1].Groups[1].Value;
                     if (platform.IsNullOrEmpty() || timestamp.IsNullOrEmpty())
                         return false;
-                    if (!platform.ToLower().Equals("android")|| !platform.ToLower().Equals("ios")||!platform.ToLower().Equals("pwa"))
+                    if (!platform.ToLower().Equals("android") && !platform.ToLower().Equals("ios") && !platform.ToLower().Equals("pwa"))
                         return false;
                     if (!IsIso8601Timestamp(timestamp))
                         return false;
