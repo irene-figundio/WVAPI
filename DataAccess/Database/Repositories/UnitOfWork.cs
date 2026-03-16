@@ -65,6 +65,8 @@ namespace AI_Integration.DataAccess.Database.Repositories
         public IGalleryRepository Galleries { get; private set; }
         public IPhotoGalleryRepository PhotoGalleries { get; private set; }
 
+        public ApplicationDbContext Context => _db;
+
         public UnitOfWork(ApplicationDbContext db)
         {
             _db = db;

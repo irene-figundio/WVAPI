@@ -26,13 +26,15 @@ namespace AI_Integration.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> Get([FromQuery] int langId = 1, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("GET", "api/photogallery", "", userAgent, "List photogallery");
+            var log = WebApiLogHelper.NewLog("GET", "api/photogallery", $"langId={langId}", userAgent, "List photogallery");
             var sw = Stopwatch.StartNew();
             try
             {
-                var items = await _unitOfWork.Query<PhotoGallery>().ToListAsync();
+                var items = await _unitOfWork.Query<PhotoGallery>()
+                    .Where(p => p.LangID == langId)
+                    .ToListAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, $"{{ success = true, count = {items.Count} }}", $"ElapsedMs={sw.ElapsedMilliseconds}");
                 return Ok(items);
@@ -46,13 +48,15 @@ namespace AI_Integration.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById(int id, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> GetById(int id, [FromQuery] int langId = 1, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("GET", $"api/photogallery/{id}", "", userAgent, "Get photogallery by id");
+            var log = WebApiLogHelper.NewLog("GET", $"api/photogallery/{id}", $"langId={langId}", userAgent, "Get photogallery by id");
             var sw = Stopwatch.StartNew();
             try
             {
-                var item = await _unitOfWork.GetByIdAsync<PhotoGallery>(id);
+                var item = await _unitOfWork.Query<PhotoGallery>()
+                    .Where(p => p.Id == id && p.LangID == langId)
+                    .FirstOrDefaultAsync();
                 if (item == null)
                 {
                     sw.Stop();
@@ -114,13 +118,8 @@ namespace AI_Integration.Controllers
                 // Basic mapping (better to use Automapper or similar, but following pattern)
                 item.ImageUrl = changes.ImageUrl ?? item.ImageUrl;
                 item.Caption = changes.Caption ?? item.Caption;
-
-
-
-
-
-
                 item.GalleryId = changes.GalleryId != 0 ? changes.GalleryId : item.GalleryId;
+                item.LangID = changes.LangID != 0 ? changes.LangID : item.LangID;
 
                 _unitOfWork.Update(item);
                 await _unitOfWork.SaveChangesAsync();

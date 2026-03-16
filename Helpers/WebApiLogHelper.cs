@@ -1,5 +1,6 @@
 ﻿using AI_Integration.DataAccess.Database.Models;
 using AI_Integration.DataAccess.Database.Repositories.interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace AI_Integration.Helpers
 {
@@ -44,8 +45,17 @@ namespace AI_Integration.Helpers
                     : $"{log.AdditionalInfo} | {more}";
             }
 
-            await unitOfWork.InsertAsync(log);
-            await unitOfWork.SaveChangesAsync();
+            var sql = "EXEC [dbo].[sp_CreaWebAPILog] @RequestMethod={0}, @RequestUrl={1}, @RequestBody={2}, @ResponseBody={3}, @ResponseCode={4}, @ResponseMessage={5}, @UserAgent={6}, @AdditionalInfo={7}";
+            await unitOfWork.Context.Database.ExecuteSqlRawAsync(sql,
+                log.RequestMethod ?? (object)DBNull.Value,
+                log.RequestUrl ?? (object)DBNull.Value,
+                log.RequestBody ?? (object)DBNull.Value,
+                log.ResponseBody ?? (object)DBNull.Value,
+                log.ResponseCode,
+                log.ResponseMessage ?? (object)DBNull.Value,
+                log.UserAgent ?? (object)DBNull.Value,
+                log.AdditionalInfo ?? (object)DBNull.Value
+            );
         }
 
         public static Task LogOkAsync(IUnitOfWork uow, WebAPILog log, string body, string? more = null)

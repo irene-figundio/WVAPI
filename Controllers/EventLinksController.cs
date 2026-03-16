@@ -71,21 +71,31 @@ namespace AI_Integration.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("add")]
         public async Task<IActionResult> Add([FromBody] EventLink item, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("POST", "api/eventlinks", item?.ToString(), userAgent, "Create eventlink");
+            var log = WebApiLogHelper.NewLog("POST", "api/eventlinks/add", item?.ToString(), userAgent, "Create eventlink via SP");
             var sw = Stopwatch.StartNew();
             if (item == null) return BadRequest();
             if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
+                var sql = "EXEC [dbo].[sp_CreaEventLink] @EventId={0}, @LinkUrl={1}, @Description={2}, @LangID={3}";
+                var results = await _unitOfWork.Context.EventLinkCreationResults.FromSqlRaw(sql,
+                    item.EventId,
+                    item.LinkUrl,
+                    item.Description ?? (object)DBNull.Value,
+                    item.LangID != 0 ? item.LangID : 1
+                ).ToListAsync();
 
-                await _unitOfWork.InsertAsync(item);
-                await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
-                await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                return Ok(new { success = true, id = item.Id });
+                var result = results.FirstOrDefault();
+                if (result != null)
+                {
+                    await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                    return Ok(new { success = true, id = result.EventLinkId });
+                }
+                return Ok(new { success = true });
             }
             catch (Exception ex)
             {
@@ -112,15 +122,9 @@ namespace AI_Integration.Controllers
                 }
 
                 // Basic mapping (better to use Automapper or similar, but following pattern)
-
-
-
                 item.LinkUrl = changes.LinkUrl ?? item.LinkUrl;
                 item.Description = changes.Description ?? item.Description;
-
-
-
-
+                item.LangID = changes.LangID != 0 ? changes.LangID : item.LangID;
 
                 _unitOfWork.Update(item);
                 await _unitOfWork.SaveChangesAsync();

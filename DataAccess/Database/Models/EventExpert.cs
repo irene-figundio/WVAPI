@@ -1,0 +1,18 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace AI_Integration.DataAccess.Database.Models
+{
+    public class EventExpert
+    {
+        public int Id { get; set; }
+
+        public Guid EventId { get; set; }
+        [ForeignKey("EventId")]
+        public virtual Event? Event { get; set; }
+
+        public int ExpertId { get; set; }
+        [ForeignKey("ExpertId")]
+        public virtual Expert? Expert { get; set; }
+    }
+}

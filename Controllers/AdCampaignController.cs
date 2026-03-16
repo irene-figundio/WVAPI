@@ -181,11 +181,27 @@ namespace AI_Integration.Controllers
 
             try
             {
-                campaign.CreationTime = DateTime.Now;
-                await _unitOfWork.InsertAsync(campaign);
-                await _unitOfWork.SaveChangesAsync();
+                var sql = "EXEC [dbo].[sp_CreaAdCampaign] @Name={0}, @Description={1}, @StartDate={2}, @EndDate={3}, @Budget={4}, @Creation_User={5}, @LangID={6}";
+                var results = await _unitOfWork.Context.AdCampaignCreationResults.FromSqlRaw(sql,
+                    campaign.Name,
+                    campaign.Description ?? (object)DBNull.Value,
+                    campaign.StartDate,
+                    campaign.EndDate,
+                    campaign.Budget ?? (object)DBNull.Value,
+                    campaign.Creation_User ?? (object)DBNull.Value,
+                    1
+                ).ToListAsync();
 
                 sw.Stop();
+                var result = results.FirstOrDefault();
+                if (result != null)
+                {
+                    await WebApiLogHelper.LogOkAsync(_unitOfWork, log,
+                        $"{{ success = true, id = {result.AdCampaignId} }}",
+                        $"ElapsedMs={sw.ElapsedMilliseconds}");
+                    return Ok(new { success = true, id = result.AdCampaignId });
+                }
+
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log,
                     "{ success = true, message = 'Campaign added successfully.' }",
                     $"ElapsedMs={sw.ElapsedMilliseconds}");

@@ -1,0 +1,92 @@
+===============================================================
+FLUSSO DI COLLEGAMENTO ESPERTI A ARTICOLI (CONTENTS) ED EVENTI
+===============================================================
+Le chiamate presuppongono l'utilizzo di un token di autorizzazione Bearer nel caso l'endpoint sia protetto da [Authorize].
+
+In questo flusso si assume di aver già creato:
+- Un Esperto con ID = 1 (tramite POST /api/experts)
+- Un Articolo con ID = 10 (tramite POST /api/contents)
+- Un Evento con ID = 20 (tramite POST /api/events)
+
+
+---------------------------------------------------------------
+1. COLLEGAMENTO DI UN ESPERTO A UN ARTICOLO (BLOG / NEWS)
+---------------------------------------------------------------
+
+# Collega l'Esperto (ID=1) come autore dell'Articolo (ID=10)
+POST /api/contentexperts
+Content-Type: application/json
+
+{
+  "contentId": 10,
+  "expertId": 1
+}
+
+[Risposta attesa: { "success": true, "id": 1 }]
+
+# Rimozione del collegamento (assumendo che la join row abbia Id=1)
+DELETE /api/contentexperts/1
+
+
+---------------------------------------------------------------
+2. COLLEGAMENTO DI UN ESPERTO A UN EVENTO
+---------------------------------------------------------------
+
+# Collega l'Esperto (ID=1) all'Evento (ID=20)
+POST /api/eventexperts
+Content-Type: application/json
+
+{
+  "eventId": 20,
+  "expertId": 1
+}
+
+[Risposta attesa: { "success": true, "id": 1 }]
+
+# Rimozione del collegamento (assumendo che la join row abbia Id=1)
+DELETE /api/eventexperts/1
+
+
+---------------------------------------------------------------
+3. VERIFICA DEL COLLEGAMENTO
+---------------------------------------------------------------
+
+# Leggendo l'articolo, si vedrà l'esperto all'interno dell'array "Authors"
+GET /api/contents/10?langId=1
+
+[
+  {
+    "id": 10,
+    "title": "Titolo articolo...",
+    ...
+    "authors": [
+      {
+        "id": 1,
+        "name": "Mario Rossi",
+        "bio": "Esperto Sommelier...",
+        "photoUrl": "https://example.com/images/mario_rossi.jpg",
+        "email": "mario.rossi@example.com"
+      }
+    ]
+  }
+]
+
+# Leggendo l'evento, si vedrà l'esperto all'interno dell'array "Authors"
+GET /api/events/20?langId=1
+
+[
+  {
+    "id": 20,
+    "title": "Festival del Vino...",
+    ...
+    "authors": [
+      {
+        "id": 1,
+        "name": "Mario Rossi",
+        "bio": "Esperto Sommelier...",
+        "photoUrl": "https://example.com/images/mario_rossi.jpg",
+        "email": "mario.rossi@example.com"
+      }
+    ]
+  }
+]

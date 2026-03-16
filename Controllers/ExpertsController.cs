@@ -16,11 +16,11 @@ namespace AI_Integration.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class PodcastsController : ControllerBase
+    public class ExpertsController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        public PodcastsController(IUnitOfWork unitOfWork)
+        public ExpertsController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
@@ -28,17 +28,17 @@ namespace AI_Integration.Controllers
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery] int langId = 1, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("GET", "api/podcasts", $"langId={langId}", userAgent, "List podcasts");
+            var log = WebApiLogHelper.NewLog("GET", "api/experts", $"langId={langId}", userAgent, "List experts");
             var sw = Stopwatch.StartNew();
             try
             {
-                var podcasts = await _unitOfWork.Query<Podcast>()
-                    .Where(p => p.LangID == langId)
-                    .OrderByDescending(p => p.PublishDate)
+                var experts = await _unitOfWork.Query<Expert>()
+                    .Where(e => e.LangID == langId)
+                    .OrderByDescending(e => e.CreatedAt)
                     .ToListAsync();
                 sw.Stop();
-                await WebApiLogHelper.LogOkAsync(_unitOfWork, log, $"{{ success = true, count = {podcasts.Count} }}", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                return Ok(podcasts);
+                await WebApiLogHelper.LogOkAsync(_unitOfWork, log, $"{{ success = true, count = {experts.Count} }}", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return Ok(experts);
             }
             catch (Exception ex)
             {
@@ -51,22 +51,24 @@ namespace AI_Integration.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id, [FromQuery] int langId = 1, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("GET", $"api/podcasts/{id}", $"langId={langId}", userAgent, "Get podcast by id");
+            var log = WebApiLogHelper.NewLog("GET", $"api/experts/{id}", $"langId={langId}", userAgent, "Get expert by id");
             var sw = Stopwatch.StartNew();
             try
             {
-                var podcast = await _unitOfWork.Query<Podcast>()
-                    .Where(p => p.Id == id && p.LangID == langId)
+                var expert = await _unitOfWork.Query<Expert>()
+                    .Where(e => e.Id == id && e.LangID == langId)
                     .FirstOrDefaultAsync();
-                if (podcast == null)
+
+                if (expert == null)
                 {
                     sw.Stop();
-                    await WebApiLogHelper.LogNotFoundAsync(_unitOfWork, log, "{ success = false, message = 'Podcast not found.' }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                    return NotFound(new { success = false, message = "Podcast not found." });
+                    await WebApiLogHelper.LogNotFoundAsync(_unitOfWork, log, "{ success = false, message = 'Expert not found.' }", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                    return NotFound(new { success = false, message = "Expert not found." });
                 }
+
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                return Ok(podcast);
+                return Ok(expert);
             }
             catch (Exception ex)
             {
@@ -76,24 +78,22 @@ namespace AI_Integration.Controllers
             }
         }
 
-        [HttpPost("CreatePodcast")]
-        public async Task<IActionResult> CreatePodcast([FromBody] Podcast podcast, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        [HttpPost("CreateExpert")]
+        public async Task<IActionResult> CreateExpert([FromBody] Expert expert, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("POST", "api/podcasts/CreatePodcast", podcast?.ToString(), userAgent, "Create podcast via SP");
+            var log = WebApiLogHelper.NewLog("POST", "api/experts/CreateExpert", expert?.ToString(), userAgent, "Create expert via SP");
             var sw = Stopwatch.StartNew();
-            if (podcast == null) return BadRequest(new { success = false, message = "Podcast info is required." });
+            if (expert == null) return BadRequest(new { success = false, message = "Expert info is required." });
             if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                var sql = "EXEC [dbo].[sp_CreaPodcast] @Title={0}, @Description={1}, @PublishDate={2}, @CoverImage={3}, @YoutubeUrl={4}, @SpotifyUrl={5}, @LangID={6}";
-                var results = await _unitOfWork.Context.PodcastCreationResults.FromSqlRaw(sql,
-                    podcast.Title,
-                    podcast.Description,
-                    podcast.PublishDate,
-                    podcast.CoverImage ?? (object)DBNull.Value,
-                    podcast.YoutubeUrl ?? (object)DBNull.Value,
-                    podcast.SpotifyUrl ?? (object)DBNull.Value,
-                    podcast.LangID != 0 ? podcast.LangID : 1
+                var sql = "EXEC [dbo].[sp_CreaExpert] @Name={0}, @Bio={1}, @PhotoUrl={2}, @Email={3}, @LangID={4}";
+                var results = await _unitOfWork.Context.ExpertCreationResults.FromSqlRaw(sql,
+                    expert.Name,
+                    expert.Bio ?? (object)DBNull.Value,
+                    expert.PhotoUrl ?? (object)DBNull.Value,
+                    expert.Email ?? (object)DBNull.Value,
+                    expert.LangID != 0 ? expert.LangID : 1
                 ).ToListAsync();
 
                 sw.Stop();
@@ -101,7 +101,7 @@ namespace AI_Integration.Controllers
                 var result = results.FirstOrDefault();
                 if (result != null)
                 {
-                    return Ok(new { success = true, id = result.PodcastId });
+                    return Ok(new { success = true, id = result.ExpertId });
                 }
                 return Ok(new { success = true });
             }
@@ -114,25 +114,23 @@ namespace AI_Integration.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, [FromBody] Podcast changes, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> Put(int id, [FromBody] Expert changes, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("PUT", $"api/podcasts/{id}", changes?.ToString(), userAgent, "Update podcast");
+            var log = WebApiLogHelper.NewLog("PUT", $"api/experts/{id}", changes?.ToString(), userAgent, "Update expert");
             var sw = Stopwatch.StartNew();
             if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                var podcast = await _unitOfWork.GetByIdAsync<Podcast>(id);
-                if (podcast == null) return NotFound(new { success = false, message = "Podcast not found." });
+                var expert = await _unitOfWork.GetByIdAsync<Expert>(id);
+                if (expert == null) return NotFound(new { success = false, message = "Expert not found." });
 
-                podcast.Title = changes.Title ?? podcast.Title;
-                podcast.Description = changes.Description ?? podcast.Description;
-                podcast.PublishDate = changes.PublishDate != default ? changes.PublishDate : podcast.PublishDate;
-                podcast.CoverImage = changes.CoverImage ?? podcast.CoverImage;
-                podcast.YoutubeUrl = changes.YoutubeUrl ?? podcast.YoutubeUrl;
-                podcast.SpotifyUrl = changes.SpotifyUrl ?? podcast.SpotifyUrl;
-                podcast.LangID = changes.LangID != 0 ? changes.LangID : podcast.LangID;
+                expert.Name = changes.Name ?? expert.Name;
+                expert.Bio = changes.Bio ?? expert.Bio;
+                expert.PhotoUrl = changes.PhotoUrl ?? expert.PhotoUrl;
+                expert.Email = changes.Email ?? expert.Email;
+                expert.LangID = changes.LangID != 0 ? changes.LangID : expert.LangID;
 
-                _unitOfWork.Update(podcast);
+                _unitOfWork.Update(expert);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
@@ -149,13 +147,14 @@ namespace AI_Integration.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("DELETE", $"api/podcasts/{id}", "", userAgent, "Delete podcast");
+            var log = WebApiLogHelper.NewLog("DELETE", $"api/experts/{id}", "", userAgent, "Delete expert");
             var sw = Stopwatch.StartNew();
             try
             {
-                var podcast = await _unitOfWork.GetByIdAsync<Podcast>(id);
-                if (podcast == null) return NotFound(new { success = false, message = "Podcast not found." });
-                _unitOfWork.Remove(podcast);
+                var expert = await _unitOfWork.GetByIdAsync<Expert>(id);
+                if (expert == null) return NotFound(new { success = false, message = "Expert not found." });
+
+                _unitOfWork.Remove(expert);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogNoContentAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");

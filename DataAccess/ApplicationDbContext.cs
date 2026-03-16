@@ -39,7 +39,34 @@ namespace AI_Integration.DataAccess
         public virtual DbSet<EventLink> EventLinks { get; set; } = null!;
         public virtual DbSet<Gallery> Galleries { get; set; } = null!;
         public virtual DbSet<PhotoGallery> PhotoGalleries { get; set; } = null!;
+        public virtual DbSet<Language> Languages { get; set; } = null!;
+        public virtual DbSet<Expert> Experts { get; set; } = null!;
+        public virtual DbSet<EventExpert> EventExperts { get; set; } = null!;
+        public virtual DbSet<ContentExpert> ContentExperts { get; set; } = null!;
+        public virtual DbSet<Partner> Partners { get; set; } = null!;
 
+        public virtual DbSet<GalleryCreationResult> GalleryCreationResults { get; set; } = null!;
+        public virtual DbSet<ContentImagesCreationResult> ContentImagesCreationResults { get; set; } = null!;
+        public virtual DbSet<ContentCreationResult> ContentCreationResults { get; set; } = null!;
+        public virtual DbSet<EventCreationResult> EventCreationResults { get; set; } = null!;
+        public virtual DbSet<ExpertCreationResult> ExpertCreationResults { get; set; } = null!;
+        public virtual DbSet<ContentExpertCreationResult> ContentExpertCreationResults { get; set; } = null!;
+        public virtual DbSet<EventExpertCreationResult> EventExpertCreationResults { get; set; } = null!;
+        public virtual DbSet<PodcastCreationResult> PodcastCreationResults { get; set; } = null!;
+        public virtual DbSet<PartnerCreationResult> PartnerCreationResults { get; set; } = null!;
+        public virtual DbSet<LanguageCreationResult> LanguageCreationResults { get; set; } = null!;
+        public virtual DbSet<AIVideoCreationResult> AIVideoCreationResults { get; set; } = null!;
+        public virtual DbSet<APITokenCreationResult> APITokenCreationResults { get; set; } = null!;
+        public virtual DbSet<AdAnalyticsCreationResult> AdAnalyticsCreationResults { get; set; } = null!;
+        public virtual DbSet<AdCampaignCreationResult> AdCampaignCreationResults { get; set; } = null!;
+        public virtual DbSet<AdSessionCreationResult> AdSessionCreationResults { get; set; } = null!;
+        public virtual DbSet<ContentLinkCreationResult> ContentLinkCreationResults { get; set; } = null!;
+        public virtual DbSet<EventLinkCreationResult> EventLinkCreationResults { get; set; } = null!;
+        public virtual DbSet<UploadedFileCreationResult> UploadedFileCreationResults { get; set; } = null!;
+        public virtual DbSet<UserCreationResult> UserCreationResults { get; set; } = null!;
+        public virtual DbSet<UserStatusCreationResult> UserStatusCreationResults { get; set; } = null!;
+        public virtual DbSet<WebAPILogCreationResult> WebAPILogCreationResults { get; set; } = null!;
+        public virtual DbSet<WineAICreationResult> WineAICreationResults { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -192,8 +219,9 @@ namespace AI_Integration.DataAccess
             modelBuilder.Entity<Content>(e =>
             {
                 e.ToTable("Contents", "dbo");
-                e.HasKey(x => x.Id);
-                e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.HasKey(x => x.Guid);
+                e.Property(x => x.Guid).ValueGeneratedOnAdd();
+                e.Property(x => x.Id).ValueGeneratedNever();
                 e.Property(x => x.Title).IsRequired().HasMaxLength(255);
                 e.Property(x => x.Text).IsRequired();
                 e.Property(x => x.PublishDate).HasColumnType("date");
@@ -240,8 +268,9 @@ namespace AI_Integration.DataAccess
             modelBuilder.Entity<Event>(e =>
             {
                 e.ToTable("Events", "dbo");
-                e.HasKey(x => x.Id);
-                e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.HasKey(x => x.Guid);
+                e.Property(x => x.Guid).ValueGeneratedOnAdd();
+                e.Property(x => x.Id).ValueGeneratedNever();
                 e.Property(x => x.Title).IsRequired().HasMaxLength(255);
                 e.Property(x => x.Description).IsRequired();
                 e.Property(x => x.EventDate).HasColumnType("date");
@@ -283,6 +312,28 @@ namespace AI_Integration.DataAccess
                  .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<GalleryCreationResult>().HasNoKey();
+            modelBuilder.Entity<ContentImagesCreationResult>().HasNoKey();
+            modelBuilder.Entity<ContentCreationResult>().HasNoKey();
+            modelBuilder.Entity<EventCreationResult>().HasNoKey();
+            modelBuilder.Entity<ExpertCreationResult>().HasNoKey();
+            modelBuilder.Entity<ContentExpertCreationResult>().HasNoKey();
+            modelBuilder.Entity<EventExpertCreationResult>().HasNoKey();
+            modelBuilder.Entity<PodcastCreationResult>().HasNoKey();
+            modelBuilder.Entity<PartnerCreationResult>().HasNoKey();
+            modelBuilder.Entity<LanguageCreationResult>().HasNoKey();
+            modelBuilder.Entity<AIVideoCreationResult>().HasNoKey();
+            modelBuilder.Entity<APITokenCreationResult>().HasNoKey();
+            modelBuilder.Entity<AdAnalyticsCreationResult>().HasNoKey();
+            modelBuilder.Entity<AdCampaignCreationResult>().HasNoKey();
+            modelBuilder.Entity<AdSessionCreationResult>().HasNoKey();
+            modelBuilder.Entity<ContentLinkCreationResult>().HasNoKey();
+            modelBuilder.Entity<EventLinkCreationResult>().HasNoKey();
+            modelBuilder.Entity<UploadedFileCreationResult>().HasNoKey();
+            modelBuilder.Entity<UserCreationResult>().HasNoKey();
+            modelBuilder.Entity<UserStatusCreationResult>().HasNoKey();
+            modelBuilder.Entity<WebAPILogCreationResult>().HasNoKey();
+            modelBuilder.Entity<WineAICreationResult>().HasNoKey();
 
             OnModelCreatingPartial(modelBuilder);
         }

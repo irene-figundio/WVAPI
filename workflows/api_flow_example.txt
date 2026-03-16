@@ -1,0 +1,145 @@
+===============================================================
+FLUSSO DI INSERIMENTO E LETTURA DATI (VITINERARIO AI WEB API)
+===============================================================
+Le chiamate presuppongono l'utilizzo di un token di autorizzazione Bearer nel caso l'endpoint sia protetto da [Authorize].
+Si ricorda che l'Id lingua di default è LangID = 1 (es. Italiano).
+
+---------------------------------------------------------------
+1. INSERIMENTO E GESTIONE ESPERTI
+---------------------------------------------------------------
+
+# A. Crea un nuovo Esperto
+POST /api/experts
+Content-Type: application/json
+
+{
+  "name": "Mario Rossi",
+  "bio": "Esperto Sommelier e curatore di eventi.",
+  "photoUrl": "https://example.com/images/mario_rossi.jpg",
+  "email": "mario.rossi@example.com",
+  "langID": 1
+}
+
+[Risposta attesa: { "success": true, "id": 1 }]
+
+# B. Lettura degli Esperti
+GET /api/experts?langId=1
+
+
+---------------------------------------------------------------
+2. INSERIMENTO ARTICOLI (BLOG / NEWS)
+---------------------------------------------------------------
+
+# A. Crea un nuovo Articolo (Blog)
+POST /api/contents
+Content-Type: application/json
+
+{
+  "title": "I migliori vini del 2024",
+  "text": "In questo articolo esploriamo le migliori cantine d'Italia...",
+  "publishDate": "2024-10-15T10:00:00Z",
+  "coverImage": "https://example.com/images/cover_vini.jpg",
+  "contentType": "blog",
+  "isPublished": true,
+  "langID": 1
+}
+
+[Risposta attesa: { "success": true, "id": 1 }]
+
+# B. Aggiungi un'immagine al contenuto appena creato (ContentId = 1)
+POST /api/contentimages
+Content-Type: application/json
+
+{
+  "contentId": 1,
+  "imageUrl": "https://example.com/images/articolo_vino1.jpg",
+  "caption": "Degustazione in cantina",
+  "position": 1,
+  "langID": 1
+}
+
+# C. Lettura Articoli filtrati per tipo (es. Blog)
+GET /api/contents/type/blog?langId=1
+
+[La risposta includerà il ContentDto con la lista delle Images e degli Authors (se collegati)]
+
+
+---------------------------------------------------------------
+3. INSERIMENTO EVENTI
+---------------------------------------------------------------
+
+# A. Crea un nuovo Evento (con i nuovi campi specifici)
+POST /api/events
+Content-Type: application/json
+
+{
+  "title": "Festival del Vino a Verona",
+  "description": "Tre giorni dedicati alla scoperta dei vini veneti.",
+  "eventDate": "2024-12-01T00:00:00Z",
+  "startDate": "2024-12-01T00:00:00Z",
+  "startTime": "09:00:00",
+  "endDate": "2024-12-03T00:00:00Z",
+  "endTime": "18:00:00",
+  "coverImage": "https://example.com/images/verona_vino.jpg",
+  "bookingEndDate": "2024-11-20T23:59:59Z",
+  "location": "Piazza Bra, Verona",
+  "organizer": "Associazione Enologi Veneti",
+  "contactInfo": "info@enologiveneti.it",
+  "price": 25.50,
+  "isOnline": false,
+  "langID": 1
+}
+
+[Risposta attesa: { "success": true, "id": 1 }]
+
+# B. Crea una Galleria associata all'Evento (EventId = 1)
+POST /api/galleries
+Content-Type: application/json
+
+{
+  "eventId": 1,
+  "title": "Foto edizioni passate Verona",
+  "langID": 1
+}
+
+[Risposta attesa: { "success": true, "id": 1 }]
+
+# C. Aggiungi Foto alla Galleria (GalleryId = 1)
+POST /api/photogallery
+Content-Type: application/json
+
+{
+  "galleryId": 1,
+  "imageUrl": "https://example.com/images/gallery_verona1.jpg",
+  "caption": "Degustazione Amarone",
+  "langID": 1
+}
+
+# D. Lettura Eventi
+GET /api/events?langId=1
+
+[La risposta includerà l'EventDto, con la sua Galleria, le Foto relative e la lista Authors]
+
+
+---------------------------------------------------------------
+4. INSERIMENTO PODCAST
+---------------------------------------------------------------
+
+# A. Crea un nuovo Podcast
+POST /api/podcasts
+Content-Type: application/json
+
+{
+  "title": "Episodio 1: Le basi del Barolo",
+  "description": "Introduzione al mondo dell'Amarone e del Barolo.",
+  "publishDate": "2024-10-20T15:00:00Z",
+  "coverImage": "https://example.com/images/podcast_cover1.jpg",
+  "youtubeUrl": "https://youtube.com/watch?v=esempio",
+  "spotifyUrl": "https://open.spotify.com/episode/esempio",
+  "langID": 1
+}
+
+[Risposta attesa: { "success": true, "id": 1 }]
+
+# B. Lettura Podcast
+GET /api/podcasts?langId=1

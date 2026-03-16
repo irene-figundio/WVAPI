@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
+using System.Diagnostics;
+using Microsoft.EntityFrameworkCore;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -50,18 +52,11 @@ namespace AI_Integration.Controllers
 
         // GET: api/wineai/generatetext
         [HttpPost("generatetext")]
-        public async Task<IActionResult> GenerateText([FromBody] Message message, [FromHeader(Name = "User-Agent")] string userAgent)
+        public async Task<IActionResult> GenerateText([FromBody] Message message, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            //crea un oggetto WebAPILog e lo inizializza
-            var log = new WebAPILog
-            {
-                DateTimeStamp = DateTime.Now,
-                RequestMethod = "POST",
-                RequestUrl = "api/wineai/generatetext",
-                RequestBody = message.ToString(),
-                UserAgent = userAgent,
-                AdditionalInfo = ""
-            };
+            var log = WebApiLogHelper.NewLog("POST", "api/wineai/generatetext", message?.ToString(), userAgent, "Call WineAI via SP");
+            var sw = Stopwatch.StartNew();
+
             try
             {
 
@@ -205,7 +200,13 @@ namespace AI_Integration.Controllers
                     };
                     var resJson = JsonConvert.SerializeObject(res);
 
-                    _unitOfWork.WineAI.AddWineAI(message.content, res.answer, userAgent);
+                    var sql = "EXEC [dbo].[sp_CreaWineAI] @Question={0}, @Answer={1}, @Dispositivo={2}";
+                    var results = await _unitOfWork.Context.WineAICreationResults.FromSqlRaw(sql,
+                        message.content ?? (object)DBNull.Value,
+                        res.answer ?? (object)DBNull.Value,
+                        userAgent ?? (object)DBNull.Value
+                    ).ToListAsync();
+
                     log.ResponseCode = 200;
                     log.ResponseMessage = "OK";
                     await _unitOfWork.InsertAsync(log);
