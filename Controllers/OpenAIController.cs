@@ -7,6 +7,7 @@ using AI_Integration.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -26,6 +27,7 @@ namespace AI_Integration.Controllers
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<OpenAIController> _logger;
         private readonly OpenAISettings _openAISettings;
         private readonly string apiKey = ""; 
        private readonly string assistantId = "";
@@ -36,10 +38,12 @@ namespace AI_Integration.Controllers
         public OpenAIController(
             IHttpClientFactory httpClientFactory, 
             IUnitOfWork unitOfWork,
+            ILogger<OpenAIController> logger,
             IOptions<OpenAISettings> openAISettings)
         {
             _httpClientFactory = httpClientFactory;
             _unitOfWork = unitOfWork;
+            _logger = logger;
             _openAISettings = openAISettings.Value;
             if (!string.IsNullOrEmpty(_openAISettings.ApiKey))
             {
@@ -80,15 +84,15 @@ namespace AI_Integration.Controllers
             {
                 // // Step 2: Create a Thread
                 // threadId = await CreateThreadAsync(this.assistantId);
-                // Console.WriteLine("Thread ID: " + threadId);
+                // _logger.LogInformation("Thread ID: " + threadId);
 
                 // // Step 3: Add a Message to the Thread
                 // await AddMessageToThreadAsync(threadId, "user", message.content);
-                // Console.WriteLine("Message added to thread.");
+                // _logger.LogInformation("Message added to thread.");
 
                 // // Step 4: Create a Run
                 //var runId = await CreateAndPollRunAsync(this.assistantId, threadId);
-                //Console.WriteLine("Run completed. Run ID: " + runId);
+                //_logger.LogInformation("Run completed. Run ID: " + runId);
 
                 // // Step 5: List Messages Added to the Thread
                 // var assistantMessage = await ListMessagesAsync(threadId);
@@ -107,7 +111,7 @@ namespace AI_Integration.Controllers
                 //if (!isDeleted)
                 //{
                 //    log.AdditionalInfo += "Failed to delete thread.";
-                //    Console.WriteLine("Failed to delete the thread.");
+                //    _logger.LogError("Failed to delete the thread.");
                 //}
 
                 return Ok(new { answer = assistantMessage });
@@ -146,7 +150,7 @@ namespace AI_Integration.Controllers
             if (!response.IsSuccessStatusCode)
             {
                 string errorContent = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"Failed to create thread. Error: {errorContent}");
+                _logger.LogError($"Failed to create thread. Error: {errorContent}");
                 throw new Exception("Error creating thread: " + errorContent);
             }
 
@@ -175,7 +179,7 @@ namespace AI_Integration.Controllers
             var requestContent = new StringContent(JsonConvert.SerializeObject(messageData), Encoding.UTF8, "application/json");
 
             // Log the request content for debugging purposes
-            Console.WriteLine("Requesting to add message with data: " + JsonConvert.SerializeObject(messageData));
+            _logger.LogDebug("Requesting to add message with data: " + JsonConvert.SerializeObject(messageData));
 
             // Use the correct endpoint for adding a message to the thread
             var response = await client.PostAsync($"https://api.openai.com/v1/threads/{threadId}/messages", requestContent);
@@ -183,11 +187,11 @@ namespace AI_Integration.Controllers
             if (!response.IsSuccessStatusCode)
             {
                 string errorContent = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"Failed to add message to thread. Error: {errorContent}");
+                _logger.LogError($"Failed to add message to thread. Error: {errorContent}");
                 throw new Exception("Error adding message to thread: " + errorContent);
             }
 
-            Console.WriteLine("Message added to thread successfully.");
+            _logger.LogInformation("Message added to thread successfully.");
         }
 
 
@@ -211,14 +215,14 @@ namespace AI_Integration.Controllers
             var requestContent = new StringContent(JsonConvert.SerializeObject(runData), Encoding.UTF8, "application/json");
 
             // Log the request content for debugging purposes
-            Console.WriteLine("Requesting to create a run with data: " + JsonConvert.SerializeObject(runData));
+            _logger.LogDebug("Requesting to create a run with data: " + JsonConvert.SerializeObject(runData));
 
             var response = await client.PostAsync($"https://api.openai.com/v1/threads/{threadId}/runs", requestContent);
 
             if (!response.IsSuccessStatusCode)
             {
                 string errorContent = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"Failed to create run. Error: {errorContent}");
+                _logger.LogError($"Failed to create run. Error: {errorContent}");
                 throw new Exception("Error creating run: " + errorContent);
             }
 
@@ -233,7 +237,7 @@ namespace AI_Integration.Controllers
                 if (!statusResponse.IsSuccessStatusCode)
                 {
                     string errorStatusContent = await statusResponse.Content.ReadAsStringAsync();
-                    Console.WriteLine($"Failed to get run status. Error: {errorStatusContent}");
+                    _logger.LogError($"Failed to get run status. Error: {errorStatusContent}");
                     throw new Exception("Error checking run status: " + errorStatusContent);
                 }
 
@@ -242,7 +246,7 @@ namespace AI_Integration.Controllers
 
                 if (statusResult.status == "completed" || statusResult.status == "in_progress")
                 {
-                    Console.WriteLine("Run completed successfully.");
+                    _logger.LogInformation("Run completed successfully.");
                     return runId;
                 }
                 else if (statusResult.status == "failed" || statusResult.status == "canceled")
@@ -272,7 +276,7 @@ namespace AI_Integration.Controllers
                 {
                     // Log the error status and content for debugging
                     var errorContent = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"Error: {response.StatusCode}, Details: {errorContent}");
+                    _logger.LogError($"Error: {response.StatusCode}, Details: {errorContent}");
                     return $"Request failed with status code {response.StatusCode}";
                 }
 
@@ -291,7 +295,7 @@ namespace AI_Integration.Controllers
             catch (Exception ex)
             {
                 // Log the exception for debugging
-                Console.WriteLine($"Exception: {ex.Message}");
+                _logger.LogError($"Exception: {ex.Message}");
                 return "An error occurred while retrieving messages.";
             }
         }
@@ -306,11 +310,11 @@ namespace AI_Integration.Controllers
             if (!response.IsSuccessStatusCode)
             {
                 var responseBody = await response.Content.ReadAsStringAsync();
-                Console.WriteLine("Failed to delete thread. Response: " + responseBody);
+                _logger.LogError("Failed to delete thread. Response: " + responseBody);
                 return false;
             }
 
-            Console.WriteLine("Thread deleted successfully.");
+            _logger.LogInformation("Thread deleted successfully.");
             return true;
         }
 
