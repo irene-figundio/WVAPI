@@ -1,37 +1,48 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VITBO.Services.Interfaces;
 using VITBO.Models;
-using VITBO.Services;
 
 namespace VITBO.Controllers
 {
     [Authorize]
     public class AiVideoController : Controller
     {
-        private readonly ApiService _apiService;
+        private readonly IAiVideoService _aiVideoService;
 
-        public AiVideoController(ApiService apiService)
+        public AiVideoController(IAiVideoService aiVideoService)
         {
-            _apiService = apiService;
+            _aiVideoService = aiVideoService;
         }
 
         public async Task<IActionResult> Index([FromQuery] string? q = null, [FromQuery] int page = 1)
         {
-            var endpoint = $"api/Video?page={page}&pageSize=20";
-            if (!string.IsNullOrEmpty(q))
-            {
-                endpoint += $"&q={Uri.EscapeDataString(q)}";
-                ViewData["CurrentFilter"] = q;
-            }
-
-            var result = await _apiService.GetAsync<PagedResult<VideoListItemDto>>(endpoint);
-            if (result == null)
-            {
-                ModelState.AddModelError("", "Error retrieving videos from API.");
-                result = new PagedResult<VideoListItemDto> { Items = new List<VideoListItemDto>() };
-            }
-
+            ViewData["CurrentFilter"] = q;
+            var result = await _aiVideoService.GetVideosAsync(q, page);
             return View(result);
+        }
+
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View(new CreateVideoRequest());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(CreateVideoRequest model)
+        {
+            if (ModelState.IsValid)
+            {
+                var success = await _aiVideoService.CreateVideoAsync(model);
+                if (success)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                ModelState.AddModelError("", "Failed to create video. Please try again.");
+            }
+            return View(model);
+
         }
     }
 }

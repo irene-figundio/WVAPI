@@ -1,0 +1,81 @@
+@model VITBO.Models.CreateEventRequest
+
+@{
+    ViewData["Title"] = "Create New Event";
+}
+
+<div class="card border-0 shadow-sm border-start border-warning border-4">
+    <div class="card-header bg-white border-bottom py-3">
+        <h5 class="mb-0 text-warning"><i class="bi bi-calendar-plus me-2"></i> Create New Event</h5>
+    </div>
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="row g-3">
+                <div class="col-md-8 form-floating mb-3">
+                    <input asp-for="Title" class="form-control" placeholder="Title" />
+                    <label asp-for="Title" class="ms-2">Event Title</label>
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4 form-floating mb-3">
+                    <select asp-for="LangID" class="form-select">
+                        <option value="1">Italian (1)</option>
+                        <option value="2">English (2)</option>
+                        <option value="3">French (3)</option>
+                        <option value="4">German (4)</option>
+                    </select>
+                    <label asp-for="LangID" class="ms-2">Language</label>
+                    <span asp-validation-for="LangID" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 form-floating mb-3">
+                    <input asp-for="EventDate" type="date" class="form-control" />
+                    <label asp-for="EventDate" class="ms-2">Event Date</label>
+                    <span asp-validation-for="EventDate" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 form-floating mb-3">
+                    <input asp-for="Price" type="number" step="0.01" class="form-control" placeholder="0.00" />
+                    <label asp-for="Price" class="ms-2">Ticket Price (€)</label>
+                    <span asp-validation-for="Price" class="text-danger"></span>
+                </div>
+
+                <div class="col-12 form-floating mb-3">
+                    <input asp-for="Location" class="form-control" placeholder="Location" />
+                    <label asp-for="Location" class="ms-2">Location / Venue</label>
+                    <span asp-validation-for="Location" class="text-danger"></span>
+                </div>
+
+                <div class="col-12 form-floating mb-3">
+                    <textarea asp-for="Description" class="form-control" placeholder="Description" style="height: 120px"></textarea>
+                    <label asp-for="Description" class="ms-2">Event Description</label>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <div class="form-check form-switch mt-2">
+                        <input asp-for="IsOnline" class="form-check-input" type="checkbox" role="switch" />
+                        <label asp-for="IsOnline" class="form-check-label text-muted fw-bold">Online Event</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6 form-floating mb-3">
+                    <input asp-for="CategoryId" type="number" class="form-control" placeholder="Category" />
+                    <label asp-for="CategoryId" class="ms-2">Category ID (Optional)</label>
+                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                </div>
+
+                <div class="col-12 mt-4 d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+                    <button type="submit" class="btn btn-warning text-dark px-5 fw-bold"><i class="bi bi-save me-2"></i> Create Event</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

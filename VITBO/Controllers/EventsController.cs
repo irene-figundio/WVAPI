@@ -1,33 +1,48 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VITBO.Services.Interfaces;
 using VITBO.Models;
-using VITBO.Services;
 
 namespace VITBO.Controllers
 {
     [Authorize]
     public class EventsController : Controller
     {
-        private readonly ApiService _apiService;
+        private readonly IEventsService _eventsService;
 
-        public EventsController(ApiService apiService)
+        public EventsController(IEventsService eventsService)
         {
-            _apiService = apiService;
+            _eventsService = eventsService;
         }
 
         public async Task<IActionResult> Index([FromQuery] int langId = 1)
         {
-            var endpoint = $"api/Events?langId={langId}";
-            var result = await _apiService.GetAsync<List<EventDto>>(endpoint);
-
-            if (result == null)
-            {
-                ModelState.AddModelError("", "Error retrieving events from API.");
-                result = new List<EventDto>();
-            }
-
             ViewData["CurrentLangId"] = langId;
+            var result = await _eventsService.GetEventsAsync(langId);
             return View(result);
+        }
+
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View(new CreateEventRequest());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(CreateEventRequest model)
+        {
+            if (ModelState.IsValid)
+            {
+                var success = await _eventsService.CreateEventAsync(model);
+                if (success)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                ModelState.AddModelError("", "Failed to create event. Please try again.");
+            }
+            return View(model);
+
         }
     }
 }
