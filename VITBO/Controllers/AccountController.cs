@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -36,15 +37,21 @@ namespace VITBO.Controllers
             {
                 var client = _httpClientFactory.CreateClient();
                 // Base address of the API
-                client.BaseAddress = new Uri("https://localhost:7275");
+                client.BaseAddress = new Uri(_configuration["ApiBaseAddress"]);
 
-                var loginData = new { Username = model.Username, Password = model.Password };
-                var content = new StringContent(JsonSerializer.Serialize(loginData), Encoding.UTF8, "application/json");
-
+                var loginData = new { username = model.Username, password = model.Password };
+                //var content = new StringContent(JsonSerializer.Serialize(loginData), Encoding.UTF8, "application/json");
+                var body = JsonSerializer.Serialize(loginData);
+                
                 try
                 {
-                    var response = await client.PostAsync("/api/Auth/login", content);
+                    // var response = await client.PostAsync($"https://www.geordie.app:441/VitinerarioGateTest/api/auth/login", content);
+                    var request = new HttpRequestMessage(HttpMethod.Post, "https://www.geordie.app:441/VitinerarioGateTest/api/auth/login");
+                    request.Content = new StringContent(body, Encoding.UTF8);
+                    request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                    request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
+                    var response = await client.SendAsync(request);
                     if (response.IsSuccessStatusCode)
                     {
                         var responseContent = await response.Content.ReadAsStringAsync();
