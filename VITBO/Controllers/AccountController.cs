@@ -3,21 +3,18 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 using System.Security.Claims;
-using System.Text;
-using System.Text.Json;
 using VITBO.Models;
+using VITBO.Services.Interfaces;
 
 namespace VITBO.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IConfiguration _configuration;
+        private readonly IAuthService _authService;
 
-        public AccountController(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+        public AccountController(IAuthService authService)
         {
-            _httpClientFactory = httpClientFactory;
-            _configuration = configuration;
+            _authService = authService;
         }
 
         [HttpGet]
@@ -35,79 +32,51 @@ namespace VITBO.Controllers
 
             if (ModelState.IsValid)
             {
-                var client = _httpClientFactory.CreateClient();
-                // Base address of the API
-                client.BaseAddress = new Uri(_configuration["ApiBaseAddress"]);
-
-                var loginData = new { username = model.Username, password = model.Password };
-                //var content = new StringContent(JsonSerializer.Serialize(loginData), Encoding.UTF8, "application/json");
-                var body = JsonSerializer.Serialize(loginData);
-                
                 try
                 {
-                    // var response = await client.PostAsync($"https://www.geordie.app:441/VitinerarioGateTest/api/auth/login", content);
-                    var request = new HttpRequestMessage(HttpMethod.Post, "https://www.geordie.app:441/VitinerarioGateTest/api/auth/login");
-                    request.Content = new StringContent(body, Encoding.UTF8);
-                    request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                    request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    var token = await _authService.LoginAsync(model);
 
-                    var response = await client.SendAsync(request);
-                    if (response.IsSuccessStatusCode)
+                    if (!string.IsNullOrEmpty(token))
                     {
-                        var responseContent = await response.Content.ReadAsStringAsync();
-                        var tokenResult = JsonSerializer.Deserialize<TokenResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                        HttpContext.Session.SetString("JWToken", token);
 
-                        if (tokenResult != null && !string.IsNullOrEmpty(tokenResult.Token))
+                        var claims = new List<Claim>
                         {
-                            // Store JWT token in session
-                            HttpContext.Session.SetString("JWToken", tokenResult.Token);
+                            new Claim(ClaimTypes.Name, model.Username),
+                        };
 
-                            // Create Cookie Authentication
-                            var claims = new List<Claim>
-                            {
-                                new Claim(ClaimTypes.Name, model.Username),
-                                // you can decode JWT here to add more specific claims if needed
-                            };
+                        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                        var authProperties = new AuthenticationProperties
+                        {
+                            IsPersistent = model.RememberMe,
+                            ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+                        };
 
-                            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                        await HttpContext.SignInAsync(
+                            CookieAuthenticationDefaults.AuthenticationScheme,
+                            new ClaimsPrincipal(claimsIdentity),
+                            authProperties);
 
-                            var authProperties = new AuthenticationProperties
-                            {
-                                IsPersistent = model.RememberMe,
-                                ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
-                            };
-
-                            await HttpContext.SignInAsync(
-                                CookieAuthenticationDefaults.AuthenticationScheme,
-                                new ClaimsPrincipal(claimsIdentity),
-                                authProperties);
-
-                            if (Url.IsLocalUrl(returnUrl))
-                            {
-                                return Redirect(returnUrl);
-                            }
-                            else
-                            {
-                                return RedirectToAction("Index", "Home");
-                            }
+                        if (Url.IsLocalUrl(returnUrl))
+                        {
+                            return Redirect(returnUrl);
                         }
-                    }
-                    else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                    {
-                        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                        else
+                        {
+                            return RedirectToAction("Index", "Home");
+                        }
                     }
                     else
                     {
-                         ModelState.AddModelError(string.Empty, $"API Error: {response.StatusCode}");
+                        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     ModelState.AddModelError(string.Empty, $"Connection Error: {ex.Message}");
                 }
             }
 
-            // If we got this far, something failed, redisplay form
             return View(model);
         }
 
@@ -124,13 +93,6 @@ namespace VITBO.Controllers
         public IActionResult AccessDenied()
         {
             return View();
-        }
-
-        // Helper class for deserializing
-        private class TokenResponse
-        {
-            public string? Token { get; set; }
-            public DateTime Expiration { get; set; }
         }
     }
 }

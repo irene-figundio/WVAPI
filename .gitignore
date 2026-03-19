@@ -68,3 +68,5 @@ secrets.*
 /.vs/ProjectEvaluation/ai_integration.projects.v10.bin
 /.vs/ProjectEvaluation/ai_integration.strings.v10.bin
 /Properties/PublishProfiles/FolderProfile2.pubxml.user
+
+VITBO/wwwroot/

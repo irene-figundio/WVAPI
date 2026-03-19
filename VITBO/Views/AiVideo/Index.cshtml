@@ -8,6 +8,7 @@
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
         <h5 class="mb-0 text-success"><i class="bi bi-camera-video me-2"></i> AI Videos Repository</h5>
+        <a asp-action="Create" class="btn btn-success btn-sm"><i class="bi bi-plus-circle me-1"></i> Add AI Video</a>
         <form method="get" class="d-flex" asp-action="Index">
             <input type="text" name="q" class="form-control form-control-sm me-2" placeholder="Search videos..." value="@currentFilter" />
             <button type="submit" class="btn btn-success btn-sm">Search</button>

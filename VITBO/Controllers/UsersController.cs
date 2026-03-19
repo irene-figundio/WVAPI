@@ -1,37 +1,48 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VITBO.Services.Interfaces;
 using VITBO.Models;
-using VITBO.Services;
 
 namespace VITBO.Controllers
 {
     [Authorize]
     public class UsersController : Controller
     {
-        private readonly ApiService _apiService;
+        private readonly IUsersService _usersService;
 
-        public UsersController(ApiService apiService)
+        public UsersController(IUsersService usersService)
         {
-            _apiService = apiService;
+            _usersService = usersService;
         }
 
         public async Task<IActionResult> Index([FromQuery] string? query = null, [FromQuery] int page = 1)
         {
-            var endpoint = $"api/Users?page={page}&pageSize=20";
-            if (!string.IsNullOrEmpty(query))
-            {
-                endpoint += $"&query={Uri.EscapeDataString(query)}";
-                ViewData["CurrentFilter"] = query;
-            }
-
-            var result = await _apiService.GetAsync<PagedResult<UserDto>>(endpoint);
-            if (result == null)
-            {
-                ModelState.AddModelError("", "Error retrieving users from API.");
-                result = new PagedResult<UserDto> { Items = new List<UserDto>() };
-            }
-
+            ViewData["CurrentFilter"] = query;
+            var result = await _usersService.GetUsersAsync(query, page);
             return View(result);
+        }
+
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View(new CreateUserRequest());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(CreateUserRequest model)
+        {
+            if (ModelState.IsValid)
+            {
+                var success = await _usersService.CreateUserAsync(model);
+                if (success)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                ModelState.AddModelError("", "Failed to create user. Please try again.");
+            }
+            return View(model);
+
         }
     }
 }
