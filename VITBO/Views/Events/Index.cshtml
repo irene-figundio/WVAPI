@@ -1,0 +1,99 @@
+@model List<VITBO.Models.EventDto>
+
+@{
+    ViewData["Title"] = "Events Management";
+    int currentLangId = ViewData["CurrentLangId"] != null ? (int)ViewData["CurrentLangId"]! : 1;
+}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-warning"><i class="bi bi-calendar-event me-2"></i> Events Directory</h5>
+
+        <!-- Language Filter Form -->
+        <form method="get" asp-action="Index" class="d-flex align-items-center">
+            <label class="me-2 text-muted small fw-bold">Language ID:</label>
+            <select name="langId" class="form-select form-select-sm" onchange="this.form.submit()">
+                <!-- Based on common IDs: 1 = IT, 2 = EN -->
+                <!option value="1" @(currentLangId == 1 ? "selected" : "")>Italian (1)</!option>
+                <!option value="2" @(currentLangId == 2 ? "selected" : "")>English (2)</!option>
+                <!option value="3" @(currentLangId == 3 ? "selected" : "")>French (3)</!option>
+                <!option value="4" @(currentLangId == 4 ? "selected" : "")>German (4)</!option>
+            </select>
+        </form>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" class="ps-4">ID</th>
+                        <th scope="col">Event Details</th>
+                        <th scope="col">Schedule</th>
+                        <th scope="col">Location</th>
+                        <th scope="col">Format</th>
+                        <th scope="col" class="text-end pe-4">Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var evt in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 text-muted fw-bold">#@evt.Id</td>
+                                <td>
+                                    <span class="d-block fw-bold text-dark">@evt.Title</span>
+                                    @if (!string.IsNullOrEmpty(evt.Subtitle))
+                                    {
+                                        <small class="text-muted d-block text-truncate" style="max-width: 200px;">@evt.Subtitle</small>
+                                    }
+                                </td>
+                                <td>
+                                    <div>
+                                        <i class="bi bi-calendar-check me-1 text-primary"></i>
+                                        @evt.EventDate.ToString("d")
+                                    </div>
+                                    @if (evt.StartTime.HasValue)
+                                    {
+                                        <small class="text-muted"><i class="bi bi-clock me-1"></i> @evt.StartTime.Value.ToString(@"hh\:mm")</small>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(evt.Location))
+                                    {
+                                        <div class="text-truncate" style="max-width: 200px;">
+                                            <i class="bi bi-geo-alt text-danger me-1"></i> @evt.Location
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic">Not specified</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (evt.IsOnline)
+                                    {
+                                        <span class="badge bg-info text-dark"><i class="bi bi-globe me-1"></i>Online</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary"><i class="bi bi-building me-1"></i>In-Person</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4 fw-bold">
+                                    @(evt.Price > 0 ? "€ " + evt.Price.ToString("F2") : "Free")
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">No events found for this language.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

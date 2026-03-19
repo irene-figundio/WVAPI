@@ -1,0 +1,49 @@
+@model VITBO.Models.LoginViewModel
+
+@{
+    ViewData["Title"] = "Log in";
+    Layout = "_Layout"; // Use standard layout for now
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h3 class="mb-0">VITBO Dashboard</h3>
+                    <p class="mb-0 small text-white-50">Please log in to your account</p>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <form asp-controller="Account" asp-action="Login" asp-route-returnurl='@ViewData["ReturnUrl"]' method="post">
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Username" class="form-control" placeholder="name@example.com" autofocus />
+                            <label asp-for="Username">Email address / Username</label>
+                            <span asp-validation-for="Username" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input asp-for="Password" class="form-control" placeholder="Password" />
+                            <label asp-for="Password">Password</label>
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input asp-for="RememberMe" class="form-check-input" />
+                            <label asp-for="RememberMe" class="form-check-label text-muted">Remember me</label>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold">Login</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
