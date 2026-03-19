@@ -36,7 +36,8 @@ namespace VITBO.Controllers
             {
                 var client = _httpClientFactory.CreateClient();
                 // Base address of the API
-                client.BaseAddress = new Uri("https://localhost:7275");
+                var apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
+                client.BaseAddress = new Uri(apiBase);
 
                 var loginData = new { Username = model.Username, Password = model.Password };
                 var content = new StringContent(JsonSerializer.Serialize(loginData), Encoding.UTF8, "application/json");
