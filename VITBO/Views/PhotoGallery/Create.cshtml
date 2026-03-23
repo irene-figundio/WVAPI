@@ -8,11 +8,11 @@
     <div class="row mb-4 align-items-center">
         <div class="col">
             <h2 class="h3 mb-0 text-gray-800">
-                <i class="bi bi-image text-info me-2"></i> Add Photo to Gallery #@Model.GalleryId
+                <i class="bi bi-image text-info me-2"></i> @(Model.GalleryId > 0 ? $"Add Photo to Gallery #{Model.GalleryId}" : "Add Photo")
             </h2>
         </div>
         <div class="col-auto">
-            <a asp-action="Index" asp-route-galleryId="@Model.GalleryId" class="btn btn-outline-secondary btn-sm shadow-sm">
+            <a asp-action="Index" asp-route-galleryId="@(Model.GalleryId > 0 ? Model.GalleryId : (int?)null)" class="btn btn-outline-secondary btn-sm shadow-sm">
                 <i class="bi bi-arrow-left me-1"></i> Back to Photos
             </a>
         </div>
@@ -27,7 +27,18 @@
                 <div class="card-body p-4">
                     <form asp-action="Create" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
-                        <input type="hidden" asp-for="GalleryId" />
+                        @if (Model.GalleryId > 0)
+                        {
+                            <input type="hidden" asp-for="GalleryId" />
+                        }
+                        else
+                        {
+                            <div class="mb-3">
+                                <label asp-for="GalleryId" class="form-label fw-bold small text-muted">Gallery ID</label>
+                                <input asp-for="GalleryId" class="form-control" type="number" required />
+                                <span asp-validation-for="GalleryId" class="text-danger small"></span>
+                            </div>
+                        }
                         <input type="hidden" asp-for="LangID" />
 
                         <div class="mb-3">

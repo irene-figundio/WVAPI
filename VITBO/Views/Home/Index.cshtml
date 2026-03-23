@@ -59,4 +59,46 @@
             </div>
         </div>
     </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mt-2">
+        <div class="col">
+            <div class="card h-100 shadow-sm border-0 border-start border-info border-4">
+                <div class="card-body">
+                    <h5 class="card-title text-info"><i class="bi bi-person-badge-fill me-2"></i>Experts</h5>
+                    <p class="card-text text-muted small">Manage expert profiles and link them to content.</p>
+                    <a asp-controller="Experts" asp-action="Index" class="btn btn-outline-info btn-sm stretched-link">Manage Experts</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 shadow-sm border-0 border-start border-secondary border-4">
+                <div class="card-body">
+                    <h5 class="card-title text-secondary"><i class="bi bi-images me-2"></i>Galleries</h5>
+                    <p class="card-text text-muted small">Manage global galleries linked to events.</p>
+                    <a asp-controller="Galleries" asp-action="Index" class="btn btn-outline-secondary btn-sm stretched-link">Manage Galleries</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 shadow-sm border-0 border-start border-dark border-4">
+                <div class="card-body">
+                    <h5 class="card-title text-dark"><i class="bi bi-file-image me-2"></i>Content Images</h5>
+                    <p class="card-text text-muted small">Manage global images linked to content items.</p>
+                    <a asp-controller="ContentImages" asp-action="Index" class="btn btn-outline-dark btn-sm stretched-link">Manage Content Images</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 shadow-sm border-0 border-start border-primary border-4">
+                <div class="card-body">
+                    <h5 class="card-title text-primary"><i class="bi bi-camera me-2"></i>Photo Gallery</h5>
+                    <p class="card-text text-muted small">Manage individual photos inside galleries.</p>
+                    <a asp-controller="PhotoGallery" asp-action="Index" class="btn btn-outline-primary btn-sm stretched-link">Manage Photos</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

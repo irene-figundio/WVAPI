@@ -2,15 +2,19 @@
 
 @{
     ViewData["Title"] = "Gallery Photos";
-    int galleryId = ViewBag.GalleryId;
+    int? galleryId = ViewBag.GalleryId;
 }
 
 <div class="card border-0 shadow-sm border-start border-info border-4">
     <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
-        <h5 class="mb-0 text-info"><i class="bi bi-images me-2"></i> Photos for Gallery #@galleryId</h5>
+        <h5 class="mb-0 text-info"><i class="bi bi-images me-2"></i> @(galleryId != null ? $"Photos for Gallery #{galleryId}" : "All Photos")</h5>
         <div>
             <a asp-action="Create" asp-route-galleryId="@galleryId" class="btn btn-info btn-sm text-white"><i class="bi bi-plus-circle me-1"></i> Add Photo</a>
-            <button onclick="window.history.back()" class="btn btn-outline-secondary btn-sm ms-2">Back to Galleries</button>
+            @if(galleryId != null) {
+                <button onclick="window.history.back()" class="btn btn-outline-secondary btn-sm ms-2">Back to Galleries</button>
+            } else {
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-sm ms-2">Back to Dashboard</a>
+            }
         </div>
     </div>
     <div class="card-body p-0">

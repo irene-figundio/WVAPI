@@ -16,7 +16,7 @@ namespace VITBO.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int eventId)
+        public async Task<IActionResult> Index(int? eventId)
         {
             ViewBag.EventId = eventId;
             var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
@@ -26,9 +26,9 @@ namespace VITBO.Controllers
         }
 
         [HttpGet]
-        public IActionResult Create(int eventId)
+        public IActionResult Create(int? eventId)
         {
-            return View(new GalleryDto { EventId = eventId, LangID = 1 });
+            return View(new GalleryDto { EventId = eventId ?? 0, LangID = 1 });
         }
 
         [HttpPost]

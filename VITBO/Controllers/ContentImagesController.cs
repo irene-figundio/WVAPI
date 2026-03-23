@@ -16,7 +16,7 @@ namespace VITBO.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int contentId)
+        public async Task<IActionResult> Index(int? contentId)
         {
             ViewBag.ContentId = contentId;
             var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
@@ -26,9 +26,9 @@ namespace VITBO.Controllers
         }
 
         [HttpGet]
-        public IActionResult Create(int contentId)
+        public IActionResult Create(int? contentId)
         {
-            return View(new ContentImageDto { ContentId = contentId, LangID = 1 });
+            return View(new ContentImageDto { ContentId = contentId ?? 0, LangID = 1 });
         }
 
         [HttpPost]

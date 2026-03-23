@@ -2,15 +2,19 @@
 
 @{
     ViewData["Title"] = "Content Images";
-    int contentId = ViewBag.ContentId;
+    int? contentId = ViewBag.ContentId;
 }
 
 <div class="card border-0 shadow-sm border-start border-info border-4">
     <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
-        <h5 class="mb-0 text-info"><i class="bi bi-images me-2"></i> Images for Content #@contentId</h5>
+        <h5 class="mb-0 text-info"><i class="bi bi-images me-2"></i> @(contentId != null ? $"Images for Content #{contentId}" : "All Content Images")</h5>
         <div>
             <a asp-action="Create" asp-route-contentId="@contentId" class="btn btn-info btn-sm text-white"><i class="bi bi-plus-circle me-1"></i> Add Image</a>
-            <a asp-controller="Contents" asp-action="Articles" class="btn btn-outline-secondary btn-sm ms-2">Back to Articles</a>
+            @if(contentId != null) {
+                <a asp-controller="Contents" asp-action="Articles" class="btn btn-outline-secondary btn-sm ms-2">Back to Articles</a>
+            } else {
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-sm ms-2">Back to Dashboard</a>
+            }
         </div>
     </div>
     <div class="card-body p-0">

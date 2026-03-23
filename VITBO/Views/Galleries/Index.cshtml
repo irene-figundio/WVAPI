@@ -2,15 +2,19 @@
 
 @{
     ViewData["Title"] = "Event Galleries";
-    int eventId = ViewBag.EventId;
+    int? eventId = ViewBag.EventId;
 }
 
 <div class="card border-0 shadow-sm border-start border-warning border-4">
     <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
-        <h5 class="mb-0 text-warning"><i class="bi bi-images me-2"></i> Galleries for Event #@eventId</h5>
+        <h5 class="mb-0 text-warning"><i class="bi bi-images me-2"></i> @(eventId != null ? $"Galleries for Event #{eventId}" : "All Galleries")</h5>
         <div>
             <a asp-action="Create" asp-route-eventId="@eventId" class="btn btn-warning btn-sm text-dark"><i class="bi bi-plus-circle me-1"></i> New Gallery</a>
-            <a asp-controller="Events" asp-action="Index" class="btn btn-outline-secondary btn-sm ms-2">Back to Events</a>
+            @if(eventId != null) {
+                <a asp-controller="Events" asp-action="Index" class="btn btn-outline-secondary btn-sm ms-2">Back to Events</a>
+            } else {
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-sm ms-2">Back to Dashboard</a>
+            }
         </div>
     </div>
     <div class="card-body p-0">

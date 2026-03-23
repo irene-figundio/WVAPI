@@ -16,7 +16,7 @@ namespace VITBO.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int galleryId)
+        public async Task<IActionResult> Index(int? galleryId)
         {
             ViewBag.GalleryId = galleryId;
             var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
@@ -26,9 +26,9 @@ namespace VITBO.Controllers
         }
 
         [HttpGet]
-        public IActionResult Create(int galleryId)
+        public IActionResult Create(int? galleryId)
         {
-            return View(new PhotoGalleryDto { GalleryId = galleryId, LangID = 1 });
+            return View(new PhotoGalleryDto { GalleryId = galleryId ?? 0, LangID = 1 });
         }
 
         [HttpPost]
