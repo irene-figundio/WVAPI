@@ -73,6 +73,7 @@ namespace VITBO.Controllers
                     var claims = new List<Claim>
                         {
                             new Claim(ClaimTypes.Name, model.Username),
+                            new Claim("JWToken", token)
                         };
 
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

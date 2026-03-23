@@ -19,7 +19,7 @@ namespace VITBO.Controllers
         public async Task<IActionResult> Index([FromQuery] string? q = null, [FromQuery] int page = 1)
         {
             ViewData["CurrentFilter"] = q;
-            string sessionToken = HttpContext.Session.GetString("JWToken");
+            string sessionToken = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
             var result = await _aiVideoService.GetVideosAsync(q, page, sessionToken, GetUserAgent(), HttpContext.RequestAborted);
             return View(result);
         }
@@ -34,7 +34,7 @@ namespace VITBO.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            string sessionToken = HttpContext.Session.GetString("JWToken");
+            string sessionToken = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
             var success = await _aiVideoService.DeleteVideoAsync(id, sessionToken, GetUserAgent(), HttpContext.RequestAborted);
             return RedirectToAction(nameof(Index));
         }
@@ -45,7 +45,7 @@ namespace VITBO.Controllers
         {
             if (ModelState.IsValid)
             {
-                string sessionToken = HttpContext.Session.GetString("JWToken");
+                string sessionToken = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
                 var success = await _aiVideoService.CreateVideoAsync(model, sessionToken, GetUserAgent(), HttpContext.RequestAborted);
                 if (success)
                 {
@@ -59,7 +59,7 @@ namespace VITBO.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            string sessionToken = HttpContext.Session.GetString("JWToken");
+            string sessionToken = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
             // To get the video details, we fetch all and filter since we don't have a GetById endpoint locally mapped.
             var videos = await _aiVideoService.GetVideosAsync(null, 1, sessionToken, GetUserAgent(), HttpContext.RequestAborted);
             // If there are many videos, this might miss it if it's not on page 1.
@@ -121,7 +121,7 @@ namespace VITBO.Controllers
 
             if (ModelState.IsValid)
             {
-                string sessionToken = HttpContext.Session.GetString("JWToken");
+                string sessionToken = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
                 var success = await _aiVideoService.UpdateVideoAsync(id, model, sessionToken, GetUserAgent(), HttpContext.RequestAborted);
                 if (success)
                 {

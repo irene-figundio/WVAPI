@@ -18,8 +18,12 @@ namespace VITBO.Services
             _httpClient.BaseAddress = new Uri(configuration["ApiBaseAddress"] ?? "https://localhost:7275");
             _jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
-            // Attach JWT token from session to the HttpClient if it exists
-            var token = _httpContextAccessor.HttpContext?.Session.GetString("JWToken");
+            // Attach JWT token from claims or session to the HttpClient if it exists
+            var token = _httpContextAccessor.HttpContext?.User?.FindFirst("JWToken")?.Value;
+            if (string.IsNullOrEmpty(token))
+            {
+                token = _httpContextAccessor.HttpContext?.Session.GetString("JWToken");
+            }
             if (!string.IsNullOrEmpty(token))
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
