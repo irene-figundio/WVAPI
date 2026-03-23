@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddSingleton<HttpService>();
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -42,6 +42,7 @@ builder.Services.AddHttpClient("HttpClient", client =>
     client.DefaultRequestHeaders.Add("User-Agent", "BackOffice-App");
 });
 //builder.Services.AddHttpClient<VITBO.Services.ApiService>();
+builder.Services.AddScoped<HttpService>();
 builder.Services.AddScoped<VITBO.Services.ApiService>();
 builder.Services.AddScoped<VITBO.Services.Interfaces.IAuthService, VITBO.Services.AuthService>();
 builder.Services.AddScoped<VITBO.Services.Interfaces.IUsersService, VITBO.Services.UsersService>();

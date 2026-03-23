@@ -11,7 +11,7 @@ namespace VITBO.Models
 
         public IFormFile? File { get; set; }
 
-        public bool? IsLandscape { get; set; } = false;
+        public bool IsLandscape { get; set; } = false;
 
         public int Play_Priority { get; set; } = 0;
 
