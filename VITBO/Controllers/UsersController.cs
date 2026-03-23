@@ -44,5 +44,9 @@ namespace VITBO.Controllers
             return View(model);
 
         }
+        protected string? GetUserAgent()
+        {
+            return Request.Headers["User-Agent"].ToString();
+        }
     }
 }

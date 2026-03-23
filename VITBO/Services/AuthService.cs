@@ -22,10 +22,10 @@ namespace VITBO.Services
             var apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
             client.BaseAddress = new Uri(apiBase);
 
-            var loginData = new { Username = model.Username, Password = model.Password };
+            var loginData = $"{{ \"username\" : {model.Username},  \"password \" : {model.Password} }}";
             var content = new StringContent(JsonSerializer.Serialize(loginData), Encoding.UTF8, "application/json");
 
-            var response = await client.PostAsync("/api/Auth/login", content);
+            var response = await client.PostAsync($"{client.BaseAddress}Auth/login", content);
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();

@@ -51,7 +51,7 @@ namespace VITBO.Services
         }
 
         public async Task<bool> PostVoidAsync(string endpoint, object data)
-        {
+        {           
             var stringContent = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync(endpoint, stringContent);
             return response.IsSuccessStatusCode;

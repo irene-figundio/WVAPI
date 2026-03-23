@@ -10,6 +10,7 @@ namespace VITBO.Controllers
     {
         private readonly IAiVideoService _aiVideoService;
 
+
         public AiVideoController(IAiVideoService aiVideoService)
         {
             _aiVideoService = aiVideoService;
@@ -18,7 +19,8 @@ namespace VITBO.Controllers
         public async Task<IActionResult> Index([FromQuery] string? q = null, [FromQuery] int page = 1)
         {
             ViewData["CurrentFilter"] = q;
-            var result = await _aiVideoService.GetVideosAsync(q, page);
+            string sessionToken = HttpContext.Session.GetString("JWToken");
+            var result = await _aiVideoService.GetVideosAsync(q, page, sessionToken, GetUserAgent(), HttpContext.RequestAborted);
             return View(result);
         }
 
@@ -34,7 +36,8 @@ namespace VITBO.Controllers
         {
             if (ModelState.IsValid)
             {
-                var success = await _aiVideoService.CreateVideoAsync(model);
+                string sessionToken = HttpContext.Session.GetString("JWToken");
+                var success = await _aiVideoService.CreateVideoAsync(model, sessionToken, GetUserAgent(), HttpContext.RequestAborted);
                 if (success)
                 {
                     return RedirectToAction(nameof(Index));
@@ -43,6 +46,10 @@ namespace VITBO.Controllers
             }
             return View(model);
 
+        }
+        protected string? GetUserAgent()
+        {
+            return Request.Headers["User-Agent"].ToString();
         }
     }
 }

@@ -22,52 +22,52 @@ namespace VITBO.Controllers
             return View(result);
         }
 
-        [HttpGet]
-        public IActionResult CreateArticle()
-        {
-            return View(new CreateContentRequest { ContentType = "Article" });
-        }
+        //[HttpGet]
+        //public IActionResult CreateArticle()
+        //{
+        //    return View(new CreateContentRequest { ContentType = "Article" });
+        //}
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateArticle(CreateContentRequest model)
-        {
-            model.ContentType = "Article";
-            if (ModelState.IsValid)
-            {
-                var success = await _contentsService.CreateContentAsync(model);
-                if (success)
-                {
-                    return RedirectToAction(nameof(Articles));
-                }
-                ModelState.AddModelError("", "Failed to create article. Please try again.");
-            }
-            return View(model);
-        }
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> CreateArticle(CreateContentRequest model)
+        //{
+        //    model.ContentType = "Article";
+        //    if (ModelState.IsValid)
+        //    {
+        //        var success = await _contentsService.CreateContentAsync(model);
+        //        if (success)
+        //        {
+        //            return RedirectToAction(nameof(Articles));
+        //        }
+        //        ModelState.AddModelError("", "Failed to create article. Please try again.");
+        //    }
+        //    return View(model);
+        //}
 
-        [HttpGet]
-        public IActionResult CreateNews()
-        {
-            return View(new CreateContentRequest { ContentType = "News" });
-        }
+        //[HttpGet]
+        //public IActionResult CreateNews()
+        //{
+        //    return View(new CreateContentRequest { ContentType = "News" });
+        //}
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateNews(CreateContentRequest model)
-        {
-            model.ContentType = "News";
-            if (ModelState.IsValid)
-            {
-                var success = await _contentsService.CreateContentAsync(model);
-                if (success)
-                {
-                    return RedirectToAction(nameof(News));
-                }
-                ModelState.AddModelError("", "Failed to create news. Please try again.");
-            }
-            return View(model);
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> CreateNews(CreateContentRequest model)
+        //{
+        //    model.ContentType = "News";
+        //    if (ModelState.IsValid)
+        //    {
+        //        var success = await _contentsService.CreateContentAsync(model);
+        //        if (success)
+        //        {
+        //            return RedirectToAction(nameof(News));
+        //        }
+        //        ModelState.AddModelError("", "Failed to create news. Please try again.");
+        //    }
+        //    return View(model);
 
-        }
+        //}
 
         public async Task<IActionResult> News([FromQuery] int langId = 1)
         {
@@ -89,7 +89,7 @@ namespace VITBO.Controllers
             model.ContentType = "Article";
             if (ModelState.IsValid)
             {
-                var success = await _contentsService.CreateContentAsync(model);
+                var success = await _contentsService.CreateContent(model);
                 if (success)
                 {
                     return RedirectToAction(nameof(Articles));
@@ -107,12 +107,12 @@ namespace VITBO.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateNews(CreateContentRequest model)
+        public async Task<IActionResult> CreateNewsAsync(CreateContentRequest model)
         {
             model.ContentType = "News";
             if (ModelState.IsValid)
             {
-                var success = await _contentsService.CreateContentAsync(model);
+                var success = await _contentsService.CreateContent(model);
                 if (success)
                 {
                     return RedirectToAction(nameof(News));
@@ -121,6 +121,10 @@ namespace VITBO.Controllers
             }
             return View(model);
 
+        }
+        protected string? GetUserAgent()
+        {
+            return Request.Headers["User-Agent"].ToString();
         }
     }
 }

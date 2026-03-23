@@ -12,7 +12,7 @@ namespace VITBO.Services
             _apiService = apiService;
         }
 
-        public async Task<bool> CreateContentAsync(CreateContentRequest request)
+        public async Task<bool> CreateContent(CreateContentRequest request)
         {
             return await _apiService.PostVoidAsync("api/Contents", request);
         }

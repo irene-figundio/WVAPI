@@ -31,4 +31,8 @@ public class HomeController : Controller
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
+    protected string? GetUserAgent()
+    {
+        return Request.Headers["User-Agent"].ToString();
+    }
 }
