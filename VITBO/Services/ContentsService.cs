@@ -50,5 +50,12 @@ namespace VITBO.Services
             var jsonRequest = System.Text.Json.JsonSerializer.Serialize(request);
             return await _httpService.SendHttpRequestAsync(HttpMethod.Put, endpoint, token, userAgent, jsonRequest) is HttpResponseMessage response && response.IsSuccessStatusCode;
         }
+
+        public async Task<bool> DeleteContentAsync(int id, string token, string userAgent)
+        {
+            var apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
+            var endpoint = $"{apiBase}Contents/{id}";
+            return await _httpService.SendHttpRequestAsync(HttpMethod.Delete, endpoint, token, userAgent, null) is HttpResponseMessage response && response.IsSuccessStatusCode;
+        }
     }
 }

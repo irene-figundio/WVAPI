@@ -1,0 +1,53 @@
+@model List<VITBO.Models.GalleryDto>
+
+@{
+    ViewData["Title"] = "Event Galleries";
+    int eventId = ViewBag.EventId;
+}
+
+<div class="card border-0 shadow-sm border-start border-warning border-4">
+    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-warning"><i class="bi bi-images me-2"></i> Galleries for Event #@eventId</h5>
+        <div>
+            <a asp-action="Create" asp-route-eventId="@eventId" class="btn btn-warning btn-sm text-dark"><i class="bi bi-plus-circle me-1"></i> New Gallery</a>
+            <a asp-controller="Events" asp-action="Index" class="btn btn-outline-secondary btn-sm ms-2">Back to Events</a>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" class="ps-4">ID</th>
+                        <th scope="col">Title</th>
+                        <th scope="col" class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 text-muted fw-bold">#@item.Id</td>
+                                <td><span class="d-block fw-bold text-dark">@item.Title</span></td>
+                                <td class="text-end pe-4">
+                                    <a asp-controller="PhotoGallery" asp-action="Index" asp-route-galleryId="@item.Id" class="btn btn-sm btn-outline-info" title="Manage Photos"><i class="bi bi-images"></i> Photos</a>
+                                    <form asp-action="Delete" asp-route-id="@item.Id" asp-route-eventId="@eventId" method="post" class="d-inline" onsubmit="return confirm('Delete this gallery and all its photos?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3" class="text-center py-4 text-muted">No galleries found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

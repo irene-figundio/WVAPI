@@ -1,0 +1,64 @@
+@model VITBO.Models.ContentImageDto
+
+@{
+    ViewData["Title"] = "Add Content Image";
+}
+
+<div class="container-fluid px-4 py-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col">
+            <h2 class="h3 mb-0 text-gray-800">
+                <i class="bi bi-image text-info me-2"></i> Add Image to Content #@Model.ContentId
+            </h2>
+        </div>
+        <div class="col-auto">
+            <a asp-action="Index" asp-route-contentId="@Model.ContentId" class="btn btn-outline-secondary btn-sm shadow-sm">
+                <i class="bi bi-arrow-left me-1"></i> Back to Images
+            </a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="m-0 font-weight-bold text-info">Image Details</h6>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+                        <input type="hidden" asp-for="ContentId" />
+                        <input type="hidden" asp-for="LangID" />
+
+                        <div class="mb-3">
+                            <label asp-for="ImageUrl" class="form-label fw-bold small text-muted">Image URL</label>
+                            <input asp-for="ImageUrl" class="form-control" required placeholder="https://..." />
+                            <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Caption" class="form-label fw-bold small text-muted">Caption (Optional)</label>
+                            <input asp-for="Caption" class="form-control" />
+                            <span asp-validation-for="Caption" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Position" class="form-label fw-bold small text-muted">Position</label>
+                            <input asp-for="Position" class="form-control" type="number" />
+                            <span asp-validation-for="Position" class="text-danger small"></span>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-action="Index" asp-route-contentId="@Model.ContentId" class="btn btn-light px-4">Cancel</a>
+                            <button type="submit" class="btn btn-info text-white px-4">
+                                <i class="bi bi-save me-1"></i> Save Image
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

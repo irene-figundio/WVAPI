@@ -19,7 +19,7 @@ namespace VITBO.Controllers
         {
 
             ViewData["CurrentLangId"] = langId;
-            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
             var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
             var result = await _contentsService.GetContentsByTypeAsync("Article", langId, token, userAgent);
             return View(result);
@@ -74,7 +74,7 @@ namespace VITBO.Controllers
 
         public async Task<IActionResult> News([FromQuery] int langId = 1)
         {
-            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
             var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
             ViewData["CurrentLangId"] = langId;
             var result = await _contentsService.GetContentsByTypeAsync("News", langId, token, userAgent);
@@ -93,7 +93,7 @@ namespace VITBO.Controllers
         {
             if (ModelState.IsValid)
             {
-                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
                 var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
                 model.ContentType = "blog";
                 var success = await _contentsService.CreateContent(model, token, userAgent);
@@ -119,7 +119,7 @@ namespace VITBO.Controllers
      
             if (ModelState.IsValid)
             {
-                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
                                 var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
                 model.ContentType = "news";
                 var success = await _contentsService.CreateContent(model, token, userAgent);
@@ -136,7 +136,7 @@ namespace VITBO.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id, [FromQuery] int langId = 1)
         {
-            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
             var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
             var contentDto = await _contentsService.GetContentByIdAsync(id, langId, token, userAgent);
             if (contentDto == null)
@@ -166,7 +166,7 @@ namespace VITBO.Controllers
         {
             if (ModelState.IsValid)
             {
-                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
                 var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
                 var request = new ContentDto
                 {
@@ -193,6 +193,21 @@ namespace VITBO.Controllers
         }
 
 
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id, string contentType)
+        {
+            var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+            var success = await _contentsService.DeleteContentAsync(id, token, userAgent);
+            if (success)
+            {
+                return RedirectToAction(contentType == "News" ? nameof(News) : nameof(Articles));
+            }
+            ModelState.AddModelError("", "Failed to delete content. Please try again.");
+            return RedirectToAction(contentType == "News" ? nameof(News) : nameof(Articles));
+        }
 
         protected string? GetUserAgent()
         {

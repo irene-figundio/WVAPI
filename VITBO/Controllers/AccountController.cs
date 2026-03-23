@@ -79,8 +79,7 @@ namespace VITBO.Controllers
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                     var authProperties = new AuthenticationProperties
                     {
-                        IsPersistent = model.RememberMe,
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+                        IsPersistent = model.RememberMe
                     };
 
                     await HttpContext.SignInAsync(
