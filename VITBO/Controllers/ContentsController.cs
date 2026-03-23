@@ -17,8 +17,11 @@ namespace VITBO.Controllers
 
         public async Task<IActionResult> Articles([FromQuery] int langId = 1)
         {
+
             ViewData["CurrentLangId"] = langId;
-            var result = await _contentsService.GetContentsByTypeAsync("Article", langId);
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+            var result = await _contentsService.GetContentsByTypeAsync("Article", langId, token, userAgent);
             return View(result);
         }
 
@@ -71,8 +74,10 @@ namespace VITBO.Controllers
 
         public async Task<IActionResult> News([FromQuery] int langId = 1)
         {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
             ViewData["CurrentLangId"] = langId;
-            var result = await _contentsService.GetContentsByTypeAsync("News", langId);
+            var result = await _contentsService.GetContentsByTypeAsync("News", langId, token, userAgent);
             return View(result);
         }
 
@@ -86,10 +91,12 @@ namespace VITBO.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateArticle(CreateContentRequest model)
         {
-            model.ContentType = "Article";
             if (ModelState.IsValid)
             {
-                var success = await _contentsService.CreateContent(model);
+                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+                model.ContentType = "blog";
+                var success = await _contentsService.CreateContent(model, token, userAgent);
                 if (success)
                 {
                     return RedirectToAction(nameof(Articles));
@@ -109,10 +116,13 @@ namespace VITBO.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateNewsAsync(CreateContentRequest model)
         {
-            model.ContentType = "News";
+     
             if (ModelState.IsValid)
             {
-                var success = await _contentsService.CreateContent(model);
+                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                                var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+                model.ContentType = "news";
+                var success = await _contentsService.CreateContent(model, token, userAgent);
                 if (success)
                 {
                     return RedirectToAction(nameof(News));
@@ -122,9 +132,86 @@ namespace VITBO.Controllers
             return View(model);
 
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id, [FromQuery] int langId = 1)
+        {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+            var contentDto = await _contentsService.GetContentByIdAsync(id, langId, token, userAgent);
+            if (contentDto == null)
+            {
+                return NotFound();
+            }
+            var model = new EditContentRequest
+            {
+                Id = contentDto.Id,
+                Title = contentDto.Title,
+                Text = contentDto.Text,
+                PublishDate = contentDto.PublishDate,
+                CoverImage = contentDto.CoverImage,
+                ContentType = contentDto.ContentType,
+                IsPublished = contentDto.IsPublished,
+                Subtitle = contentDto.Subtitle,
+                CategoryId = contentDto.CategoryId,
+                Preview = contentDto.Preview,
+                HeroImage = contentDto.HeroImage
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, EditContentRequest model)
+        {
+            if (ModelState.IsValid)
+            {
+                var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+                var request = new ContentDto
+                {
+                    Id = model.Id,
+                    Title = model.Title,
+                    Text = model.Text,
+                    PublishDate = model.PublishDate,
+                    CoverImage = model.CoverImage,
+                    ContentType = model.ContentType,
+                    IsPublished = model.IsPublished,
+                    Subtitle = model.Subtitle,
+                    CategoryId = model.CategoryId,
+                    Preview = model.Preview,
+                    HeroImage = model.HeroImage
+                };
+                var success = await _contentsService.UpdateContentAsync(model.Id,request, token, userAgent);
+                if (success)
+                {
+                    return RedirectToAction(model.ContentType == "news" ? nameof(News) : nameof(Articles));
+                }
+                ModelState.AddModelError("", "Failed to update content. Please try again.");
+            }
+            return View(model);
+        }
+
+
+
         protected string? GetUserAgent()
         {
             return Request.Headers["User-Agent"].ToString();
         }
+    }
+
+    public class EditContentRequest
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Text { get; set; }
+        public DateTime PublishDate { get; set; }
+        public string CoverImage { get; set; }
+        public string ContentType { get; set; }
+        public bool IsPublished { get; set; }
+        public string Subtitle { get; set; }
+        public int? CategoryId { get; set; }
+        public string Preview { get; set; }
+        public string HeroImage { get; set; }
     }
 }

@@ -35,7 +35,7 @@ namespace VITBO.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             string sessionToken = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
-            var success = await _aiVideoService.DeleteVideoAsync(id, sessionToken, GetUserAgent(), HttpContext.RequestAborted);
+            var success = await _aiVideoService.DeleteVideoAsync(id, sessionToken, GetUserAgent() ?? string.Empty, HttpContext.RequestAborted);
             return RedirectToAction(nameof(Index));
         }
 
@@ -78,7 +78,7 @@ namespace VITBO.Controllers
             // we will temporarily modify GetVideosAsync to support a large page size, or simply iterate.
 
             // To be safe and simple:
-            var allVideos = await _aiVideoService.GetVideosAsync(null, 1, sessionToken, GetUserAgent(), HttpContext.RequestAborted);
+            var allVideos = await _aiVideoService.GetVideosAsync(null, 1, sessionToken, GetUserAgent() ?? string.Empty, HttpContext.RequestAborted);
             var video = allVideos.Items.FirstOrDefault(v => v.Id == id);
 
             // If we didn't find it on page 1, check other pages (assuming a reasonable number of items)
@@ -86,7 +86,7 @@ namespace VITBO.Controllers
             {
                 for (int p = 2; p <= Math.Ceiling(allVideos.Total / 20.0); p++)
                 {
-                    var moreVideos = await _aiVideoService.GetVideosAsync(null, p, sessionToken, GetUserAgent(), HttpContext.RequestAborted);
+                    var moreVideos = await _aiVideoService.GetVideosAsync(null, p, sessionToken, GetUserAgent() ?? string.Empty, HttpContext.RequestAborted);
                     video = moreVideos.Items.FirstOrDefault(v => v.Id == id);
                     if (video != null) break;
                 }
@@ -122,7 +122,7 @@ namespace VITBO.Controllers
             if (ModelState.IsValid)
             {
                 string sessionToken = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
-                var success = await _aiVideoService.UpdateVideoAsync(id, model, sessionToken, GetUserAgent(), HttpContext.RequestAborted);
+                var success = await _aiVideoService.UpdateVideoAsync(id, model, sessionToken, GetUserAgent() ?? string.Empty, HttpContext.RequestAborted);
                 if (success)
                 {
                     return RedirectToAction(nameof(Index));
