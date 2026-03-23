@@ -1,0 +1,62 @@
+@{
+    ViewData["Title"] = "Dashboard Overview";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card shadow-sm border-0 bg-primary text-white">
+                <div class="card-body">
+                    <h2 class="display-6">Welcome to VITBO Admin Dashboard</h2>
+                    <p class="lead">Use the sidebar to manage users, media, events, and content entries.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mt-2">
+        <!-- Quick Links Cards -->
+        <div class="col">
+            <div class="card h-100 shadow-sm border-0 border-start border-primary border-4">
+                <div class="card-body">
+                    <h5 class="card-title text-primary"><i class="bi bi-people-fill me-2"></i>Users</h5>
+                    <p class="card-text text-muted small">Manage administrators and users across the platform.</p>
+                    <a asp-controller="Users" asp-action="Index" class="btn btn-outline-primary btn-sm stretched-link">View Users</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 shadow-sm border-0 border-start border-success border-4">
+                <div class="card-body">
+                    <h5 class="card-title text-success"><i class="bi bi-camera-video-fill me-2"></i>AI Videos</h5>
+                    <p class="card-text text-muted small">Oversee auto-generated AI videos and playlists.</p>
+                    <a asp-controller="AiVideo" asp-action="Index" class="btn btn-outline-success btn-sm stretched-link">Manage Videos</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 shadow-sm border-0 border-start border-warning border-4">
+                <div class="card-body">
+                    <h5 class="card-title text-warning"><i class="bi bi-calendar-event-fill me-2"></i>Events</h5>
+                    <p class="card-text text-muted small">Update event listings, locations, and timings.</p>
+                    <a asp-controller="Events" asp-action="Index" class="btn btn-outline-warning btn-sm stretched-link">Manage Events</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 shadow-sm border-0 border-start border-danger border-4">
+                <div class="card-body">
+                    <h5 class="card-title text-danger"><i class="bi bi-file-text-fill me-2"></i>Content</h5>
+                    <p class="card-text text-muted small">Edit articles, news entries, and content imagery.</p>
+                    <div class="d-flex justify-content-between mt-3 position-relative z-1">
+                         <a asp-controller="Contents" asp-action="Articles" class="btn btn-outline-danger btn-sm">Articles</a>
+                         <a asp-controller="Contents" asp-action="News" class="btn btn-outline-danger btn-sm">News</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
