@@ -7,10 +7,11 @@ namespace VITBO.Models
         [Required]
         public string Title { get; set; } = default!;
 
-        [Required]
-        public string Url_Video { get; set; } = default!;
+        public string? Url_Video { get; set; }
 
-        public bool IsLandscape { get; set; } = false;
+        public IFormFile? File { get; set; }
+
+        public bool? IsLandscape { get; set; } = false;
 
         public int Play_Priority { get; set; } = 0;
 

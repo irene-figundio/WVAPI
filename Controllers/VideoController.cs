@@ -403,6 +403,14 @@ namespace AI_Integration.Controllers
 
             if (req.Title != null) video.Title = req.Title;
             if (req.Play_Priority.HasValue) video.Play_Priority = req.Play_Priority.Value;
+            if (req.IsDeleted.HasValue)
+            {
+                video.IsDeleted = req.IsDeleted.Value;
+                if (req.IsDeleted == true)
+                {
+                    video.DeletionTime = DateTime.Now;
+                }
+            }
 
             video.DataUpdate = DateTime.Now;
             // video.LastModification_User = <callerId se disponibile>

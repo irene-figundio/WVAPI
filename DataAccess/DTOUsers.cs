@@ -68,6 +68,7 @@ namespace AI_Integration.DataAccess
         public bool? IsLandscape { get; set; }
         public int? Play_Priority { get; set; }
         public int? ID_Session { get; set; }        // se vuoi consentire il cambio sessione
+        public bool? IsDeleted { get; set; }
     }
     public class VideoListItemDto
     {
