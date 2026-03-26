@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "VIT_System",
+    "Projects": [
+      {
+        "Path": "VITBO\\VITBO.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "AI_Integration.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

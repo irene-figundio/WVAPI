@@ -319,8 +319,9 @@ namespace AI_Integration.Controllers
             {
                 var content = await _unitOfWork.GetByIdAsync<Content>(id);
                 if (content == null) return NotFound(new { success = false, message = "Content not found." });
-
-                _unitOfWork.Remove(content);
+                //Effettuiamo un soft delete impostando IsPublished a false invece di rimuovere fisicamente il record, per preservare la cronologia e le relazioni
+                content.IsPublished = false;
+                content.UpdatedAt = DateTime.Now;
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogNoContentAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");

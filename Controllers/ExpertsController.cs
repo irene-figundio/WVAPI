@@ -141,8 +141,7 @@ namespace AI_Integration.Controllers
             try
             {
                 var expert = await _unitOfWork.GetByIdAsync<Expert>(id);
-                if (expert == null) return NotFound(new { success = false, message = "Expert not found." });
-
+                if (expert == null) return NotFound(new { success = false, message = "Expert not found." });                
                 _unitOfWork.Remove(expert);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();

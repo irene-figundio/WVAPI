@@ -21,7 +21,7 @@ namespace VITBO.Controllers
             ViewData["CurrentLangId"] = langId;
             var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
             var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
-            var result = await _contentsService.GetContentsByTypeAsync("Article", langId, token, userAgent);
+            var result = await _contentsService.GetContentsByTypeAsync("blog", langId, token, userAgent);
             return View(result);
         }
 
