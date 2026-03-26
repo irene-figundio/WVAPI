@@ -5,13 +5,11 @@ namespace VITBO.Services
 {
     public class AiVideoService : IAiVideoService
     {
-        private readonly ApiService _apiService;
         private readonly HttpService _httpService;
         private readonly IConfiguration _configuration;
 
-        public AiVideoService(ApiService apiService, HttpService httpService, IConfiguration configuration)
+        public AiVideoService(HttpService httpService, IConfiguration configuration)
         {
-            _apiService = apiService;
             _httpService = httpService;
             _configuration = configuration;
         }

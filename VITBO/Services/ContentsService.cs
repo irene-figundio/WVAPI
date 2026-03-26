@@ -5,13 +5,11 @@ namespace VITBO.Services
 {
     public class ContentsService : IContentsService
     {
-        private readonly ApiService _apiService;
         private readonly HttpService _httpService;
         private readonly IConfiguration _configuration;
 
-        public ContentsService(ApiService apiService, HttpService httpService, IConfiguration configuration)
+        public ContentsService(HttpService httpService, IConfiguration configuration)
         {
-            _apiService = apiService;
             _httpService = httpService;
             _configuration = configuration;
         }

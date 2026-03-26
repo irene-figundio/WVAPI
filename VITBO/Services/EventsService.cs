@@ -5,13 +5,11 @@ namespace VITBO.Services
 {
     public class EventsService : IEventsService
     {
-        private readonly ApiService _apiService;
         private readonly HttpService _httpService;
         private readonly IConfiguration _configuration;
 
-        public EventsService(ApiService apiService, HttpService httpService, IConfiguration configuration)
+        public EventsService(HttpService httpService, IConfiguration configuration)
         {
-            _apiService = apiService;
             _httpService = httpService;
             _configuration = configuration;
         }
