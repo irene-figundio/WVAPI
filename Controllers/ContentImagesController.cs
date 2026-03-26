@@ -32,7 +32,7 @@ namespace AI_Integration.Controllers
             var sw = Stopwatch.StartNew();
             try
             {
-                var items = await _unitOfWork.Query<ContentImage>().ToListAsync();
+                var items = await _unitOfWork.Query<ContentImage>().Where(e => e.IsDeleted != true).ToListAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, $"{{ success = true, count = {items.Count} }}", $"ElapsedMs={sw.ElapsedMilliseconds}");
                 return Ok(items);
@@ -145,7 +145,9 @@ namespace AI_Integration.Controllers
                     await WebApiLogHelper.LogNotFoundAsync(_unitOfWork, log, "{ success = false, message = 'Item not found.' }", $"ElapsedMs={sw.ElapsedMilliseconds}");
                     return NotFound();
                 }
-                _unitOfWork.Remove(item);
+                item.IsDeleted = true;
+                item.DeletionDate = DateTime.Now;
+                _unitOfWork.Update(item);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogNoContentAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");

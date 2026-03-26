@@ -3,6 +3,8 @@ namespace AI_Integration.DataAccess.Database.Models
 {
     public class WebAPILog
     {
+        public bool? IsDeleted { get; set; }
+        public DateTime? DeletionDate { get; set; }
         public int IDLog { get; set; }
         public DateTime DateTimeStamp { get; set; }
         public string RequestMethod { get; set; }

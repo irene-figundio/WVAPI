@@ -74,7 +74,7 @@ namespace AI_Integration.Controllers
             var sw = Stopwatch.StartNew();
             try
             {
-                var contents = await _unitOfWork.Query<Content>()
+                var contents = await _unitOfWork.Query<Content>().Where(e => e.IsDeleted != true)
                     .Where(c => c.LangID == langId)
                     .OrderByDescending(c => c.PublishDate)
                     .Select(c => new ContentDto
@@ -132,7 +132,7 @@ namespace AI_Integration.Controllers
             var sw = Stopwatch.StartNew();
             try
             {
-                var contents = await _unitOfWork.Query<Content>()
+                var contents = await _unitOfWork.Query<Content>().Where(e => e.IsDeleted != true)
                     .Where(c => c.ContentType.ToLower() == contentType.ToLower() && c.LangID == langId)
                     .OrderByDescending(c => c.PublishDate)
                     .Select(c => new ContentDto
@@ -190,7 +190,7 @@ namespace AI_Integration.Controllers
             var sw = Stopwatch.StartNew();
             try
             {
-                var dto = await _unitOfWork.Query<Content>()
+                var dto = await _unitOfWork.Query<Content>().Where(e => e.IsDeleted != true)
                     .Where(c => c.Id == id && c.LangID == langId)
                     .Select(c => new ContentDto
                     {
@@ -319,9 +319,10 @@ namespace AI_Integration.Controllers
             {
                 var content = await _unitOfWork.GetByIdAsync<Content>(id);
                 if (content == null) return NotFound(new { success = false, message = "Content not found." });
-                //Effettuiamo un soft delete impostando IsPublished a false invece di rimuovere fisicamente il record, per preservare la cronologia e le relazioni
-                content.IsPublished = false;
-                content.UpdatedAt = DateTime.Now;
+
+                content.IsDeleted = true;
+                content.DeletionDate = DateTime.Now;
+                _unitOfWork.Update(content);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogNoContentAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");

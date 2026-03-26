@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using AI_Integration.DataAccess;
-using AI_Integration.DataAccess.Database.Models;
 using AI_Integration.DataAccess.Database.Repositories.interfaces;
+using AI_Integration.DataAccess.Database.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,26 +14,28 @@ namespace AI_Integration.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class ContentLinksController : ControllerBase
+    public class ContentCategoriesController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        public ContentLinksController(IUnitOfWork unitOfWork)
+        public ContentCategoriesController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> Get([FromQuery] int langId = 1, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("GET", "api/contentlinks", "", userAgent, "List contentlinks");
+            var log = WebApiLogHelper.NewLog("GET", "api/contentcategories", $"langId={langId}", userAgent, "List content categories");
             var sw = Stopwatch.StartNew();
             try
             {
-                var items = await _unitOfWork.Query<ContentLink>().Where(e => e.IsDeleted != true).ToListAsync();
+                var categories = await _unitOfWork.Query<ContentCategory>().Where(e => e.IsDeleted != true)
+                    .Where(c => c.LangID == langId)
+                    .ToListAsync();
                 sw.Stop();
-                await WebApiLogHelper.LogOkAsync(_unitOfWork, log, $"{{ success = true, count = {items.Count} }}", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                return Ok(items);
+                await WebApiLogHelper.LogOkAsync(_unitOfWork, log, $"{{ success = true, count = {categories.Count} }}", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return Ok(categories);
             }
             catch (Exception ex)
             {
@@ -46,22 +46,21 @@ namespace AI_Integration.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById(int id, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> GetById(int id, [FromQuery] int langId = 1, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("GET", $"api/contentlinks/{id}", "", userAgent, "Get contentlink by id");
+            var log = WebApiLogHelper.NewLog("GET", $"api/contentcategories/{id}", $"langId={langId}", userAgent, "Get content category by id");
             var sw = Stopwatch.StartNew();
             try
             {
-                var item = await _unitOfWork.GetByIdAsync<ContentLink>(id);
-                if (item == null)
-                {
-                    sw.Stop();
-                    await WebApiLogHelper.LogNotFoundAsync(_unitOfWork, log, "{ success = false, message = 'Item not found.' }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                    return NotFound();
-                }
+                var category = await _unitOfWork.Query<ContentCategory>().Where(e => e.IsDeleted != true)
+                    .Where(c => c.Id == id && c.LangID == langId)
+                    .FirstOrDefaultAsync();
+
+                if (category == null) return NotFound();
+
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                return Ok(item);
+                return Ok(category);
             }
             catch (Exception ex)
             {
@@ -72,15 +71,14 @@ namespace AI_Integration.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] ContentLink item, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> Add([FromBody] ContentCategory item, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("POST", "api/contentlinks", item?.ToString(), userAgent, "Create contentlink");
+            var log = WebApiLogHelper.NewLog("POST", "api/contentcategories", item?.ToString(), userAgent, "Create content category");
             var sw = Stopwatch.StartNew();
             if (item == null) return BadRequest();
             if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                item.CreatedAt = DateTime.Now;
                 await _unitOfWork.InsertAsync(item);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
@@ -96,23 +94,17 @@ namespace AI_Integration.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, [FromBody] ContentLink changes, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> Put(int id, [FromBody] ContentCategory changes, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("PUT", $"api/contentlinks/{id}", changes?.ToString(), userAgent, "Update contentlink");
+            var log = WebApiLogHelper.NewLog("PUT", $"api/contentcategories/{id}", changes?.ToString(), userAgent, "Update content category");
             var sw = Stopwatch.StartNew();
             if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                var item = await _unitOfWork.GetByIdAsync<ContentLink>(id);
-                if (item == null)
-                {
-                    sw.Stop();
-                    await WebApiLogHelper.LogNotFoundAsync(_unitOfWork, log, "{ success = false, message = 'Item not found.' }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                    return NotFound();
-                }
+                var item = await _unitOfWork.GetByIdAsync<ContentCategory>(id);
+                if (item == null) return NotFound();
 
-                // Basic mapping (better to use Automapper or similar, but following pattern)
-                item.LinkUrl = changes.LinkUrl ?? item.LinkUrl;
+                item.Name = changes.Name ?? item.Name;
                 item.Description = changes.Description ?? item.Description;
                 item.LangID = changes.LangID != 0 ? changes.LangID : item.LangID;
 
@@ -133,17 +125,13 @@ namespace AI_Integration.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("DELETE", $"api/contentlinks/{id}", "", userAgent, "Delete contentlink");
+            var log = WebApiLogHelper.NewLog("DELETE", $"api/contentcategories/{id}", "", userAgent, "Delete content category");
             var sw = Stopwatch.StartNew();
             try
             {
-                var item = await _unitOfWork.GetByIdAsync<ContentLink>(id);
-                if (item == null)
-                {
-                    sw.Stop();
-                    await WebApiLogHelper.LogNotFoundAsync(_unitOfWork, log, "{ success = false, message = 'Item not found.' }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                    return NotFound();
-                }
+                var item = await _unitOfWork.GetByIdAsync<ContentCategory>(id);
+                if (item == null) return NotFound();
+
                 item.IsDeleted = true;
                 item.DeletionDate = DateTime.Now;
                 _unitOfWork.Update(item);

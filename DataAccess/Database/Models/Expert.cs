@@ -7,6 +7,8 @@ namespace AI_Integration.DataAccess.Database.Models
 {
     public class Expert
     {
+        public bool? IsDeleted { get; set; }
+        public DateTime? DeletionDate { get; set; }
         public int Id { get; set; }
 
         [Required]

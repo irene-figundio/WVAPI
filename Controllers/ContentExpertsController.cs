@@ -33,7 +33,7 @@ namespace AI_Integration.Controllers
             try
             {
                 // Check if connection already exists to prevent duplicates
-                var existing = await _unitOfWork.Query<ContentExpert>()
+                var existing = await _unitOfWork.Query<ContentExpert>().Where(e => e.IsDeleted != true)
                     .FirstOrDefaultAsync(ce => ce.ContentId == item.ContentId && ce.ExpertId == item.ExpertId);
 
                 if (existing != null)
@@ -70,7 +70,9 @@ namespace AI_Integration.Controllers
                     await WebApiLogHelper.LogNotFoundAsync(_unitOfWork, log, "{ success = false, message = 'Item not found.' }", $"ElapsedMs={sw.ElapsedMilliseconds}");
                     return NotFound();
                 }
-                _unitOfWork.Remove(item);
+                item.IsDeleted = true;
+                item.DeletionDate = DateTime.Now;
+                _unitOfWork.Update(item);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogNoContentAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");

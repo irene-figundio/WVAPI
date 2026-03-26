@@ -7,6 +7,8 @@ namespace AI_Integration.DataAccess.Database.Models
 {
     public class Gallery
     {
+        public bool? IsDeleted { get; set; }
+        public DateTime? DeletionDate { get; set; }
         public int Id { get; set; }
         public int EventId { get; set; }
         [StringLength(255)]

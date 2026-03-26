@@ -32,7 +32,7 @@ namespace AI_Integration.Controllers
             var sw = Stopwatch.StartNew();
             try
             {
-                var experts = await _unitOfWork.Query<Expert>()
+                var experts = await _unitOfWork.Query<Expert>().Where(e => e.IsDeleted != true)
                     .Where(e => e.LangID == langId)
                     .OrderByDescending(e => e.CreatedAt)
                     .ToListAsync();
@@ -55,7 +55,7 @@ namespace AI_Integration.Controllers
             var sw = Stopwatch.StartNew();
             try
             {
-                var expert = await _unitOfWork.Query<Expert>()
+                var expert = await _unitOfWork.Query<Expert>().Where(e => e.IsDeleted != true)
                     .Where(e => e.Id == id && e.LangID == langId)
                     .FirstOrDefaultAsync();
 
@@ -141,8 +141,11 @@ namespace AI_Integration.Controllers
             try
             {
                 var expert = await _unitOfWork.GetByIdAsync<Expert>(id);
-                if (expert == null) return NotFound(new { success = false, message = "Expert not found." });                
-                _unitOfWork.Remove(expert);
+                if (expert == null) return NotFound(new { success = false, message = "Expert not found." });
+
+                expert.IsDeleted = true;
+                expert.DeletionDate = DateTime.Now;
+                _unitOfWork.Update(expert);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogNoContentAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");

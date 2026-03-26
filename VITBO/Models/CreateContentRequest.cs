@@ -18,5 +18,8 @@ namespace VITBO.Models
         public bool IsPublished { get; set; } = true;
 
         public int LangID { get; set; } = 1;
+
+        public string? CoverImage { get; set; }
+        public string? HeroImage { get; set; }
     }
 }

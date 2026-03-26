@@ -89,7 +89,7 @@ namespace AI_Integration.Controllers
             var sw = Stopwatch.StartNew();
             try
             {
-                var events = await _unitOfWork.Query<Event>()
+                var events = await _unitOfWork.Query<Event>().Where(e => e.IsDeleted != true)
                     .Where(e => e.LangID == langId)
                     .OrderByDescending(e => e.EventDate)
                     .Select(e => new EventDto
@@ -159,7 +159,7 @@ namespace AI_Integration.Controllers
             var sw = Stopwatch.StartNew();
             try
             {
-                var dto = await _unitOfWork.Query<Event>()
+                var dto = await _unitOfWork.Query<Event>().Where(e => e.IsDeleted != true)
                     .Where(e => e.Id == id && e.LangID == langId)
                     .Select(e => new EventDto
                     {
@@ -308,7 +308,9 @@ namespace AI_Integration.Controllers
             {
                 var @event = await _unitOfWork.GetByIdAsync<Event>(id);
                 if (@event == null) return NotFound(new { success = false, message = "Event not found." });
-                _unitOfWork.Remove(@event);
+                @event.IsDeleted = true;
+                @event.DeletionDate = DateTime.Now;
+                _unitOfWork.Update(@event);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogNoContentAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");

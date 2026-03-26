@@ -32,7 +32,7 @@ namespace AI_Integration.Controllers
             page = page <= 0 ? 1 : page;
             pageSize = pageSize <= 0 ? 20 : Math.Min(pageSize, 100);
 
-            var q = _uow.Query<User>()        // IQueryable<Users> (AsNoTracking di default)
+            var q = _uow.Query<User>().Where(e => e.IsDeleted != true)
                         .Where(u => !u.IsDeleted);
 
             if (!string.IsNullOrWhiteSpace(query))

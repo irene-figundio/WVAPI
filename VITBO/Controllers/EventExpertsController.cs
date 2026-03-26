@@ -9,19 +9,24 @@ namespace VITBO.Controllers
     public class EventExpertsController : Controller
     {
         private readonly IMediaService _mediaService;
+        private readonly IExpertsService _expertsService;
 
-        public EventExpertsController(IMediaService mediaService)
+        public EventExpertsController(IMediaService mediaService, IExpertsService expertsService)
         {
             _mediaService = mediaService;
+            _expertsService = expertsService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int eventId)
+        public async Task<IActionResult> Index(int eventId, int langId = 1)
         {
             ViewBag.EventId = eventId;
+            ViewBag.LangId = langId;
             var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
             var userAgent = GetUserAgent() ?? string.Empty;
             var list = await _mediaService.GetEventExpertsAsync(eventId, token, userAgent);
+            var expertsList = await _expertsService.GetExpertsAsync(langId, token, userAgent);
+            ViewBag.AvailableExperts = expertsList;
             return View(list);
         }
 
