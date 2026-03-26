@@ -1,0 +1,103 @@
+@model VITBO.Models.UpdateTripRequest
+@{
+    ViewData["Title"] = "Modifica Viaggio";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-pencil me-2"></i> @ViewData["Title"] (ID: @Model.Id)</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="EventId" class="form-label">Evento</label>
+                                <select asp-for="EventId" class="form-select">
+                                    <option value="">Seleziona Evento</option>
+                                    @if (ViewBag.Events != null)
+                                    {
+                                        @foreach (var ev in (List<VITBO.Models.EventDto>)ViewBag.Events)
+                                        {
+                                            <option value="@ev.Id">@ev.Title (@ev.Id)</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="EventId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Status" class="form-label">Status</label>
+                                <select asp-for="Status" class="form-select">
+                                    <option value="booking">Booking</option>
+                                    <option value="started">Started</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="done">Done</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                                <span asp-validation-for="Status" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="DepartureCity" class="form-label">Città Partenza</label>
+                                <input asp-for="DepartureCity" class="form-control" placeholder="Es. Roma" required />
+                                <span asp-validation-for="DepartureCity" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="DepartureCountry" class="form-label">Paese Partenza</label>
+                                <input asp-for="DepartureCountry" class="form-control" placeholder="Es. Italia" required />
+                                <span asp-validation-for="DepartureCountry" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ArrivalCity" class="form-label">Città Arrivo</label>
+                                <input asp-for="ArrivalCity" class="form-control" placeholder="Es. Tokyo" required />
+                                <span asp-validation-for="ArrivalCity" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ArrivalCountry" class="form-label">Paese Arrivo (Opzionale)</label>
+                                <input asp-for="ArrivalCountry" class="form-control" placeholder="Es. Giappone" />
+                                <span asp-validation-for="ArrivalCountry" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="DurationDays" class="form-label">Durata (Giorni)</label>
+                                <input asp-for="DurationDays" type="number" min="0" class="form-control" />
+                                <span asp-validation-for="DurationDays" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="DurationNights" class="form-label">Durata (Notti)</label>
+                                <input asp-for="DurationNights" type="number" min="0" class="form-control" />
+                                <span asp-validation-for="DurationNights" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="MaxGuests" class="form-label">Max Ospiti</label>
+                                <input asp-for="MaxGuests" type="number" min="1" class="form-control" />
+                                <span asp-validation-for="MaxGuests" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i> Annulla
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-check-circle me-1"></i> Salva Viaggio
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
