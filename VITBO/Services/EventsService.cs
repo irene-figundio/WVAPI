@@ -55,8 +55,7 @@ namespace VITBO.Services
 
         public async Task<List<EventCategoryDto>> GetEventCategoriesAsync(int langId, string token, string userAgent)
         {
-            var apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
-            var endpoint = $"{apiBase}/api/eventcategories?langId={langId}";
+            var endpoint = $"{_apiBase}/eventcategories?langId={langId}";
             var result = await _httpService.SendHttpRequestAsync(HttpMethod.Get, endpoint, token, userAgent, null);
             var list = await _httpService.GetBodyFromHttpResponseAsync<List<EventCategoryDto>>(result);
             return list ?? new List<EventCategoryDto>();

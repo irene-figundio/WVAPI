@@ -71,6 +71,26 @@ namespace AI_Integration.Controllers
             }
         }
 
+        [HttpGet("bycontent/{idContent:int}")]
+        public async Task<IActionResult> GetByIdContent(int idContent, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        {
+            var log = WebApiLogHelper.NewLog("GET", $"api/contentimages/bycontent/{idContent}", "", userAgent, "Get contentimages by content id");
+            var sw = Stopwatch.StartNew();
+            try
+            {
+                var items = await _unitOfWork.Query<ContentImage>().Where(e => e.ContentId == idContent && e.IsDeleted != true).ToListAsync();
+                sw.Stop();
+                await WebApiLogHelper.LogOkAsync(_unitOfWork, log, $"{{ success = true, count = {items.Count} }}", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                sw.Stop();
+                await WebApiLogHelper.LogErrorAsync(_unitOfWork, log, ex, $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] ContentImage item, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {

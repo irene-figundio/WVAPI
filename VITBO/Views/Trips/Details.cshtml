@@ -1,0 +1,357 @@
+@model VITBO.Models.TripDto
+@{
+    ViewData["Title"] = $"Dettagli Viaggio #{Model.Id}";
+    var stays = ViewBag.Stays as List<VITBO.Models.StayDto> ?? new();
+    var days = ViewBag.Days as List<VITBO.Models.ItineraryDayDto> ?? new();
+    var musts = ViewBag.Musts as List<VITBO.Models.TripMustDto> ?? new();
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-airplane me-2"></i> @ViewData["Title"]</h2>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">
+                <i class="bi bi-pencil me-1"></i> Modifica Generale
+            </a>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Torna alla lista
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabs Nav -->
+    <ul class="nav nav-tabs mb-4" id="tripTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab">Generale</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="stays-tab" data-bs-toggle="tab" data-bs-target="#stays" type="button" role="tab">Soggiorni</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="days-tab" data-bs-toggle="tab" data-bs-target="#days" type="button" role="tab">Giorni Itinerario</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="musts-tab" data-bs-toggle="tab" data-bs-target="#musts" type="button" role="tab">Include/Esclude</button>
+        </li>
+    </ul>
+
+    <!-- Tabs Content -->
+    <div class="tab-content" id="tripTabsContent">
+        <!-- Tab Generale -->
+        <div class="tab-pane fade show active" id="general" role="tabpanel">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 border-end">
+                            <p><strong>Evento Collegato:</strong> @Model.EventId</p>
+                            <p><strong>Partenza:</strong> @Model.DepartureCity (@Model.DepartureCountry)</p>
+                            <p><strong>Arrivo:</strong> @Model.ArrivalCity (@Model.ArrivalCountry)</p>
+                        </div>
+                        <div class="col-md-6 ps-md-4">
+                            <p><strong>Durata:</strong> @Model.DurationDays Giorni / @Model.DurationNights Notti</p>
+                            <p><strong>Max Ospiti:</strong> @Model.MaxGuests</p>
+                            <p><strong>Status:</strong> <span class="badge bg-primary">@Model.Status</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Soggiorni -->
+        <div class="tab-pane fade" id="stays" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>Gestione Soggiorni</h5>
+                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#addStayModal">
+                    <i class="bi bi-plus-circle me-1"></i> Aggiungi Soggiorno
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Ordine</th>
+                            <th>Nome</th>
+                            <th>Location</th>
+                            <th>Giorno Itinerario</th>
+                            <th>Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in stays)
+                        {
+                            <tr>
+                                <td>@s.OrderIndex</td>
+                                <td>@s.Name</td>
+                                <td>@s.Location</td>
+                                <td>@(s.ItineraryDayId.HasValue ? $"Giorno {days.FirstOrDefault(d => d.Id == s.ItineraryDayId)?.DayNumber}" : "N/D")</td>
+                                <td>
+                                    <form asp-action="DeleteStay" method="post" onsubmit="return confirm('Sicuro?');">
+                                        <input type="hidden" name="id" value="@s.Id" />
+                                        <input type="hidden" name="tripId" value="@Model.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab Giorni -->
+        <div class="tab-pane fade" id="days" role="tabpanel">
+             <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>Itinerario Giornaliero</h5>
+                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#addDayModal">
+                    <i class="bi bi-plus-circle me-1"></i> Aggiungi Giorno
+                </button>
+            </div>
+            @foreach (var day in days.OrderBy(d => d.DayNumber))
+            {
+                <div class="card mb-3 shadow-sm border-start border-4 border-info">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Giorno @day.DayNumber: @day.Title</h6>
+                        <div class="btn-group btn-group-sm">
+                             <button type="button" class="btn btn-outline-success" onclick="openAddStopModal(@day.Id, @day.DayNumber)" title="Aggiungi Tappa">
+                                <i class="bi bi-plus"></i> Tappa
+                            </button>
+                            <form asp-action="DeleteDay" method="post" onsubmit="return confirm('Sicuro di voler eliminare questo giorno e tutte le sue tappe?');">
+                                <input type="hidden" name="id" value="@day.Id" />
+                                <input type="hidden" name="tripId" value="@Model.Id" />
+                                <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="small text-muted mb-3">@day.Description</p>
+
+                        <!-- Tappe -->
+                        <div id="stops-container-@day.Id" class="ps-3 border-start">
+                             @{
+                                 var stops = (ViewBag.StopsByDay as Dictionary<int, List<VITBO.Models.ItineraryStopDto>>)?.GetValueOrDefault(day.Id) ?? new();
+                             }
+                             @if (stops.Any())
+                             {
+                                 <div class="list-group list-group-flush">
+                                     @foreach (var s in stops.OrderBy(x => x.OrderIndex).ThenBy(x => x.Time))
+                                     {
+                                         <div class="list-group-item d-flex justify-content-between align-items-center py-1">
+                                             <div>
+                                                 <span class="badge bg-light text-dark me-2">@(s.Time?.ToString(@"hh\:mm") ?? "--:--")</span>
+                                                 <strong>@s.Title</strong>
+                                                 <small class="text-muted ms-2">(@s.Type)</small>
+                                             </div>
+                                             <form asp-action="DeleteStop" method="post" onsubmit="return confirm('Eliminare questa tappa?');">
+                                                 <input type="hidden" name="id" value="@s.Id" />
+                                                 <input type="hidden" name="tripId" value="@Model.Id" />
+                                                 <button type="submit" class="btn btn-sm text-danger border-0 bg-transparent p-0"><i class="bi bi-x-circle"></i></button>
+                                             </form>
+                                         </div>
+                                     }
+                                 </div>
+                             }
+                             else
+                             {
+                                 <p class="small text-muted mb-0">Nessuna tappa aggiunta.</p>
+                             }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Tab Include/Esclude -->
+        <div class="tab-pane fade" id="musts" role="tabpanel">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">Include</div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                @foreach (var m in musts.Where(x => x.TypeId == 1))
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        @m.Text
+                                        <form asp-action="DeleteMust" method="post">
+                                            <input type="hidden" name="id" value="@m.Id" />
+                                            <input type="hidden" name="tripId" value="@Model.Id" />
+                                            <button type="submit" class="btn btn-sm text-danger border-0 bg-transparent"><i class="bi bi-x-circle"></i></button>
+                                        </form>
+                                    </li>
+                                }
+                                <li class="list-group-item">
+                                    <form asp-action="AddMust" method="post" class="input-group input-group-sm">
+                                        <input type="hidden" name="TripId" value="@Model.Id" />
+                                        <input type="hidden" name="TypeId" value="1" />
+                                        <input name="Text" class="form-control" placeholder="Aggiungi inclusione..." required />
+                                        <button class="btn btn-success" type="submit">Aggiungi</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-danger text-white">Esclude</div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                @foreach (var m in musts.Where(x => x.TypeId == 2))
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        @m.Text
+                                        <form asp-action="DeleteMust" method="post">
+                                            <input type="hidden" name="id" value="@m.Id" />
+                                            <input type="hidden" name="tripId" value="@Model.Id" />
+                                            <button type="submit" class="btn btn-sm text-danger border-0 bg-transparent"><i class="bi bi-x-circle"></i></button>
+                                        </form>
+                                    </li>
+                                }
+                                <li class="list-group-item">
+                                    <form asp-action="AddMust" method="post" class="input-group input-group-sm">
+                                        <input type="hidden" name="TripId" value="@Model.Id" />
+                                        <input type="hidden" name="TypeId" value="2" />
+                                        <input name="Text" class="form-control" placeholder="Aggiungi esclusione..." required />
+                                        <button class="btn btn-danger" type="submit">Aggiungi</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+
+<!-- Add Stay Modal -->
+<div class="modal fade" id="addStayModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form asp-action="AddStay" method="post" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Aggiungi Soggiorno</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="TripId" value="@Model.Id" />
+                <div class="mb-3">
+                    <label class="form-label">Nome Soggiorno</label>
+                    <input name="Name" class="form-control" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Location</label>
+                    <input name="Location" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Ordine Visualizzazione</label>
+                    <input name="OrderIndex" type="number" class="form-control" value="0" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Giorno Associato (Opzionale)</label>
+                    <select name="ItineraryDayId" class="form-select">
+                        <option value="">Nessuno</option>
+                        @foreach (var d in days)
+                        {
+                            <option value="@d.Id">Giorno @d.DayNumber: @d.Title</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                <button type="submit" class="btn btn-primary">Salva Soggiorno</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Day Modal -->
+<div class="modal fade" id="addDayModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form asp-action="AddDay" method="post" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Aggiungi Giorno Itinerario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="TripId" value="@Model.Id" />
+                <div class="mb-3">
+                    <label class="form-label">Numero Giorno</label>
+                    <input name="DayNumber" type="number" class="form-control" value="@(days.Any() ? days.Max(d => d.DayNumber) + 1 : 1)" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Titolo Giorno</label>
+                    <input name="Title" class="form-control" required placeholder="Es. Arrivo e Sistemazione" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Descrizione</label>
+                    <textarea name="Description" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                <button type="submit" class="btn btn-primary">Salva Giorno</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Stop Modal (Placeholder triggered by JS) -->
+<div class="modal fade" id="addStopModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form asp-action="AddStop" method="post" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Aggiungi Tappa al Giorno <span id="modal-day-number"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="tripId" value="@Model.Id" />
+                <input type="hidden" name="DayId" id="modal-day-id" />
+                <div class="mb-3">
+                    <label class="form-label">Titolo Tappa</label>
+                    <input name="Title" class="form-control" required />
+                </div>
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label class="form-label">Orario (HH:mm)</label>
+                        <input name="Time" type="time" class="form-control" />
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label class="form-label">Tipo</label>
+                        <select name="Type" class="form-select" required>
+                            <option value="activity">Attività</option>
+                            <option value="meal">Pasto</option>
+                            <option value="transfer">Spostamento</option>
+                            <option value="experience">Esperienza</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Descrizione</label>
+                    <textarea name="Description" class="form-control"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Ordine</label>
+                    <input name="OrderIndex" type="number" class="form-control" value="0" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                <button type="submit" class="btn btn-primary">Salva Tappa</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openAddStopModal(dayId, dayNumber) {
+            document.getElementById('modal-day-id').value = dayId;
+            document.getElementById('modal-day-number').innerText = dayNumber;
+            var modal = new bootstrap.Modal(document.getElementById('addStopModal'));
+            modal.show();
+        }
+    </script>
+}

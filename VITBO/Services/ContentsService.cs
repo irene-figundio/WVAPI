@@ -5,11 +5,12 @@ namespace VITBO.Services
 {
     public class ContentsService : IContentsService
     {
+        
         private readonly HttpService _httpService;
         private readonly IConfiguration _configuration;
         private readonly string _apiBase;
 
-        public ContentsService(HttpService httpService, IConfiguration configuration)
+        public ContentsService( HttpService httpService, IConfiguration configuration)
         {
             _httpService = httpService;
             _configuration = configuration;
@@ -52,8 +53,7 @@ namespace VITBO.Services
 
         public async Task<List<ContentCategoryDto>> GetContentCategoriesAsync(int langId, string token, string userAgent)
         {
-            var apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
-            var endpoint = $"{apiBase}/api/contentcategories?langId={langId}";
+            var endpoint = $"{_apiBase}/contentcategories?langId={langId}";
             var result = await _httpService.SendHttpRequestAsync(HttpMethod.Get, endpoint, token, userAgent, null);
             var list = await _httpService.GetBodyFromHttpResponseAsync<List<ContentCategoryDto>>(result);
             return list ?? new List<ContentCategoryDto>();

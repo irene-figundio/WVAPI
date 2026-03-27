@@ -50,6 +50,7 @@ builder.Services.AddScoped<VITBO.Services.Interfaces.IAuthService, VITBO.Service
 builder.Services.AddScoped<VITBO.Services.Interfaces.IUsersService, VITBO.Services.UsersService>();
 builder.Services.AddScoped<VITBO.Services.Interfaces.IAiVideoService, VITBO.Services.AiVideoService>();
 builder.Services.AddScoped<VITBO.Services.Interfaces.IEventsService, VITBO.Services.EventsService>();
+builder.Services.AddScoped<VITBO.Services.Interfaces.ITripsService, VITBO.Services.TripsService>();
 builder.Services.AddScoped<VITBO.Services.Interfaces.IContentsService, VITBO.Services.ContentsService>();
 builder.Services.AddScoped<VITBO.Services.Interfaces.IExpertsService, VITBO.Services.ExpertsService>();
 builder.Services.AddScoped<VITBO.Services.Interfaces.IMediaService, VITBO.Services.MediaService>();

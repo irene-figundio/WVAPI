@@ -1,15 +1,14 @@
-using AI_Integration.DataAccess.Database.Models;
-using AI_Integration.DataAccess.Database.Repositories.interfaces;
-using AI_Integration.Helpers;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
+using AI_Integration.DataAccess.Database.Models;
+using AI_Integration.DataAccess.Database.Repositories.interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using AI_Integration.Helpers;
 
 namespace AI_Integration.Controllers
 {
@@ -119,43 +118,29 @@ namespace AI_Integration.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] TripDto model, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> Add([FromBody] Trip trip, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("POST", "api/trips", model?.ToString(), userAgent, "Create trip");
+            var log = WebApiLogHelper.NewLog("POST", "api/trips", trip?.ToString(), userAgent, "Create trip");
             var sw = Stopwatch.StartNew();
-            if (model == null) return BadRequest(new { success = false, message = "Trip info is required." });
+            if (trip == null) return BadRequest(new { success = false, message = "Trip info is required." });
 
             // Manual validation according to requirements
-            if (model.EventId <= 0) ModelState.AddModelError("EventId", "EventId is required.");
-            if (string.IsNullOrWhiteSpace(model.DepartureCity)) ModelState.AddModelError("DepartureCity", "DepartureCity is required.");
-            if (string.IsNullOrWhiteSpace(model.DepartureCountry)) ModelState.AddModelError("DepartureCountry", "DepartureCountry is required.");
-            if (string.IsNullOrWhiteSpace(model.ArrivalCity)) ModelState.AddModelError("ArrivalCity", "ArrivalCity is required.");
-            if (model.DurationDays < 0) ModelState.AddModelError("DurationDays", "DurationDays must be >= 0.");
-            if (model.DurationNights < 0) ModelState.AddModelError("DurationNights", "DurationNights must be >= 0.");
-            if (model.MaxGuests < 1) ModelState.AddModelError("MaxGuests", "MaxGuests must be >= 1.");
+            if (trip.EventId <= 0) ModelState.AddModelError("EventId", "EventId is required.");
+            if (string.IsNullOrWhiteSpace(trip.DepartureCity)) ModelState.AddModelError("DepartureCity", "DepartureCity is required.");
+            if (string.IsNullOrWhiteSpace(trip.DepartureCountry)) ModelState.AddModelError("DepartureCountry", "DepartureCountry is required.");
+            if (string.IsNullOrWhiteSpace(trip.ArrivalCity)) ModelState.AddModelError("ArrivalCity", "ArrivalCity is required.");
+            if (trip.DurationDays < 0) ModelState.AddModelError("DurationDays", "DurationDays must be >= 0.");
+            if (trip.DurationNights < 0) ModelState.AddModelError("DurationNights", "DurationNights must be >= 0.");
+            if (trip.MaxGuests < 1) ModelState.AddModelError("MaxGuests", "MaxGuests must be >= 1.");
 
             var validStatuses = new[] { "done", "cancelled", "booking", "started", "in_progress" };
-            if (!validStatuses.Contains(model.Status)) ModelState.AddModelError("Status", "Invalid status.");
+            if (!validStatuses.Contains(trip.Status)) ModelState.AddModelError("Status", "Invalid status.");
 
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             try
             {
-                var trip = new Trip 
-                {
-                    EventId = model.EventId,
-                    DepartureCity = model.DepartureCity,
-                    DepartureCountry = model.DepartureCountry,
-                    ArrivalCity = model.ArrivalCity,
-                    ArrivalCountry = model.ArrivalCountry,
-                    DurationDays = model.DurationDays,
-                    DurationNights = model.DurationNights,
-                    MaxGuests = model.MaxGuests,
-                    Status = model.Status
-                };
                 trip.CreationTime = DateTime.Now;
-                trip.LastModificationTime = DateTime.Now;
-                trip.IsDeleted = false;
                 await _unitOfWork.InsertAsync(trip);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
@@ -173,7 +158,6 @@ namespace AI_Integration.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(int id, [FromBody] Trip changes, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var userId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsedId) ? parsedId : 0;
             var log = WebApiLogHelper.NewLog("PUT", $"api/trips/{id}", changes?.ToString(), userAgent, "Update trip");
             var sw = Stopwatch.StartNew();
             if (changes == null) return BadRequest(new { success = false, message = "Trip info is required." });
@@ -194,7 +178,6 @@ namespace AI_Integration.Controllers
                 trip.Status = changes.Status ?? trip.Status;
 
                 trip.LastModificationTime = DateTime.Now;
-                trip.LastModification_User = userId;
 
                 _unitOfWork.Update(trip);
                 await _unitOfWork.SaveChangesAsync();
@@ -213,7 +196,6 @@ namespace AI_Integration.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var userId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsedId) ? parsedId : 0;
             var log = WebApiLogHelper.NewLog("DELETE", $"api/trips/{id}", "", userAgent, "Soft delete trip");
             var sw = Stopwatch.StartNew();
             try
@@ -223,7 +205,7 @@ namespace AI_Integration.Controllers
 
                 trip.IsDeleted = true;
                 trip.DeletionTime = DateTime.Now;
-                trip.Deletion_User = userId;
+
                 _unitOfWork.Update(trip);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();

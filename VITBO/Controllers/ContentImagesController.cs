@@ -21,7 +21,7 @@ namespace VITBO.Controllers
             ViewBag.ContentId = contentId;
             var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
             var userAgent = GetUserAgent() ?? string.Empty;
-            var list = await _mediaService.GetContentImagesAsync(contentId, token, userAgent);
+            var list = await _mediaService.GetContentImagesByContentIdAsync(contentId, token, userAgent);
             return View(list);
         }
 

@@ -7,7 +7,7 @@ namespace AI_Integration.DataAccess.Database.Models
 {
     public class Content
     {
-        public bool? IsDeleted { get; set; }
+        public bool? IsDeleted { get; set; } = false;
         public DateTime? DeletionDate { get; set; }
         public int Id { get; set; }
         public int LangID { get; set; }

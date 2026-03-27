@@ -9,7 +9,7 @@ namespace VITBO.Services
         private readonly IConfiguration _configuration;
         private readonly string _apiBase;
 
-        public UsersService(ApiService apiService,HttpService httpService,IConfiguration configuration)
+        public UsersService(HttpService httpService,IConfiguration configuration)
         {
             _httpService = httpService;
             _configuration = configuration;

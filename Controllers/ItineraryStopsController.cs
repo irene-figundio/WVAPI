@@ -1,15 +1,14 @@
-using AI_Integration.DataAccess.Database.Models;
-using AI_Integration.DataAccess.Database.Repositories.interfaces;
-using AI_Integration.Helpers;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
+using AI_Integration.DataAccess.Database.Models;
+using AI_Integration.DataAccess.Database.Repositories.interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using AI_Integration.Helpers;
 
 namespace AI_Integration.Controllers
 {
@@ -110,37 +109,35 @@ namespace AI_Integration.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] ItineraryStopDto model, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> Add([FromBody] ItineraryStopDto stop, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var userId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsedId) ? parsedId : 0;
-            var log = WebApiLogHelper.NewLog("POST", "api/itinerarystops", model?.ToString(), userAgent, "Create itinerary stop");
+            var log = WebApiLogHelper.NewLog("POST", "api/itinerarystops", stop?.ToString(), userAgent, "Create itinerary stop");
             var sw = Stopwatch.StartNew();
-            if (model == null) return BadRequest(new { success = false, message = "Itinerary stop info is required." });
+            if (stop == null) return BadRequest(new { success = false, message = "Itinerary stop info is required." });
 
-            if (model.DayId <= 0) ModelState.AddModelError("DayId", "DayId is required.");
-            if (string.IsNullOrWhiteSpace(model.Title)) ModelState.AddModelError("Title", "Title is required.");
+            if (stop.DayId <= 0) ModelState.AddModelError("DayId", "DayId is required.");
+            if (string.IsNullOrWhiteSpace(stop.Title)) ModelState.AddModelError("Title", "Title is required.");
 
             var validTypes = new[] { "activity", "meal", "transfer", "experience" };
-            if (!validTypes.Contains(model.Type)) ModelState.AddModelError("Type", "Invalid type.");
+            if (!validTypes.Contains(stop.Type)) ModelState.AddModelError("Type", "Invalid type.");
 
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             try
             {
-                var stop = new ItineraryStop
+                var sstop = new ItineraryStop
                 {
-                    DayId = model.DayId,
-                    Time = model.Time,
-                    Title = model.Title,
-                    Description = model.Description,
-                    Type = model.Type,
-                    OrderIndex = model.OrderIndex
+                    DayId = stop.DayId,
+                    Time = stop.Time,
+                    Title = stop.Title,
+                    Description = stop.Description,
+                    Type = stop.Type,
+                    OrderIndex = stop.OrderIndex
                 };
-                stop.CreationTime = DateTime.Now;
-                stop.Creation_User = userId;
-                stop.LastModificationTime = DateTime.Now;
-                stop.LastModification_User = userId;
-                await _unitOfWork.InsertAsync(stop);
+
+
+                sstop.CreationTime = DateTime.Now;
+                await _unitOfWork.InsertAsync(sstop);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
@@ -157,7 +154,6 @@ namespace AI_Integration.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(int id, [FromBody] ItineraryStop changes, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var userId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsedId) ? parsedId : 0;
             var log = WebApiLogHelper.NewLog("PUT", $"api/itinerarystops/{id}", changes?.ToString(), userAgent, "Update itinerary stop");
             var sw = Stopwatch.StartNew();
             if (changes == null) return BadRequest(new { success = false, message = "Itinerary stop info is required." });
@@ -175,7 +171,6 @@ namespace AI_Integration.Controllers
                 stop.OrderIndex = changes.OrderIndex;
 
                 stop.LastModificationTime = DateTime.Now;
-                stop.LastModification_User = userId;
 
                 _unitOfWork.Update(stop);
                 await _unitOfWork.SaveChangesAsync();
@@ -194,7 +189,6 @@ namespace AI_Integration.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var userId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsedId) ? parsedId : 0;
             var log = WebApiLogHelper.NewLog("DELETE", $"api/itinerarystops/{id}", "", userAgent, "Soft delete itinerary stop");
             var sw = Stopwatch.StartNew();
             try
@@ -204,7 +198,6 @@ namespace AI_Integration.Controllers
 
                 stop.IsDeleted = true;
                 stop.DeletionTime = DateTime.Now;
-                stop.Deletion_User = userId;
 
                 _unitOfWork.Update(stop);
                 await _unitOfWork.SaveChangesAsync();

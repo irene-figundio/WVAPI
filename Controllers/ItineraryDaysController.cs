@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AI_Integration.Helpers;
-using System.Security.Claims;
 
 namespace AI_Integration.Controllers
 {
@@ -23,7 +22,7 @@ namespace AI_Integration.Controllers
         public ItineraryDaysController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-        }
+        }      
 
         public sealed class ItineraryDayDto
         {
@@ -104,39 +103,35 @@ namespace AI_Integration.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] ItineraryDayDto model, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> Add([FromBody] ItineraryDayDto day, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var log = WebApiLogHelper.NewLog("POST", "api/itinerarydays", model?.ToString(), userAgent, "Create itinerary day");
-            var sw = Stopwatch.StartNew();
-            if (model == null) return BadRequest(new { success = false, message = "Itinerary day info is required." });
 
-            if (model.TripId <= 0) ModelState.AddModelError("TripId", "TripId is required.");
-            if (model.DayNumber <= 0) ModelState.AddModelError("DayNumber", "DayNumber must be > 0.");
-            if (string.IsNullOrWhiteSpace(model.Title)) ModelState.AddModelError("Title", "Title is required.");
-            var userId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsedId) ? parsedId : 0;
+            var log = WebApiLogHelper.NewLog("POST", "api/itinerarydays", day?.ToString(), userAgent, "Create itinerary day");
+            var sw = Stopwatch.StartNew();
+            if (day == null) return BadRequest(new { success = false, message = "Itinerary day info is required." });
+
+            if (day.TripId <= 0) ModelState.AddModelError("TripId", "TripId is required.");
+            if (day.DayNumber <= 0) ModelState.AddModelError("DayNumber", "DayNumber must be > 0.");
+            if (string.IsNullOrWhiteSpace(day.Title)) ModelState.AddModelError("Title", "Title is required.");
+
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             try
             {
-                var day = new ItineraryDay
-                { 
-                    TripId = model.TripId,
-                    DayNumber = model.DayNumber,
-                    Title = model.Title,
-                    Description = model.Description
+                var dad = new ItineraryDay
+                {
+                    DayNumber = day.DayNumber,
+                    Title = day.Title,
+                    TripId = day.TripId,
+                    Description = day.Description
                 };
-
-                day.CreationTime = DateTime.Now;
-                day.Creation_User = userId;
-                day.LastModificationTime = DateTime.Now;
-                day.LastModification_User = userId;
-                day.IsDeleted = false;
-
-                await _unitOfWork.InsertAsync(day);
+                
+                dad.CreationTime = DateTime.Now;
+                await _unitOfWork.InsertAsync(dad);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                return Ok(new { success = true, id = day.Id });
+                return Ok(new { success = true, id = dad.Id });
             }
             catch (Exception ex)
             {
@@ -164,7 +159,6 @@ namespace AI_Integration.Controllers
                 day.Description = changes.Description ?? day.Description;
 
                 day.LastModificationTime = DateTime.Now;
-
                 _unitOfWork.Update(day);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
@@ -205,5 +199,8 @@ namespace AI_Integration.Controllers
                 return StatusCode(500, new { success = false, message = $"Error: {ex.Message}" });
             }
         }
+
+       
     }
+   
 }

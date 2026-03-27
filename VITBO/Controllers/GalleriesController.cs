@@ -21,8 +21,10 @@ namespace VITBO.Controllers
             ViewBag.EventId = eventId;
             var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
             var userAgent = GetUserAgent() ?? string.Empty;
-            var list = await _mediaService.GetGalleriesAsync(eventId, token, userAgent);
-            return View(list);
+            var list = await _mediaService.GetGalleriesByEventIdAsync(eventId, token, userAgent);
+            var t = new List<GalleryDto>();
+            t.Add(list);
+            return View(t);
         }
 
         [HttpGet]

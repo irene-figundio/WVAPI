@@ -1,15 +1,14 @@
-using AI_Integration.DataAccess.Database.Models;
-using AI_Integration.DataAccess.Database.Repositories.interfaces;
-using AI_Integration.Helpers;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
+using AI_Integration.DataAccess.Database.Models;
+using AI_Integration.DataAccess.Database.Repositories.interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using AI_Integration.Helpers;
 
 namespace AI_Integration.Controllers
 {
@@ -113,34 +112,20 @@ namespace AI_Integration.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] StayDto model, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> Add([FromBody] Stay stay, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var userId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsedId) ? parsedId : 0;
-            var log = WebApiLogHelper.NewLog("POST", "api/stays", model?.ToString(), userAgent, "Create stay");
+            var log = WebApiLogHelper.NewLog("POST", "api/stays", stay?.ToString(), userAgent, "Create stay");
             var sw = Stopwatch.StartNew();
-            if (model == null) return BadRequest(new { success = false, message = "Stay info is required." });
+            if (stay == null) return BadRequest(new { success = false, message = "Stay info is required." });
 
-            if (model.TripId <= 0) ModelState.AddModelError("TripId", "TripId is required.");
-            if (string.IsNullOrWhiteSpace(model.Name)) ModelState.AddModelError("Name", "Name is required.");
+            if (stay.TripId <= 0) ModelState.AddModelError("TripId", "TripId is required.");
+            if (string.IsNullOrWhiteSpace(stay.Name)) ModelState.AddModelError("Name", "Name is required.");
 
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             try
             {
-                var stay = new Stay
-                {
-                    TripId = model.TripId,
-                    Name = model.Name,
-                    Description = model.Description,
-                    Image = model.Image,
-                    Location = model.Location,
-                    OrderIndex = model.OrderIndex,
-                    ItineraryDayId = model.ItineraryDayId
-                };
                 stay.CreationTime = DateTime.Now;
-                stay.Creation_User = userId;
-                stay.LastModificationTime = DateTime.Now;
-                stay.LastModification_User = userId;
                 await _unitOfWork.InsertAsync(stay);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
@@ -158,7 +143,6 @@ namespace AI_Integration.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(int id, [FromBody] Stay changes, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var userId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsedId) ? parsedId : 0;
             var log = WebApiLogHelper.NewLog("PUT", $"api/stays/{id}", changes?.ToString(), userAgent, "Update stay");
             var sw = Stopwatch.StartNew();
             if (changes == null) return BadRequest(new { success = false, message = "Stay info is required." });
@@ -177,7 +161,6 @@ namespace AI_Integration.Controllers
                 stay.ItineraryDayId = changes.ItineraryDayId;
 
                 stay.LastModificationTime = DateTime.Now;
-                stay.LastModification_User = userId;
 
                 _unitOfWork.Update(stay);
                 await _unitOfWork.SaveChangesAsync();
@@ -196,7 +179,6 @@ namespace AI_Integration.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
-            var userId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsedId) ? parsedId : 0;
             var log = WebApiLogHelper.NewLog("DELETE", $"api/stays/{id}", "", userAgent, "Soft delete stay");
             var sw = Stopwatch.StartNew();
             try
@@ -206,7 +188,6 @@ namespace AI_Integration.Controllers
 
                 stay.IsDeleted = true;
                 stay.DeletionTime = DateTime.Now;
-                stay.Deletion_User = userId;
 
                 _unitOfWork.Update(stay);
                 await _unitOfWork.SaveChangesAsync();

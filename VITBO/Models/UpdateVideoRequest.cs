@@ -8,6 +8,6 @@ namespace VITBO.Models
         public bool IsLandscape { get; set; } = false;
         public int? Play_Priority { get; set; }
         public int? ID_Session { get; set; }
-        public bool? IsDeleted { get; set; } = false;
+        public bool? IsDeleted { get; set; } = false; 
     }
 }

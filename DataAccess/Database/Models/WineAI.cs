@@ -2,7 +2,7 @@
 {
     public class WineAI
     {
-        public bool? IsDeleted { get; set; }
+        public bool? IsDeleted { get; set; } = false;
         public DateTime? DeletionDate { get; set; }
         public int ID { get; set; }
         public DateTime CreationDate { get; set; }
