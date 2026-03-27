@@ -143,6 +143,9 @@ namespace VITBO.Controllers
             {
                 return NotFound();
             }
+            var categories = await _contentsService.GetContentCategoriesAsync(langId, token, userAgent);
+            ViewBag.Categories = categories;
+
             var model = new EditContentRequest
             {
                 Id = contentDto.Id,

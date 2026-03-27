@@ -24,9 +24,10 @@
                 <thead class="table-light">
                     <tr>
                         <th scope="col" class="ps-4" style="width: 5%">ID</th>
-                        <th scope="col" style="width: 30%">Name</th>
-                        <th scope="col" style="width: 30%">Email</th>
-                        <th scope="col" class="text-end pe-4" style="width: 35%">Actions</th>
+                        <th scope="col" style="width: 15%">Photo</th>
+                        <th scope="col" style="width: 25%">Name</th>
+                        <th scope="col" style="width: 25%">Email</th>
+                        <th scope="col" class="text-end pe-4" style="width: 30%">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -36,6 +37,18 @@
                         {
                             <tr>
                                 <td class="ps-4 text-muted fw-bold">#@expert.Id</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(expert.PhotoUrl))
+                                    {
+                                        <img src="@expert.PhotoUrl" alt="@expert.Name" style="height: 50px; width: 50px; object-fit: cover;" class="rounded-circle shadow-sm" />
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light text-secondary rounded-circle d-flex justify-content-center align-items-center shadow-sm" style="height: 50px; width: 50px;">
+                                            <i class="bi bi-person"></i>
+                                        </div>
+                                    }
+                                </td>
                                 <td><span class="d-block fw-bold text-dark">@expert.Name</span></td>
                                 <td>@expert.Email</td>
                                 <td class="text-end pe-4">

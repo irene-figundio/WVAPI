@@ -55,5 +55,14 @@ namespace VITBO.Services
             var endpoint = $"{apiBase}Contents/{id}";
             return await _httpService.SendHttpRequestAsync(HttpMethod.Delete, endpoint, token, userAgent, null) is HttpResponseMessage response && response.IsSuccessStatusCode;
         }
+
+        public async Task<List<ContentCategoryDto>> GetContentCategoriesAsync(int langId, string token, string userAgent)
+        {
+            var apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
+            var endpoint = $"{apiBase}/api/contentcategories?langId={langId}";
+            var result = await _httpService.SendHttpRequestAsync(HttpMethod.Get, endpoint, token, userAgent, null);
+            var list = await _httpService.GetBodyFromHttpResponseAsync<List<ContentCategoryDto>>(result);
+            return list ?? new List<ContentCategoryDto>();
+        }
     }
 }

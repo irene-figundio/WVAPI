@@ -143,5 +143,32 @@ namespace VITBO.Services
             var endpoint = $"{apiBase}/api/eventexperts/{id}";
             return await _httpService.SendHttpRequestAsync(HttpMethod.Delete, endpoint, token, userAgent, null) is HttpResponseMessage response && response.IsSuccessStatusCode;
         }
+
+        public async Task<List<ContentLinkDto>> GetContentLinksAsync(int? contentId, string token, string userAgent)
+        {
+            var apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
+            var endpoint = $"{apiBase}/api/contentlinks";
+            var result = await _httpService.SendHttpRequestAsync(HttpMethod.Get, endpoint, token, userAgent, null);
+            var list = await _httpService.GetBodyFromHttpResponseAsync<List<ContentLinkDto>>(result);
+            if (contentId.HasValue) {
+                return list?.Where(x => x.ContentId == contentId.Value).ToList() ?? new List<ContentLinkDto>();
+            }
+            return list ?? new List<ContentLinkDto>();
+        }
+
+        public async Task<bool> CreateContentLinkAsync(ContentLinkDto model, string token, string userAgent)
+        {
+            var apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
+            var endpoint = $"{apiBase}/api/contentlinks";
+            var jsonContent = JsonSerializer.Serialize(model);
+            return await _httpService.SendHttpRequestAsync(HttpMethod.Post, endpoint, token, userAgent, jsonContent) is HttpResponseMessage response && response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> DeleteContentLinkAsync(int id, string token, string userAgent)
+        {
+            var apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
+            var endpoint = $"{apiBase}/api/contentlinks/{id}";
+            return await _httpService.SendHttpRequestAsync(HttpMethod.Delete, endpoint, token, userAgent, null) is HttpResponseMessage response && response.IsSuccessStatusCode;
+        }
     }
 }

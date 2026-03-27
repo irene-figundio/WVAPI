@@ -45,8 +45,16 @@
 
                         <div class="mb-3">
                             <label asp-for="PhotoUrl" class="form-label fw-bold small text-muted">Photo URL</label>
-                            <input asp-for="PhotoUrl" class="form-control" />
-                            <span asp-validation-for="PhotoUrl" class="text-danger small"></span>
+                            <div class="d-flex align-items-center gap-3">
+                                @if (!string.IsNullOrEmpty(Model.PhotoUrl))
+                                {
+                                    <img src="@Model.PhotoUrl" alt="@Model.Name" style="height: 60px; width: 60px; object-fit: cover;" class="rounded-circle shadow-sm" />
+                                }
+                                <div class="flex-grow-1">
+                                    <input asp-for="PhotoUrl" class="form-control" />
+                                    <span asp-validation-for="PhotoUrl" class="text-danger small"></span>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="mb-4">

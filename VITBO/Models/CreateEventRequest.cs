@@ -19,6 +19,7 @@ namespace VITBO.Models
         public string? Location { get; set; }
         [Required]
         public string? CoverImage { get; set; }
+        public string? HeroImage { get; set; }
 
        public string Organizer { get; set; } = "Vitinerario®";
 
