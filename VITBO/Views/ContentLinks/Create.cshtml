@@ -1,0 +1,69 @@
+@model VITBO.Models.ContentLinkDto
+
+@{
+    ViewData["Title"] = "Add Content Link";
+}
+
+<div class="container-fluid px-4 py-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col">
+            <h2 class="h3 mb-0 text-gray-800">
+                <i class="bi bi-link-45deg text-danger me-2"></i> @(Model.ContentId > 0 ? $"Add Link to Content #{Model.ContentId}" : "Add Content Link")
+            </h2>
+        </div>
+        <div class="col-auto">
+            <a asp-action="Index" asp-route-contentId="@(Model.ContentId > 0 ? Model.ContentId : (int?)null)" class="btn btn-outline-secondary btn-sm shadow-sm">
+                <i class="bi bi-arrow-left me-1"></i> Back to Links
+            </a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="m-0 font-weight-bold text-danger">Link Details</h6>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+                        @if (Model.ContentId > 0)
+                        {
+                            <input type="hidden" asp-for="ContentId" />
+                        }
+                        else
+                        {
+                            <div class="mb-3">
+                                <label asp-for="ContentId" class="form-label fw-bold small text-muted">Content ID</label>
+                                <input asp-for="ContentId" class="form-control" type="number" required />
+                                <span asp-validation-for="ContentId" class="text-danger small"></span>
+                            </div>
+                        }
+                        <input type="hidden" asp-for="LangID" />
+
+                        <div class="mb-3">
+                            <label asp-for="LinkUrl" class="form-label fw-bold small text-muted">URL</label>
+                            <input asp-for="LinkUrl" class="form-control" required placeholder="https://..." />
+                            <span asp-validation-for="LinkUrl" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label fw-bold small text-muted">Description (Optional)</label>
+                            <input asp-for="Description" class="form-control" />
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-action="Index" asp-route-contentId="@Model.ContentId" class="btn btn-light px-4">Cancel</a>
+                            <button type="submit" class="btn btn-danger text-white px-4">
+                                <i class="bi bi-save me-1"></i> Save Link
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -26,9 +26,12 @@ namespace VITBO.Controllers
         }
 
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create([FromQuery] int langId = 1)
         {
-            return View(new CreateEventRequest());
+            string sessionToken = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            string userAgent = GetUserAgent() ?? string.Empty;
+            ViewBag.Categories = await _eventsService.GetEventCategoriesAsync(langId, sessionToken, userAgent);
+            return View(new CreateEventRequest { LangID = langId });
         }
 
         [HttpPost]
@@ -51,7 +54,6 @@ namespace VITBO.Controllers
         }
 
         [HttpGet]
-        
         public async Task<IActionResult> Edit(int id, [FromQuery] int langId = 1)
         {
             string sessionToken = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
@@ -61,7 +63,32 @@ namespace VITBO.Controllers
             {
                 return NotFound();
             }
-            return View(eventDto);
+
+            ViewBag.Categories = await _eventsService.GetEventCategoriesAsync(langId, sessionToken, userAgent);
+
+            var model = new UpdateEventRequest
+            {
+                id = eventDto.Id,
+                Title = eventDto.Title,
+                Description = eventDto.Description,
+                EventDate = eventDto.EventDate,
+                EndDate = eventDto.EndDate,
+                EndTime = eventDto.EndTime,
+                CoverImage = eventDto.CoverImage,
+                BookingEndDate = eventDto.BookingEndDate,
+                Location = eventDto.Location,
+                Organizer = eventDto.Organizer,
+                ContactInfo = eventDto.ContactInfo,
+                Price = eventDto.Price,
+                IsOnline = eventDto.IsOnline,
+                LangID = eventDto.LangID,
+                Subtitle = eventDto.Subtitle,
+                CategoryId = eventDto.CategoryId,
+                Coordinates = eventDto.Coordinates,
+                HeroImage = eventDto.HeroImage
+            };
+
+            return View(model);
         }
 
         [HttpPost]

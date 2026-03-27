@@ -23,5 +23,9 @@ namespace VITBO.Services.Interfaces
         Task<List<EventExpertDto>> GetEventExpertsAsync(int eventId, string token, string userAgent);
         Task<bool> AddEventExpertAsync(EventExpertDto model, string token, string userAgent);
         Task<bool> RemoveEventExpertAsync(int id, string token, string userAgent);
+
+        Task<List<ContentLinkDto>> GetContentLinksAsync(int? contentId, string token, string userAgent);
+        Task<bool> CreateContentLinkAsync(ContentLinkDto model, string token, string userAgent);
+        Task<bool> DeleteContentLinkAsync(int id, string token, string userAgent);
     }
 }

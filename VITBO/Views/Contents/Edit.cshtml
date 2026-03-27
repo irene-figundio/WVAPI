@@ -52,9 +52,21 @@
                 </div>
 
                 <div class="col-md-4 form-floating mb-3">
-                    <input asp-for="CategoryId" class="form-control" type="number" placeholder="Category ID" />
-                    <label asp-for="CategoryId" class="ms-2">Category ID</label>
+                    <select asp-for="CategoryId" class="form-select">
+                        <option value="">-- Select Category --</option>
+                        @if (ViewBag.Categories != null)
+                        {
+                            foreach (var cat in (List<VITBO.Models.ContentCategoryDto>)ViewBag.Categories)
+                            {
+                                <option value="@cat.Id">@cat.Name</option>
+                            }
+                        }
+                    </select>
+                    <label asp-for="CategoryId" class="ms-2">Category</label>
                     <span asp-validation-for="CategoryId" class="text-danger"></span>
+                    <div class="form-text text-muted small mt-1">
+                        <i class="bi bi-info-circle"></i> Select the primary grouping context for this content to help users find related items.
+                    </div>
                 </div>
 
                 <div class="col-md-4 form-floating mb-3">

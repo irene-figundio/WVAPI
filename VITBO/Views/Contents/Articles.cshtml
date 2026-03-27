@@ -65,6 +65,7 @@
                                     <a asp-action="Edit" asp-route-id="@article.Id" class="btn btn-sm btn-outline-primary mb-1"><i class="bi bi-pencil"></i></a>
                                     <a asp-controller="ContentImages" asp-action="Index" asp-route-contentId="@article.Id" class="btn btn-sm btn-outline-info mb-1" title="Manage Images"><i class="bi bi-images"></i></a>
                                     <a asp-controller="ContentExperts" asp-action="Index" asp-route-contentId="@article.Id" class="btn btn-sm btn-outline-secondary mb-1" title="Manage Experts"><i class="bi bi-person-badge"></i></a>
+                                    <a asp-controller="ContentLinks" asp-action="Index" asp-route-contentId="@article.Id" class="btn btn-sm btn-outline-dark mb-1" title="Manage Links"><i class="bi bi-link-45deg"></i> Links</a>
                                     <form asp-action="Delete" asp-route-id="@article.Id" asp-route-contentType="Article" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this article?');">
                                         <button type="submit" class="btn btn-sm btn-outline-danger mb-1"><i class="bi bi-trash"></i></button>
                                     </form>
