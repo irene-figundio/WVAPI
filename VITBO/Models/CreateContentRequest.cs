@@ -13,7 +13,7 @@ namespace VITBO.Models
         public DateTime PublishDate { get; set; } = DateTime.Now;
 
         [Required]
-        public string ContentType { get; set; } = default!;
+        public string ContentType { get; set; } = "blog";
 
         public bool IsPublished { get; set; } = true;
 

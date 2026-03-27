@@ -1,12 +1,13 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using AI_Integration.DataAccess;
+﻿using AI_Integration.DataAccess;
 using AI_Integration.DataAccess.Database.Models;
 using AI_Integration.DataAccess.Database.Repositories.interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore; // CountAsync, ToListAsync
+using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace AI_Integration.Controllers
 {
@@ -93,6 +94,7 @@ namespace AI_Integration.Controllers
         public async Task<IActionResult> Create([FromBody] CreateUserRequest req,
             [FromHeader(Name = "User-Agent")] string userAgent)
         {
+            var user_Id = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsedId) ? parsedId : 0;
             var log = new WebAPILog
             {
                 DateTimeStamp = DateTime.Now,
@@ -139,6 +141,9 @@ namespace AI_Integration.Controllers
                 SuperAdmin = req.SuperAdmin,
                 VerificationToken = Guid.NewGuid().ToString("N")
             };
+            user.CreationUserId = user_Id;
+            user.LastModificationTime = DateTime.Now;
+            user.LastModificationUserId = user_Id;
 
             await _uow.InsertAsync(user);
             log.ResponseCode = 201; log.ResponseMessage = "Created";
@@ -153,6 +158,7 @@ namespace AI_Integration.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] UpdateUserRequest req,
             [FromHeader(Name = "User-Agent")] string userAgent)
         {
+            var userId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsedId) ? parsedId : 0;
             var log = new WebAPILog
             {
                 DateTimeStamp = DateTime.Now,
@@ -181,7 +187,7 @@ namespace AI_Integration.Controllers
             }
 
             user.LastModificationTime = DateTime.Now;
-            // user.LastModification_User = <callerId se disponibile>
+            user.LastModificationUserId = userId;
 
             _uow.Update(user);
 
@@ -197,6 +203,7 @@ namespace AI_Integration.Controllers
         public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordRequest req,
             [FromHeader(Name = "User-Agent")] string userAgent)
         {
+            var userId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsedId) ? parsedId : 0;
             var log = new WebAPILog
             {
                 DateTimeStamp = DateTime.Now,
@@ -221,6 +228,8 @@ namespace AI_Integration.Controllers
 
             user.Password = BCrypt.Net.BCrypt.HashPassword(req.NewPassword);
             user.LastPasswordModificationTime = DateTime.Now;
+            user.LastModificationTime = DateTime.Now;
+            user.LastModificationUserId = userId;
 
             _uow.Update(user);
             log.ResponseCode = 200; log.ResponseMessage = "OK";
@@ -235,6 +244,7 @@ namespace AI_Integration.Controllers
         public async Task<IActionResult> SetStatus(int id, [FromBody] SetStatusRequest req,
             [FromHeader(Name = "User-Agent")] string userAgent)
         {
+            var userId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsedId) ? parsedId : 0;
             var log = new WebAPILog
             {
                 DateTimeStamp = DateTime.Now,
@@ -256,6 +266,8 @@ namespace AI_Integration.Controllers
 
             user.StatusId = req.StatusId;
             user.StatusTime = DateTime.Now;
+            user.LastModificationTime = DateTime.Now;
+            user.LastModificationUserId = userId;
 
             _uow.Update(user);
             log.ResponseCode = 200; log.ResponseMessage = "OK";
@@ -270,6 +282,7 @@ namespace AI_Integration.Controllers
         public async Task<IActionResult> SoftDelete(int id,
             [FromHeader(Name = "User-Agent")] string userAgent)
         {
+            var userId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsedId) ? parsedId : 0;
             var log = new WebAPILog
             {
                 DateTimeStamp = DateTime.Now,
@@ -291,7 +304,7 @@ namespace AI_Integration.Controllers
 
             user.IsDeleted = true;
             user.DeletionTime = DateTime.Now;
-            // user.Deletion_User = <callerId se disponibile>
+            user.DeletionUserId = userId;
 
             _uow.Update(user);
             log.ResponseCode = 204; 

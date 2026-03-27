@@ -1,15 +1,16 @@
+using AI_Integration.DataAccess;
+using AI_Integration.DataAccess.Database.Models;
+using AI_Integration.DataAccess.Database.Repositories.interfaces;
+using AI_Integration.Helpers;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using AI_Integration.DataAccess;
-using AI_Integration.DataAccess.Database.Models;
-using AI_Integration.DataAccess.Database.Repositories.interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using AI_Integration.Helpers;
 
 namespace AI_Integration.Controllers
 {
@@ -84,7 +85,7 @@ namespace AI_Integration.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                item.CreatedAt = DateTime.Now;
+                item.CreatedAt = DateTime.Now;              
                 await _unitOfWork.InsertAsync(item);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();

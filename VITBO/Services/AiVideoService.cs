@@ -7,17 +7,18 @@ namespace VITBO.Services
     {
         private readonly HttpService _httpService;
         private readonly IConfiguration _configuration;
+        private readonly string _url;
 
         public AiVideoService(HttpService httpService, IConfiguration configuration)
         {
             _httpService = httpService;
             _configuration = configuration;
+                _url = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
         }
 
         public async Task<bool> CreateVideoAsync(CreateVideoRequest request, string sessionToken, string userAgent, CancellationToken ct)
         {
-            var apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
-            var endpoint = $"{apiBase}Video/upload";
+            var endpoint = $"{_url}/Video/upload";
 
             using var content = new MultipartFormDataContent();
 
@@ -55,8 +56,7 @@ namespace VITBO.Services
 
         public async Task<bool> UpdateVideoAsync(int id, UpdateVideoRequest request, string sessionToken, string userAgent, CancellationToken ct)
         {
-            var apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
-            var endpoint = $"{apiBase}Video/{id}";
+            var endpoint = $"{_url}/Video/{id}";
 
             var response = await _httpService.SendHttpRequestAsync(HttpMethod.Put, endpoint, sessionToken, request, userAgent, ct);
 
@@ -65,8 +65,7 @@ namespace VITBO.Services
 
         public async Task<bool> DeleteVideoAsync(int id, string sessionToken, string userAgent, CancellationToken ct)
         {
-            var apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
-            var endpoint = $"{apiBase}Video/{id}";
+            var endpoint = $"{_url}/Video/{id}";
 
             var payload = new { IsDeleted = true };
             var response = await _httpService.SendHttpRequestAsync(HttpMethod.Put, endpoint, sessionToken, payload, userAgent, ct);
@@ -76,8 +75,7 @@ namespace VITBO.Services
 
         public async Task<PagedResult<VideoListItemDto>> GetVideosAsync(string? query, int page, string sessionToken, string userAgent, CancellationToken ct)
         {
-            var apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
-            var endpoint = $"{apiBase}Video/all";
+            var endpoint = $"{_url}/Video/all";
 
             // Pass the session token and user agent as requested
             var response = await _httpService.SendHttpRequestAsync<object>(HttpMethod.Get, endpoint, sessionToken, null, userAgent, ct);

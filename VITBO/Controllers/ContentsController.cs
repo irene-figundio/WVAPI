@@ -21,7 +21,7 @@ namespace VITBO.Controllers
             ViewData["CurrentLangId"] = langId;
             var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
             var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
-            var result = await _contentsService.GetContentsByTypeAsync("Article", langId, token, userAgent);
+            var result = await _contentsService.GetContentsByTypeAsync("blog", langId, token, userAgent);
             return View(result);
         }
 
@@ -84,18 +84,19 @@ namespace VITBO.Controllers
         [HttpGet]
         public IActionResult CreateArticle()
         {
-            return View(new CreateContentRequest { ContentType = "Article" });
+            return View(new CreateContentRequest { ContentType = "blog" });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateArticle(CreateContentRequest model)
         {
+            model.ContentType = "blog";
             if (ModelState.IsValid)
             {
                 var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
                 var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
-                model.ContentType = "blog";
+                
                 var success = await _contentsService.CreateContent(model, token, userAgent);
                 if (success)
                 {
@@ -109,19 +110,20 @@ namespace VITBO.Controllers
         [HttpGet]
         public IActionResult CreateNews()
         {
-            return View(new CreateContentRequest { ContentType = "News" });
+            return View(new CreateContentRequest { ContentType = "news" });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateNewsAsync(CreateContentRequest model)
         {
-     
+            model.ContentType = "news";
+
             if (ModelState.IsValid)
             {
                 var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
                                 var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
-                model.ContentType = "news";
+               
                 var success = await _contentsService.CreateContent(model, token, userAgent);
                 if (success)
                 {
