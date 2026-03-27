@@ -46,8 +46,6 @@ builder.Services.AddHttpClient("HttpClient", client =>
     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     client.DefaultRequestHeaders.Add("User-Agent", "BackOffice-App");
 });
-//builder.Services.AddHttpClient<VITBO.Services.ApiService>();
-builder.Services.AddScoped<VITBO.Services.ApiService>();
 builder.Services.AddScoped<VITBO.Services.Interfaces.IAuthService, VITBO.Services.AuthService>();
 builder.Services.AddScoped<VITBO.Services.Interfaces.IUsersService, VITBO.Services.UsersService>();
 builder.Services.AddScoped<VITBO.Services.Interfaces.IAiVideoService, VITBO.Services.AiVideoService>();

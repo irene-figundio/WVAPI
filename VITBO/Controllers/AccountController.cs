@@ -13,12 +13,16 @@ namespace VITBO.Controllers
     public class AccountController : Controller
     {
         private readonly IAuthService _authService;
-        private readonly HttpService _httpService;  
+        private readonly HttpService _httpService;
+        private IConfiguration _configuration;
+        private readonly string _apiBaseUrl;
 
-        public AccountController(IAuthService authService, HttpService httpService)
+        public AccountController(IAuthService authService, HttpService httpService,IConfiguration configuration)
         {
             _authService = authService;
             _httpService = httpService;
+            _configuration = configuration;
+            _apiBaseUrl = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
         }
 
         [HttpGet]
@@ -39,7 +43,7 @@ namespace VITBO.Controllers
             Password = model.Password
         };
 
-        var response = await _httpService.SendHttpRequestAsync(HttpMethod.Post, "auth/login", null, requestBody, userAgent: GetUserAgent());
+        var response = await _httpService.SendHttpRequestAsync(HttpMethod.Post, $"{_apiBaseUrl}auth/login", null, requestBody, userAgent: GetUserAgent());
 
 
         var (isValid, error) = this.ValidateHttpResponse(

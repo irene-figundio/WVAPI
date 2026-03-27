@@ -10,6 +10,7 @@ namespace VITBO.Services
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
 
+
         public AuthService(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _httpClientFactory = httpClientFactory;
@@ -25,7 +26,7 @@ namespace VITBO.Services
             var loginData = $"{{ \"username\" : {model.Username},  \"password \" : {model.Password} }}";
             var content = new StringContent(JsonSerializer.Serialize(loginData), Encoding.UTF8, "application/json");
 
-            var response = await client.PostAsync($"{client.BaseAddress}Auth/login", content);
+            var response = await client.PostAsync($"{client.BaseAddress}/Auth/login", content);
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
