@@ -1,12 +1,13 @@
-﻿using System;
+﻿using Abp.Collections.Extensions;
+using AI_Integration.DataAccess.Database.Models;
+using AI_Integration.DataAccess.Database.Repositories.interfaces;
+using Microsoft.Extensions.FileSystemGlobbing;
+using Microsoft.IdentityModel.Tokens;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
-using Abp.Collections.Extensions;
-using AI_Integration.DataAccess.Database.Repositories.interfaces;
-using Microsoft.Extensions.FileSystemGlobbing;
-using Microsoft.IdentityModel.Tokens;
 
 namespace AI_Integration.Helpers
 {
@@ -117,6 +118,21 @@ namespace AI_Integration.Helpers
                 return false;
             }
 
+        }
+
+        public int? GetUserIdFromToken(ClaimsPrincipal user)
+        {
+            var result = user.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? user.FindFirst("sub")?.Value
+                ?? user.FindFirst("user_id")?.Value
+                ?? user.FindFirst("id")?.Value;
+
+            if (int.TryParse(result, out int userId))
+            {
+                return userId;
+            }
+
+            return null;
         }
     }
 }

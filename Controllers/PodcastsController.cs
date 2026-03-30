@@ -32,7 +32,7 @@ namespace AI_Integration.Controllers
             var sw = Stopwatch.StartNew();
             try
             {
-                var podcasts = await _unitOfWork.Query<Podcast>()
+                var podcasts = await _unitOfWork.Query<Podcast>().Where(e => e.IsDeleted != true)
                     .Where(p => p.LangID == langId)
                     .OrderByDescending(p => p.PublishDate)
                     .ToListAsync();
@@ -55,7 +55,7 @@ namespace AI_Integration.Controllers
             var sw = Stopwatch.StartNew();
             try
             {
-                var podcast = await _unitOfWork.Query<Podcast>()
+                var podcast = await _unitOfWork.Query<Podcast>().Where(e => e.IsDeleted != true)
                     .Where(p => p.Id == id && p.LangID == langId)
                     .FirstOrDefaultAsync();
                 if (podcast == null)
@@ -142,7 +142,9 @@ namespace AI_Integration.Controllers
             {
                 var podcast = await _unitOfWork.GetByIdAsync<Podcast>(id);
                 if (podcast == null) return NotFound(new { success = false, message = "Podcast not found." });
-                _unitOfWork.Remove(podcast);
+                podcast.IsDeleted = true;
+                podcast.DeletionDate = DateTime.Now;
+                _unitOfWork.Update(podcast);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogNoContentAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");

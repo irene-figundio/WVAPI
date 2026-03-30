@@ -152,24 +152,24 @@ provider.Mappings[".mp4"] = "video/mp4";
 
 
 
-app.UseStaticFiles(new StaticFileOptions
-{
-    RequestPath = "/Media/portrait",
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(app.Environment.WebRootPath, "MediaStore", "Portrait")
-    ),
-    ContentTypeProvider = provider
-});
+//app.UseStaticFiles(new StaticFileOptions
+//{
+//    RequestPath = "/Media/portrait",
+//    FileProvider = new PhysicalFileProvider(
+//        Path.Combine(app.Environment.WebRootPath, "MediaStore", "Portrait")
+//    ),
+//    ContentTypeProvider = provider
+//});
 
-// /Media/landscape -> wwwroot/MediaStore/Landscape
-app.UseStaticFiles(new StaticFileOptions
-{
-    RequestPath = "/Media/landscape",
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(app.Environment.WebRootPath, "MediaStore", "Landscape")
-    ),
-    ContentTypeProvider = provider
-}); 
+//// /Media/landscape -> wwwroot/MediaStore/Landscape
+//app.UseStaticFiles(new StaticFileOptions
+//{
+//    RequestPath = "/Media/landscape",
+//    FileProvider = new PhysicalFileProvider(
+//        Path.Combine(app.Environment.WebRootPath, "MediaStore", "Landscape")
+//    ),
+//    ContentTypeProvider = provider
+//});
 
 // Configura il pipeline della richiesta HTTP.
 if (app.Environment.IsDevelopment())

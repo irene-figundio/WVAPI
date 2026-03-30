@@ -13,10 +13,13 @@ namespace VITBO.Models
         public DateTime PublishDate { get; set; } = DateTime.Now;
 
         [Required]
-        public string ContentType { get; set; } = default!;
+        public string ContentType { get; set; } = "blog";
 
         public bool IsPublished { get; set; } = true;
 
         public int LangID { get; set; } = 1;
+
+        public string? CoverImage { get; set; }
+        public string? HeroImage { get; set; }
     }
 }

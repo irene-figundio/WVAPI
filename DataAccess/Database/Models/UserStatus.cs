@@ -2,6 +2,8 @@
 {
     public class UserStatus
     {
+        public bool? IsDeleted { get; set; } = false;
+        public DateTime? DeletionDate { get; set; }
         public int Id { get; set; }                // 0 = NotActive, 1 = Active
         public string Name { get; set; } = null!;  // Nome leggibile (es. Active, NotActive)
         public string ResourceKey { get; set; } = null!;

@@ -89,7 +89,7 @@ namespace AI_Integration.Controllers
             var sw = Stopwatch.StartNew();
             try
             {
-                var events = await _unitOfWork.Query<Event>()
+                var events = await _unitOfWork.Query<Event>().Where(e => e.IsDeleted != true)
                     .Where(e => e.LangID == langId)
                     .OrderByDescending(e => e.EventDate)
                     .Select(e => new EventDto
@@ -159,7 +159,7 @@ namespace AI_Integration.Controllers
             var sw = Stopwatch.StartNew();
             try
             {
-                var dto = await _unitOfWork.Query<Event>()
+                var dto = await _unitOfWork.Query<Event>().Where(e => e.IsDeleted != true)
                     .Where(e => e.Id == id && e.LangID == langId)
                     .Select(e => new EventDto
                     {
@@ -227,6 +227,33 @@ namespace AI_Integration.Controllers
                 return StatusCode(500, new { success = false, message = $"Error: {ex.Message}" });
             }
         }
+
+        [HttpGet("absolute/{id:int}")]
+        public async Task<IActionResult> GetAbsoluteById(int id, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        {
+            var log = WebApiLogHelper.NewLog("GET", $"api/events/absolute/{id}", "", userAgent, "Get event by id (absolute)");
+            var sw = Stopwatch.StartNew();
+            try
+            {
+                var @event = await _unitOfWork.GetByIdAsync<Event>(id);
+                if (@event == null || @event.IsDeleted == true)
+                {
+                    sw.Stop();
+                    await WebApiLogHelper.LogNotFoundAsync(_unitOfWork, log, "{ success = false, message = 'Event not found.' }", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                    return NotFound(new { success = false, message = "Event not found." });
+                }
+                sw.Stop();
+                await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return Ok(@event);
+            }
+            catch (Exception ex)
+            {
+                sw.Stop();
+                await WebApiLogHelper.LogErrorAsync(_unitOfWork, log, ex, $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return StatusCode(500, new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] Event @event, [FromHeader(Name = "User-Agent")] string userAgent = "")
@@ -308,7 +335,9 @@ namespace AI_Integration.Controllers
             {
                 var @event = await _unitOfWork.GetByIdAsync<Event>(id);
                 if (@event == null) return NotFound(new { success = false, message = "Event not found." });
-                _unitOfWork.Remove(@event);
+                @event.IsDeleted = true;
+                @event.DeletionDate = DateTime.Now;
+                _unitOfWork.Update(@event);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogNoContentAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");

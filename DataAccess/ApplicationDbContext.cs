@@ -47,6 +47,11 @@ namespace AI_Integration.DataAccess
 
         public virtual DbSet<EventCategory> EventCategories { get; set; } = null!;
         public virtual DbSet<ContentCategory> ContentCategories { get; set; } = null!;
+        public virtual DbSet<Trip> Trips { get; set; } = null!;
+        public virtual DbSet<Stay> Stays { get; set; } = null!;
+        public virtual DbSet<ItineraryDay> ItineraryDays { get; set; } = null!;
+        public virtual DbSet<ItineraryStop> ItineraryStops { get; set; } = null!;
+        public virtual DbSet<TripMust> TripMusts { get; set; } = null!;
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -291,6 +296,64 @@ namespace AI_Integration.DataAccess
                  .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<Trip>(e =>
+            {
+                e.ToTable("Trips", "dbo");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.HasOne(x => x.Event)
+                 .WithMany()
+                 .HasForeignKey(x => x.EventId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ItineraryDay>(e =>
+            {
+                e.ToTable("ItineraryDays", "dbo");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.HasOne(x => x.Trip)
+                 .WithMany(t => t.ItineraryDays)
+                 .HasForeignKey(x => x.TripId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Stay>(e =>
+            {
+                e.ToTable("Stays", "dbo");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.HasOne(x => x.Trip)
+                 .WithMany(t => t.Stays)
+                 .HasForeignKey(x => x.TripId)
+                 .OnDelete(DeleteBehavior.Cascade);
+                e.HasOne(x => x.ItineraryDay)
+                 .WithMany(d => d.Stays)
+                 .HasForeignKey(x => x.ItineraryDayId)
+                 .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<ItineraryStop>(e =>
+            {
+                e.ToTable("ItineraryStops", "dbo");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.HasOne(x => x.ItineraryDay)
+                 .WithMany(d => d.ItineraryStops)
+                 .HasForeignKey(x => x.DayId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<TripMust>(e =>
+            {
+                e.ToTable("TripMusts", "dbo");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.HasOne(x => x.Trip)
+                 .WithMany(t => t.TripMusts)
+                 .HasForeignKey(x => x.TripId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
 
             OnModelCreatingPartial(modelBuilder);
         }

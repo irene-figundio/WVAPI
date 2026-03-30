@@ -57,7 +57,7 @@ namespace AI_Integration.Controllers
             try
             {
                 // Proiezione in DTO: nessuna navigazione circolare
-                var campaigns = await _unitOfWork.Query<AdCampaign>()
+                var campaigns = await _unitOfWork.Query<AdCampaign>().Where(e => e.IsDeleted != true)
                     .Where(c => c.IsDeleted != true)
                     .OrderByDescending(c => c.CreationTime)
                     .Select(c => new AdCampaignDto
@@ -116,7 +116,7 @@ namespace AI_Integration.Controllers
                 }
 
                 // Proiezione diretta in DTO: evita Include + entità
-                var dto = await _unitOfWork.Query<AdCampaign>()
+                var dto = await _unitOfWork.Query<AdCampaign>().Where(e => e.IsDeleted != true)
                     .Where(c => c.IsDeleted != true && c.Id == id)
                     .Select(c => new AdCampaignDto
                     {

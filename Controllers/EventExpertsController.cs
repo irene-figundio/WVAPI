@@ -23,6 +23,26 @@ namespace AI_Integration.Controllers
             _unitOfWork = unitOfWork;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Get([FromHeader(Name = "User-Agent")] string userAgent = "")
+        {
+            var log = WebApiLogHelper.NewLog("GET", "api/eventexperts", "", userAgent, "List eventexperts");
+            var sw = Stopwatch.StartNew();
+            try
+            {
+                var items = await _unitOfWork.Query<EventExpert>().AsEnumerable().AsQueryable().AsEnumerable().AsQueryable().ToListAsync();
+                sw.Stop();
+                await WebApiLogHelper.LogOkAsync(_unitOfWork, log, $"{{ success = true, count = {items.Count} }}", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                sw.Stop();
+                await WebApiLogHelper.LogErrorAsync(_unitOfWork, log, ex, $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] EventExpert item, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
@@ -33,7 +53,7 @@ namespace AI_Integration.Controllers
             try
             {
                 // Check if connection already exists to prevent duplicates
-                var existing = await _unitOfWork.Query<EventExpert>()
+                var existing = await _unitOfWork.Query<EventExpert>().Where(e => e.IsDeleted != true)
                     .FirstOrDefaultAsync(ee => ee.EventId == item.EventId && ee.ExpertId == item.ExpertId);
 
                 if (existing != null)
@@ -70,7 +90,9 @@ namespace AI_Integration.Controllers
                     await WebApiLogHelper.LogNotFoundAsync(_unitOfWork, log, "{ success = false, message = 'Item not found.' }", $"ElapsedMs={sw.ElapsedMilliseconds}");
                     return NotFound();
                 }
-                _unitOfWork.Remove(item);
+                item.IsDeleted = true;
+                item.DeletionDate = DateTime.Now;
+                _unitOfWork.Update(item);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogNoContentAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");

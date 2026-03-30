@@ -1,0 +1,58 @@
+@model List<VITBO.Models.PhotoGalleryDto>
+
+@{
+    ViewData["Title"] = "Gallery Photos";
+    int? galleryId = ViewBag.GalleryId;
+}
+
+<div class="card border-0 shadow-sm border-start border-info border-4">
+    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-info"><i class="bi bi-images me-2"></i> @(galleryId != null ? $"Photos for Gallery #{galleryId}" : "All Photos")</h5>
+        <div>
+            <a asp-action="Create" asp-route-galleryId="@galleryId" class="btn btn-info btn-sm text-white"><i class="bi bi-plus-circle me-1"></i> Add Photo</a>
+            @if(galleryId != null) {
+                <button onclick="window.history.back()" class="btn btn-outline-secondary btn-sm ms-2">Back to Galleries</button>
+            } else {
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-sm ms-2">Back to Dashboard</a>
+            }
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" class="ps-4">ID</th>
+                        <th scope="col">Photo</th>
+                        <th scope="col">Caption</th>
+                        <th scope="col" class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 text-muted fw-bold">#@item.Id</td>
+                                <td><img src="@item.ImageUrl" alt="@item.Caption" style="height: 50px; width: auto;" class="rounded shadow-sm" /></td>
+                                <td>@item.Caption</td>
+                                <td class="text-end pe-4">
+                                    <form asp-action="Delete" asp-route-id="@item.Id" asp-route-galleryId="@galleryId" method="post" class="d-inline" onsubmit="return confirm('Delete this photo?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">No photos found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,60 @@
+@model List<VITBO.Models.ContentImageDto>
+
+@{
+    ViewData["Title"] = "Content Images";
+    int? contentId = ViewBag.ContentId;
+}
+
+<div class="card border-0 shadow-sm border-start border-info border-4">
+    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-info"><i class="bi bi-images me-2"></i> @(contentId != null ? $"Images for Content #{contentId}" : "All Content Images")</h5>
+        <div>
+            <a asp-action="Create" asp-route-contentId="@contentId" class="btn btn-info btn-sm text-white"><i class="bi bi-plus-circle me-1"></i> Add Image</a>
+            @if(contentId != null) {
+                <a asp-controller="Contents" asp-action="Articles" class="btn btn-outline-secondary btn-sm ms-2">Back to Articles</a>
+            } else {
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-sm ms-2">Back to Dashboard</a>
+            }
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" class="ps-4">ID</th>
+                        <th scope="col">Image</th>
+                        <th scope="col">Caption</th>
+                        <th scope="col">Position</th>
+                        <th scope="col" class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 text-muted fw-bold">#@item.Id</td>
+                                <td><img src="@item.ImageUrl" alt="@item.Caption" style="height: 50px; width: auto;" class="rounded shadow-sm" /></td>
+                                <td>@item.Caption</td>
+                                <td>@item.Position</td>
+                                <td class="text-end pe-4">
+                                    <form asp-action="Delete" asp-route-id="@item.Id" asp-route-contentId="@contentId" method="post" class="d-inline" onsubmit="return confirm('Delete this image?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">No images found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

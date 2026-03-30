@@ -49,6 +49,18 @@
                     </div>
                 </div>
 
+                <div class="col-md-6 form-floating mb-3">
+                    <input asp-for="CoverImage" class="form-control" placeholder="Cover Image URL" />
+                    <label asp-for="CoverImage" class="ms-2">Cover Image URL</label>
+                    <span asp-validation-for="CoverImage" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 form-floating mb-3">
+                    <input asp-for="HeroImage" class="form-control" placeholder="Hero Image URL" />
+                    <label asp-for="HeroImage" class="ms-2">Hero Image URL</label>
+                    <span asp-validation-for="HeroImage" class="text-danger"></span>
+                </div>
+
                 <div class="col-12 mt-4 d-flex justify-content-between">
                     <a asp-action="Articles" class="btn btn-outline-secondary px-4">Cancel</a>
                     <button type="submit" class="btn btn-danger px-5"><i class="bi bi-save me-2"></i> Create Article</button>

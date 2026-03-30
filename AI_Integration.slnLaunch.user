@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "Nuovo profilo",
+    "Projects": [
+      {
+        "Path": "AI_Integration.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "VITBO\\VITBO.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

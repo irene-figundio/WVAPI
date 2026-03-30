@@ -283,7 +283,7 @@ namespace AI_Integration.Controllers
                 return BadRequest(new { success = false, message = "Invalid or missing Session ID." });
             }
 
-            var sessionExists = await _unitOfWork.Query<AdSession>()
+            var sessionExists = await _unitOfWork.Query<AdSession>().Where(e => e.IsDeleted != true)
                                                  .AnyAsync(s => s.Id == video.ID_Session && s.IsDeleted != true);
             if (!sessionExists)
             {
@@ -367,7 +367,7 @@ namespace AI_Integration.Controllers
             // Se si cambia sessione, verifica che esista
             if (req.ID_Session.HasValue && req.ID_Session.Value > 0 && req.ID_Session.Value != video.ID_Session)
             {
-                var sessionExists = await _unitOfWork.Query<AdSession>()
+                var sessionExists = await _unitOfWork.Query<AdSession>().Where(e => e.IsDeleted != true)
                                                      .AnyAsync(s => s.Id == req.ID_Session.Value && s.IsDeleted != true);
                 if (!sessionExists)
                 {
@@ -491,7 +491,7 @@ namespace AI_Integration.Controllers
             };
 
             List<AdSession> sessions = await _unitOfWork
-                .Query<AdSession>()
+                .Query<AdSession>().Where(e => e.IsDeleted != true)
                 .Where(s => s.Id == v.ID_Session)                
                 .ToListAsync();
             if (sessions.Count > 0)
@@ -515,7 +515,7 @@ namespace AI_Integration.Controllers
             page = page <= 0 ? 1 : page;
             pageSize = Math.Clamp(pageSize, 1, 100);
 
-            var qry = _unitOfWork.Query<AIVideo>()  // IQueryable<AIVideo> (AsNoTracking)
+            var qry = _unitOfWork.Query<AIVideo>().Where(e => e.IsDeleted != true)
                                  .Where(v => v.IsDeleted != true);
 
             if (sessionId.HasValue)
@@ -557,7 +557,7 @@ namespace AI_Integration.Controllers
                 it.PublicUrl = it.PublicUrl.Replace("\\", "/");
                 it.Sessions = new List<AdSession>();
                 var sessions = await _unitOfWork
-                    .Query<AdSession>()
+                    .Query<AdSession>().Where(e => e.IsDeleted != true)
                     .Where(s => s.Id == it.ID_Session)                    
                     .ToListAsync();
                 if (sessions.Count > 0)
@@ -579,7 +579,7 @@ namespace AI_Integration.Controllers
         [HttpGet("all")]
         public async Task<IActionResult> GetAll([FromQuery] bool includeDeleted = false)
         {
-            var qry = _unitOfWork.Query<AIVideo>();
+            var qry = _unitOfWork.Query<AIVideo>().Where(e => e.IsDeleted != true);
 
             if (!includeDeleted)
                 qry = qry.Where(v => v.IsDeleted != true);
@@ -608,7 +608,7 @@ namespace AI_Integration.Controllers
                 it.PublicUrl = it.PublicUrl.Replace("\\", "/");
                 it.Sessions = new List<AdSession>();
                 var sessions = await _unitOfWork
-                    .Query<AdSession>()
+                    .Query<AdSession>().Where(e => e.IsDeleted != true)
                     .Where(s => s.Id == it.ID_Session)
                     .ToListAsync();
                 if (sessions.Count > 0)
