@@ -78,7 +78,7 @@ namespace AI_Integration.Controllers
             }
         }
 
-        [HttpGet("/bycontent/{contentId:int}")]
+        [HttpGet("bycontent/{contentId:int}")]
         public async Task<IActionResult> GetByContentId(int contentId, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
             var log = WebApiLogHelper.NewLog("GET", $"api/experts/bycontent/{contentId}", "", userAgent, "Get experts by content id");
@@ -108,7 +108,7 @@ namespace AI_Integration.Controllers
             }
         }
 
-        [HttpGet("/byevent/{eventId:int}")]
+        [HttpGet("byevent/{eventId:int}")]
         public async Task<IActionResult> GetByEventId(int eventId, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
             var log = WebApiLogHelper.NewLog("GET", $"api/experts/byevent/{eventId}", "", userAgent, "Get experts by event id");

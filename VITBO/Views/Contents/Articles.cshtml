@@ -10,14 +10,20 @@
         <h5 class="mb-0 text-danger"><i class="bi bi-file-earmark-text me-2"></i> Articles Directory</h5>
         <a asp-action="CreateArticle" class="btn btn-danger btn-sm"><i class="bi bi-plus-circle me-1"></i> New Article</a>
 
-        <form method="get" asp-action="Articles" class="d-flex align-items-center">
-            <label class="me-2 text-muted small fw-bold">Language ID:</label>
-            <select name="langId" class="form-select form-select-sm" onchange="this.form.submit()">
-                <!option value="1" @(currentLangId == 1 ? "selected" : "")>English (1)</!option>
-                <!option value="2" @(currentLangId == 2 ? "selected" : "")>Italiano (2)</!option>
-@*                 <!option value="3" @(currentLangId == 3 ? "selected" : "")>French (3)</!option>
-                <!option value="4" @(currentLangId == 4 ? "selected" : "")>German (4)</!option> *@
-            </select>
+        <form method="get" asp-action="Articles" class="row g-2 align-items-center">
+            <div class="col-auto d-flex align-items-center">
+                <label class="me-2 text-muted small fw-bold">Language:</label>
+                <select name="langId" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <!option value="1" @(currentLangId == 1 ? "selected" : "")>English (1)</!option>
+                    <!option value="2" @(currentLangId == 2 ? "selected" : "")>Italiano (2)</!option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <div class="input-group input-group-sm">
+                    <input type="text" name="search" class="form-control" placeholder="Search title..." value="@ViewData["SearchTerm"]">
+                    <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
         </form>
     </div>
     <div class="card-body p-0">

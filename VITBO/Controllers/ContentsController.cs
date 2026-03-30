@@ -15,13 +15,20 @@ namespace VITBO.Controllers
             _contentsService = contentsService;
         }
 
-        public async Task<IActionResult> Articles([FromQuery] int langId = 1)
+        public async Task<IActionResult> Articles([FromQuery] int langId = 1, string? search = null)
         {
-
             ViewData["CurrentLangId"] = langId;
+            ViewData["SearchTerm"] = search;
             var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
             var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
             var result = await _contentsService.GetContentsByTypeAsync("blog", langId, token, userAgent);
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                result = result.Where(c => (c.Title?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                                         (c.Subtitle?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false)).ToList();
+            }
+
             return View(result);
         }
 
@@ -72,12 +79,20 @@ namespace VITBO.Controllers
 
         //}
 
-        public async Task<IActionResult> News([FromQuery] int langId = 1)
+        public async Task<IActionResult> News([FromQuery] int langId = 1, string? search = null)
         {
+            ViewData["CurrentLangId"] = langId;
+            ViewData["SearchTerm"] = search;
             var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
             var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
-            ViewData["CurrentLangId"] = langId;
             var result = await _contentsService.GetContentsByTypeAsync("News", langId, token, userAgent);
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                result = result.Where(c => (c.Title?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                                         (c.Subtitle?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false)).ToList();
+            }
+
             return View(result);
         }
 
@@ -212,6 +227,15 @@ namespace VITBO.Controllers
             }
             ModelState.AddModelError("", "Failed to delete content. Please try again.");
             return RedirectToAction(contentType == "News" ? nameof(News) : nameof(Articles));
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> GetCategoriesByLang(int langId)
+        {
+            var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            var userAgent = GetUserAgent() ?? string.Empty;
+            var categories = await _contentsService.GetContentCategoriesAsync(langId, token, userAgent);
+            return Json(categories.Select(c => new { id = c.Id, name = c.Name }));
         }
 
         protected string? GetUserAgent()

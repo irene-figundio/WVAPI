@@ -12,7 +12,7 @@
             </h2>
         </div>
         <div class="col-auto">
-            <a asp-action="Index" asp-route-eventId="@(Model.EventId > 0 ? Model.EventId : (int?)null)" class="btn btn-outline-secondary btn-sm shadow-sm">
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm shadow-sm">
                 <i class="bi bi-arrow-left me-1"></i> Back to Galleries
             </a>
         </div>
@@ -34,12 +34,22 @@
                         else
                         {
                             <div class="mb-3">
-                                <label asp-for="EventId" class="form-label fw-bold small text-muted">Event ID</label>
-                                <input asp-for="EventId" class="form-control" type="number" required />
+                            <label asp-for="LangID" class="form-label fw-bold small text-muted">Language</label>
+                            <select asp-for="LangID" class="form-select" id="langSelect">
+                                <option value="1">English (1)</option>
+                                <option value="2">Italiano (2)</option>
+                            </select>
+                            <span asp-validation-for="LangID" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="EventId" class="form-label fw-bold small text-muted">Event</label>
+                            <select asp-for="EventId" class="form-select" id="eventSelect">
+                                <option value="">-- Select Event --</option>
+                            </select>
                                 <span asp-validation-for="EventId" class="text-danger small"></span>
                             </div>
                         }
-                        <input type="hidden" asp-for="LangID" />
 
                         <div class="mb-4">
                             <label asp-for="Title" class="form-label fw-bold small text-muted">Title</label>
@@ -50,7 +60,7 @@
                         <hr class="my-4">
 
                         <div class="d-flex justify-content-end gap-2">
-                            <a asp-action="Index" asp-route-eventId="@Model.EventId" class="btn btn-light px-4">Cancel</a>
+                            <a asp-action="Index" class="btn btn-light px-4">Cancel</a>
                             <button type="submit" class="btn btn-warning px-4">
                                 <i class="bi bi-save me-1"></i> Create Gallery
                             </button>
@@ -61,3 +71,30 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            function loadEvents(langId) {
+                $.getJSON('@Url.Action("GetEventsByLang", "Events")', { langId: langId }, function (data) {
+                    var items = '<option value="">-- Select Event --</option>';
+                    $.each(data, function (i, ev) {
+                        items += "<option value='" + ev.id + "'>" + ev.title + " (#" + ev.id + ")</option>";
+                    });
+                    $('#eventSelect').html(items);
+
+                    @if(Model.EventId > 0) {
+                        <text>$('#eventSelect').val(@Model.EventId);</text>
+                    }
+                });
+            }
+
+            $('#langSelect').change(function () {
+                loadEvents($(this).val());
+            });
+
+            // Initial load
+            loadEvents($('#langSelect').val());
+        });
+    </script>
+}

@@ -16,12 +16,20 @@ namespace VITBO.Controllers
             _eventsService = eventsService;
         }
 
-        public async Task<IActionResult> Index([FromQuery] int langId = 1)
+        public async Task<IActionResult> Index([FromQuery] int langId = 1, string? search = null)
         {
             ViewData["CurrentLangId"] = langId;
+            ViewData["SearchTerm"] = search;
             string sessionToken = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
             string userAgent = GetUserAgent() ?? string.Empty;
             var result = await _eventsService.GetEventsAsync(langId, sessionToken, userAgent);
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                result = result.Where(e => (e.Title?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                                         (e.Description?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false)).ToList();
+            }
+
             return View(result);
         }
 
@@ -121,6 +129,24 @@ namespace VITBO.Controllers
             }
             ModelState.AddModelError("", "Failed to delete event. Please try again.");
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> GetEventsByLang(int langId)
+        {
+            string sessionToken = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            string userAgent = GetUserAgent() ?? string.Empty;
+            var events = await _eventsService.GetEventsAsync(langId, sessionToken, userAgent);
+            return Json(events.Select(e => new { id = e.Id, title = e.Title, categoryId = e.CategoryId }));
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> GetCategoriesByLang(int langId)
+        {
+            string sessionToken = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            string userAgent = GetUserAgent() ?? string.Empty;
+            var categories = await _eventsService.GetEventCategoriesAsync(langId, sessionToken, userAgent);
+            return Json(categories.Select(c => new { id = c.Id, name = c.Name }));
         }
 
         protected string? GetUserAgent()

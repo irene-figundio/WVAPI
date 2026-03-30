@@ -18,14 +18,14 @@ namespace VITBO.Services
 
         public async Task<bool> CreateUserAsync(CreateUserRequest request,string sessionToken,string userAgent)
         {
-            var endpoint = $"{_apiBase}/Users";                
+            var endpoint = $"{_apiBase}/api/Users";
             var response = await _httpService.SendHttpRequestAsync(HttpMethod.Post, endpoint, sessionToken,request, userAgent);
             return response is HttpResponseMessage r && r.IsSuccessStatusCode;
         }
 
         public async Task<PagedResult<UserDto>> GetUsersAsync(string? query, int page, string sessionToken, string userAgent)
         {
-            var endpoint = $"{_apiBase}/Users?page={page}&pageSize=20";
+            var endpoint = $"{_apiBase}/api/Users?page={page}&pageSize=20";
             if (!string.IsNullOrEmpty(query))
             {
                 endpoint += $"&query={Uri.EscapeDataString(query)}";
@@ -36,14 +36,14 @@ namespace VITBO.Services
         }
         public async Task<bool> DeleteUserAsync(Guid userId, string sessionToken, string userAgent)
         {
-            var endpoint = $"{_apiBase}/Users/{userId}";
+            var endpoint = $"{_apiBase}/api/Users/{userId}";
             var response = await _httpService.SendHttpRequestAsync(HttpMethod.Delete, endpoint, sessionToken, userAgent, null);
             return response is HttpResponseMessage r && r.IsSuccessStatusCode;
         }
 
         public async Task<bool> UpdateUserAsync(Guid userId, UpdateUserRequest request, string sessionToken, string userAgent)
         {
-            var endpoint = $"{_apiBase}/Users/{userId}";
+            var endpoint = $"{_apiBase}/api/Users/{userId}";
             var response = await _httpService.SendHttpRequestAsync(HttpMethod.Put, endpoint, sessionToken, request, userAgent);
             return response is HttpResponseMessage r && r.IsSuccessStatusCode;
         }

@@ -24,6 +24,7 @@
             background-color: #343a40;
             color: white;
             padding-top: 20px;
+            transition: all 0.3s;
         }
         .sidebar a {
             color: #adb5bd;
@@ -40,10 +41,38 @@
         .main-content {
             flex: 1;
             background-color: #f8f9fa;
+            min-width: 0;
         }
         .navbar-top {
             background-color: #ffffff;
             box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+
+        @@media (max-width: 768px) {
+            .wrapper {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                padding-top: 10px;
+            }
+            .sidebar .nav {
+                flex-direction: row !important;
+                flex-wrap: wrap;
+            }
+            .sidebar .nav-item {
+                flex: 1 1 auto;
+            }
+            .sidebar a {
+                padding: 10px;
+                text-align: center;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+            }
+            .sidebar a:hover, .sidebar a.active {
+                border-left-color: transparent;
+                border-bottom-color: #0d6efd;
+            }
         }
     </style>
 </head>
@@ -72,6 +101,11 @@
                     <li class="nav-item">
                         <a href="@Url.Action("Index", "AiVideo")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "AiVideo" ? "active" : "")">
                             <i class="bi bi-camera-video me-2"></i> AI Videos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Galleries")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Galleries" ? "active" : "")">
+                            <i class="bi bi-images me-2"></i> Galleries
                         </a>
                     </li>
                     <li class="nav-item">

@@ -16,19 +16,22 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
+                                <label asp-for="LangID" class="form-label">Lingua</label>
+                                <select asp-for="LangID" class="form-select" id="langSelect">
+                                    <option value="1">English (1)</option>
+                                    <option value="2">Italiano (2)</option>
+                                </select>
+                                <span asp-validation-for="LangID" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
                                 <label asp-for="EventId" class="form-label">Evento</label>
-                                <select asp-for="EventId" class="form-select">
+                                <select asp-for="EventId" class="form-select" id="eventSelect">
                                     <option value="">Seleziona Evento</option>
-                                    @if (ViewBag.Events != null)
-                                    {
-                                        @foreach (var ev in (List<VITBO.Models.EventDto>)ViewBag.Events)
-                                        {
-                                            <option value="@ev.Id">@ev.Title (@ev.Id)</option>
-                                        }
-                                    }
                                 </select>
                                 <span asp-validation-for="EventId" class="text-danger"></span>
                             </div>
+                        </div>
+                        <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label asp-for="Status" class="form-label">Status</label>
                                 <select asp-for="Status" class="form-select">
@@ -100,3 +103,34 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            function loadEvents(langId) {
+                $.getJSON('@Url.Action("GetEventsByLang", "Events")', { langId: langId }, function (data) {
+                    var items = '<option value="">Seleziona Evento</option>';
+                    $.each(data, function (i, ev) {
+                        // Filter by CategoryId 3 or 4 for Trips as per requirements
+                        if (ev.categoryId == 3 || ev.categoryId == 4) {
+                            items += "<option value='" + ev.id + "'>" + ev.title + " (#" + ev.id + ")</option>";
+                        }
+                    });
+                    $('#eventSelect').html(items);
+
+                    @if(Model.EventId > 0) {
+                        <text>$('#eventSelect').val(@Model.EventId);</text>
+                    }
+                });
+            }
+
+            $('#langSelect').change(function () {
+                loadEvents($(this).val());
+            });
+
+            // Initial load
+            loadEvents($('#langSelect').val());
+        });
+    </script>
+}

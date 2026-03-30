@@ -15,12 +15,20 @@ namespace VITBO.Controllers
             _expertsService = expertsService;
         }
 
-        public async Task<IActionResult> Index([FromQuery] int langId = 1)
+        public async Task<IActionResult> Index([FromQuery] int langId = 1, string? search = null)
         {
             ViewData["CurrentLangId"] = langId;
+            ViewData["SearchTerm"] = search;
             var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
             var userAgent = GetUserAgent() ?? string.Empty;
             var experts = await _expertsService.GetExpertsAsync(langId, token, userAgent);
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                experts = experts.Where(e => (e.Name?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                                         (e.Bio?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false)).ToList();
+            }
+
             return View(experts);
         }
 

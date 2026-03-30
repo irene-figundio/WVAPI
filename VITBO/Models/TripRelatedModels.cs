@@ -16,6 +16,7 @@ namespace VITBO.Models
 
     public class CreateTripRequest
     {
+        public int LangID { get; set; } = 1;
         public int EventId { get; set; }
         public string DepartureCity { get; set; } = null!;
         public string DepartureCountry { get; set; } = null!;

@@ -18,11 +18,29 @@ namespace VITBO.Controllers
             _eventsService = eventsService;
         }
 
-        public async Task<IActionResult> Index(int? eventId)
+        public async Task<IActionResult> Index(int? eventId, [FromQuery] int langId = 1, string? search = null)
         {
+            ViewData["CurrentLangId"] = langId;
+            ViewData["SearchTerm"] = search;
             string token = GetToken();
             string ua = GetUserAgent();
             var trips = await _tripsService.GetTripsAsync(eventId, token, ua);
+
+            // Note: Trips themselves don't have LangID, but they are linked to Events which do.
+            // However, we added LangID to CreateTripRequest for UI filtering.
+            // If the API doesn't support LangID on Trips, we might need to filter by related Event.
+            // For now, let's filter by search term on departure/arrival cities.
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                trips = trips.Where(t =>
+                    (t.DepartureCity?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (t.ArrivalCity?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (t.DepartureCountry?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (t.ArrivalCountry?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false)
+                ).ToList();
+            }
+
             ViewBag.EventId = eventId;
             return View(trips);
         }
@@ -72,6 +90,15 @@ namespace VITBO.Controllers
             {
                 string token = GetToken();
                 string ua = GetUserAgent();
+
+                // Validation: prevent multiple trips for the same EventId
+                var existingTrips = await _tripsService.GetTripsAsync(model.EventId, token, ua);
+                if (existingTrips != null && existingTrips.Any(t => t.EventId == model.EventId))
+                {
+                    ModelState.AddModelError("EventId", "A trip is already associated with this Event ID.");
+                    return View(model);
+                }
+
                 var success = await _tripsService.CreateTripAsync(model, token, ua);
                 if (success) return RedirectToAction(nameof(Index));
                 ModelState.AddModelError("", "Error creating trip.");

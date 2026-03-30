@@ -18,14 +18,14 @@ namespace VITBO.Services
 
         public async Task<bool> CreateEventAsync(CreateEventRequest request, string sessionToken, string userAgent)
         {
-            var endpoint = $"{_apiBase}/events";
+            var endpoint = $"{_apiBase}/api/events";
            // var jsonRequest = System.Text.Json.JsonSerializer.Serialize(request);
             return await _httpService.SendHttpRequestAsync(HttpMethod.Post, endpoint, sessionToken, userAgent) is HttpResponseMessage response && response.IsSuccessStatusCode;
         }
 
         public async Task<List<EventDto>> GetEventsAsync(int langId, string sessionToken, string userAgent)
         {
-            var endpoint = $"{_apiBase}/events?langId={langId}";
+            var endpoint = $"{_apiBase}/api/events?langId={langId}";
             var result = await _httpService.SendHttpRequestAsync(HttpMethod.Get, endpoint, sessionToken, userAgent);
             var list = await _httpService.GetBodyFromHttpResponseAsync<List<EventDto>>(result);
             // var result = await _apiService.GetAsync<List<EventDto>>(endpoint, sessionToken, userAgent);
@@ -34,7 +34,7 @@ namespace VITBO.Services
 
         public async Task<EventDto?> GetEventByIdAsync(int id, int langId,string sessionToken, string userAgent)
         {
-            var endpoint = $"{_apiBase}/events/{id}?langId={langId}";
+            var endpoint = $"{_apiBase}/api/events/{id}?langId={langId}";
             var result = await _httpService.SendHttpRequestAsync(HttpMethod.Get, endpoint, sessionToken, userAgent);
             var eventDto = await _httpService.GetBodyFromHttpResponseAsync<EventDto>(result);
             return eventDto;
@@ -42,7 +42,7 @@ namespace VITBO.Services
 
         public async Task<EventDto?> GetEventByIdAbsAsync(int id, string sessionToken, string userAgent)
         {
-            var endpoint = $"{_apiBase}/events/absolute/{id}";
+            var endpoint = $"{_apiBase}/api/events/absolute/{id}";
             var result = await _httpService.SendHttpRequestAsync(HttpMethod.Get, endpoint, sessionToken, userAgent);
             var eventDto = await _httpService.GetBodyFromHttpResponseAsync<EventDto>(result);
             return eventDto;
@@ -50,20 +50,20 @@ namespace VITBO.Services
 
         public async Task<bool> UpdateEventAsync(int id, UpdateEventRequest request,string sessionToken, string userAgent)
         {
-            var endpoint = $"{_apiBase}/events/{id}";
+            var endpoint = $"{_apiBase}/api/events/{id}";
             //var jsonRequest = System.Text.Json.JsonSerializer.Serialize(request);
             return await _httpService.SendHttpRequestAsync(HttpMethod.Put, endpoint,sessionToken, userAgent) is HttpResponseMessage response && response.IsSuccessStatusCode;
         } 
 
         public async Task<bool> DeleteEventAsync(int id, string sessionToken, string userAgent)
         {
-            var endpoint = $"{_apiBase}/events/{id}";
+            var endpoint = $"{_apiBase}/api/events/{id}";
             return await _httpService.SendHttpRequestAsync(HttpMethod.Delete, endpoint, sessionToken, userAgent) is HttpResponseMessage response && response.IsSuccessStatusCode;
         }
 
         public async Task<List<EventCategoryDto>> GetEventCategoriesAsync(int langId, string token, string userAgent)
         {
-            var endpoint = $"{_apiBase}/eventcategories?langId={langId}";
+            var endpoint = $"{_apiBase}/api/eventcategories?langId={langId}";
             var result = await _httpService.SendHttpRequestAsync(HttpMethod.Get, endpoint, token, userAgent, null);
             var list = await _httpService.GetBodyFromHttpResponseAsync<List<EventCategoryDto>>(result);
             return list ?? new List<EventCategoryDto>();
