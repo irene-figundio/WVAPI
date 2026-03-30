@@ -2,6 +2,8 @@
 {
     public class UploadedFile
     {
+        public bool? IsDeleted { get; set; } = false;
+        public DateTime? DeletionDate { get; set; }
         public int Id { get; set; }
         public string FileName { get; set; }
         public string FilePath { get; set; }

@@ -31,7 +31,7 @@ namespace AI_Integration.Controllers
             var sw = Stopwatch.StartNew();
             try
             {
-                var partners = await _unitOfWork.Query<Partner>().ToListAsync();
+                var partners = await _unitOfWork.Query<Partner>().Where(e => e.IsDeleted != true).ToListAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, $"{{ success = true, count = {partners.Count} }}", $"ElapsedMs={sw.ElapsedMilliseconds}");
                 return Ok(partners);
@@ -134,7 +134,9 @@ namespace AI_Integration.Controllers
                 var partner = await _unitOfWork.GetByIdAsync<Partner>(id);
                 if (partner == null) return NotFound(new { success = false, message = "Partner not found." });
 
-                _unitOfWork.Remove(partner);
+                partner.IsDeleted = true;
+                partner.DeletionDate = DateTime.Now;
+                _unitOfWork.Update(partner);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogNoContentAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");

@@ -2,7 +2,7 @@
 FLUSSO DI INSERIMENTO E LETTURA DATI (VITINERARIO AI WEB API)
 ===============================================================
 Le chiamate presuppongono l'utilizzo di un token di autorizzazione Bearer nel caso l'endpoint sia protetto da [Authorize].
-Si ricorda che l'Id lingua di default è LangID = 1 (es. Italiano).
+Si ricorda che l'Id lingua di default è LangID = 1 (es. Inglese).
 
 ---------------------------------------------------------------
 1. INSERIMENTO E GESTIONE ESPERTI

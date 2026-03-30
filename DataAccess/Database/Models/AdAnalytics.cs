@@ -2,6 +2,8 @@
 {
     public class AdAnalytics
     {
+        public bool? IsDeleted { get; set; } = false;
+        public DateTime? DeletionDate { get; set; }
         public int Id { get; set; }
         public int SessionId { get; set; }
         public int VideoId { get; set; }

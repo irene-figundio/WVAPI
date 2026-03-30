@@ -9,23 +9,25 @@ namespace VITBO.Services
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
+        private readonly string _apiBase;
+
 
         public AuthService(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;
+            _apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
         }
 
         public async Task<string?> LoginAsync(LoginViewModel model)
         {
             var client = _httpClientFactory.CreateClient();
-            var apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
-            client.BaseAddress = new Uri(apiBase);
+            client.BaseAddress = new Uri(_apiBase);
 
             var loginData = $"{{ \"username\" : {model.Username},  \"password \" : {model.Password} }}";
             var content = new StringContent(JsonSerializer.Serialize(loginData), Encoding.UTF8, "application/json");
 
-            var response = await client.PostAsync($"{client.BaseAddress}Auth/login", content);
+            var response = await client.PostAsync($"{client.BaseAddress}/Auth/login", content);
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();

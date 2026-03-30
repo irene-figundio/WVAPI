@@ -32,7 +32,7 @@ namespace AI_Integration.Controllers
             var sw = Stopwatch.StartNew();
             try
             {
-                var experts = await _unitOfWork.Query<Expert>()
+                var experts = await _unitOfWork.Query<Expert>().Where(e => e.IsDeleted != true)
                     .Where(e => e.LangID == langId)
                     .OrderByDescending(e => e.CreatedAt)
                     .ToListAsync();
@@ -55,7 +55,7 @@ namespace AI_Integration.Controllers
             var sw = Stopwatch.StartNew();
             try
             {
-                var expert = await _unitOfWork.Query<Expert>()
+                var expert = await _unitOfWork.Query<Expert>().Where(e => e.IsDeleted != true)
                     .Where(e => e.Id == id && e.LangID == langId)
                     .FirstOrDefaultAsync();
 
@@ -77,6 +77,67 @@ namespace AI_Integration.Controllers
                 return StatusCode(500, new { success = false, message = $"Error: {ex.Message}" });
             }
         }
+
+        [HttpGet("/bycontent/{contentId:int}")]
+        public async Task<IActionResult> GetByContentId(int contentId, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        {
+            var log = WebApiLogHelper.NewLog("GET", $"api/experts/bycontent/{contentId}", "", userAgent, "Get experts by content id");
+            var sw = Stopwatch.StartNew();
+            try
+            {
+                var experts = await _unitOfWork.Query<ContentExpert>().Where(e => e.IsDeleted != true)
+                    .Where(e => e.ContentId == contentId)
+                    .ToListAsync();
+                if (experts == null || experts.Count == 0)
+                {
+                    sw.Stop();
+                    await WebApiLogHelper.LogNotFoundAsync(_unitOfWork, log, "{ success = false, message = 'Experts not found.' }", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                    return NotFound();
+                }
+                var expertIds = experts.Select(e => e.ExpertId).ToList();
+                var expertDetails = await _unitOfWork.Query<Expert>().Where(e => expertIds.Contains(e.Id)).ToListAsync();
+                sw.Stop();
+                await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return Ok(expertDetails);
+            }
+            catch (Exception ex)
+            {
+                sw.Stop();
+                await WebApiLogHelper.LogErrorAsync(_unitOfWork, log, ex, $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return StatusCode(500, new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        [HttpGet("/byevent/{eventId:int}")]
+        public async Task<IActionResult> GetByEventId(int eventId, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        {
+            var log = WebApiLogHelper.NewLog("GET", $"api/experts/byevent/{eventId}", "", userAgent, "Get experts by event id");
+            var sw = Stopwatch.StartNew();
+            try
+            {
+                var experts = await _unitOfWork.Query<EventExpert>().Where(e => e.IsDeleted != true)
+                    .Where(e => e.EventId == eventId)
+                    .ToListAsync();
+                if (experts == null || experts.Count == 0)
+                {
+                    sw.Stop();
+                    await WebApiLogHelper.LogNotFoundAsync(_unitOfWork, log, "{ success = false, message = 'Experts not found.' }", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                    return NotFound();
+                }
+                var expertIds = experts.Select(e => e.ExpertId).ToList();
+                var expertDetails = await _unitOfWork.Query<Expert>().Where(e => expertIds.Contains(e.Id)).ToListAsync();
+                sw.Stop();
+                await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return Ok(expertDetails);
+            }
+            catch (Exception ex)
+            {
+                sw.Stop();
+                await WebApiLogHelper.LogErrorAsync(_unitOfWork, log, ex, $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return StatusCode(500, new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] Expert expert, [FromHeader(Name = "User-Agent")] string userAgent = "")
@@ -143,7 +204,9 @@ namespace AI_Integration.Controllers
                 var expert = await _unitOfWork.GetByIdAsync<Expert>(id);
                 if (expert == null) return NotFound(new { success = false, message = "Expert not found." });
 
-                _unitOfWork.Remove(expert);
+                expert.IsDeleted = true;
+                expert.DeletionDate = DateTime.Now;
+                _unitOfWork.Update(expert);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogNoContentAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");

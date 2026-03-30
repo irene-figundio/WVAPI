@@ -5,35 +5,44 @@ namespace VITBO.Services
 {
     public class AiVideoService : IAiVideoService
     {
-        private readonly ApiService _apiService;
         private readonly HttpService _httpService;
         private readonly IConfiguration _configuration;
+        private readonly string _apiBase;
 
-        public AiVideoService(ApiService apiService, HttpService httpService, IConfiguration configuration)
+        public AiVideoService(HttpService httpService, IConfiguration configuration)
         {
-            _apiService = apiService;
             _httpService = httpService;
             _configuration = configuration;
+                _apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
         }
 
         public async Task<bool> CreateVideoAsync(CreateVideoRequest request, string sessionToken, string userAgent, CancellationToken ct)
         {
-            //var response = await _apiService.PostAsync("api/Video", request, sessionToken, userAgent, ct);
-            var apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
-                var body = new
-                {
-                    Title = request.Title,
-                    Url_Video = request.Url_Video,
-                    IsLandscape = request.IsLandscape,
-                    Play_Priority = request.Play_Priority,
-                    ID_Session = request.ID_Session
-                };
-            var jsonBody = System.Text.Json.JsonSerializer.Serialize(body);
-            var response = await _httpService.SendHttpRequestAsync(HttpMethod.Post,$"{apiBase}api/Video", sessionToken, jsonBody, userAgent, ct);
+            var endpoint = $"{_apiBase}/Video/upload";
+
+            using var content = new MultipartFormDataContent();
+
+            content.Add(new StringContent(request.Title), "Title");
+            content.Add(new StringContent(request.IsLandscape.ToString().ToLower() ?? "false"), "isLandscape");
+            content.Add(new StringContent(request.Play_Priority.ToString()), "play_Priority");
+            content.Add(new StringContent(request.ID_Session.ToString()), "idSession"); // Backend endpoint expects idSession for this endpoint
+            content.Add(new StringContent(request.Url_Video ?? string.Empty), "Url_Video");
+            content.Add(new StringContent(request.File != null ? request.File.FileName : string.Empty), "FileName");
+            // content.Add(new StringContent(request.ID_Session.ToString()), "idUser"); // Backend endpoint maps ID_Session to idUser for this endpoint
+
+            if (request.File != null)
+            {
+                var streamContent = new StreamContent(request.File.OpenReadStream());
+                content.Add(streamContent, "file", request.File.FileName);
+            }
+
+            var response = await _httpService.PostMultipartAsync(endpoint, content, sessionToken, userAgent, ct);
+
             if (response == null)
             {
                 return false;
             }
+
             if (response.IsSuccessStatusCode)
             {
                 return true;
@@ -41,23 +50,63 @@ namespace VITBO.Services
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync(ct);               
-                //_apiService.LogError($"Failed to create video. Status: {response.StatusCode}, Response: {errorContent}");
                 return false;
             }
-            //  return await _apiService.PostVoidAsync("api/Video", request);
+        }
+
+        public async Task<bool> UpdateVideoAsync(int id, UpdateVideoRequest request, string sessionToken, string userAgent, CancellationToken ct)
+        {
+            var endpoint = $"{_apiBase}/Video/{id}";
+
+            var response = await _httpService.SendHttpRequestAsync(HttpMethod.Put, endpoint, sessionToken, request, userAgent, ct);
+
+            return response != null && response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> DeleteVideoAsync(int id, string sessionToken, string userAgent, CancellationToken ct)
+        {
+            var endpoint = $"{_apiBase}/Video/{id}";
+
+            var payload = new { IsDeleted = true };
+            var response = await _httpService.SendHttpRequestAsync(HttpMethod.Put, endpoint, sessionToken, payload, userAgent, ct);
+
+            return response != null && response.IsSuccessStatusCode;
         }
 
         public async Task<PagedResult<VideoListItemDto>> GetVideosAsync(string? query, int page, string sessionToken, string userAgent, CancellationToken ct)
         {
-            var apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
-            var endpoint = $"{apiBase}api/Video?page={page}&pageSize=20";
-            if (!string.IsNullOrEmpty(query))
+            var endpoint = $"{_apiBase}/Video/all";
+
+            // Pass the session token and user agent as requested
+            var response = await _httpService.SendHttpRequestAsync<object>(HttpMethod.Get, endpoint, sessionToken, null, userAgent, ct);
+            if (response == null || !response.IsSuccessStatusCode)
             {
-                endpoint += $"&q={Uri.EscapeDataString(query)}";
+                return new PagedResult<VideoListItemDto> { Items = new List<VideoListItemDto>(), Total = 0, Page = page, PageSize = 20 };
             }
 
-            var result = await _apiService.GetAsync<PagedResult<VideoListItemDto>>(endpoint);
-            return result ?? new PagedResult<VideoListItemDto> { Items = new List<VideoListItemDto>() };
+            var allItems = await _httpService.GetBodyFromHttpResponseAsync<List<VideoListItemDto>>(response);
+            if (allItems == null)
+            {
+                return new PagedResult<VideoListItemDto> { Items = new List<VideoListItemDto>(), Total = 0, Page = page, PageSize = 20 };
+            }
+
+            // Apply search filter locally since /all endpoint might not support `q` parameter
+            if (!string.IsNullOrEmpty(query))
+            {
+                allItems = allItems.Where(v => v.Title != null && v.Title.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            // Apply pagination locally
+            var total = allItems.Count;
+            var pagedItems = allItems.Skip((page - 1) * 20).Take(20).ToList();
+
+            return new PagedResult<VideoListItemDto>
+            {
+                Items = pagedItems,
+                Total = total,
+                Page = page,
+                PageSize = 20
+            };
         }
     }
 }

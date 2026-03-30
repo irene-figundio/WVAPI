@@ -14,11 +14,15 @@ namespace VITBO.Controllers
     {
         private readonly IAuthService _authService;
         private readonly HttpService _httpService;  
+        private IConfiguration _config;
+        private readonly string _apiBaseUrl; // Adjust as needed
 
-        public AccountController(IAuthService authService, HttpService httpService)
+        public AccountController(IAuthService authService, HttpService httpService, IConfiguration config)
         {
             _authService = authService;
             _httpService = httpService;
+            _config = config;
+            _apiBaseUrl = _config["ApiSettings:BaseUrl"] ?? "https://localhost:7275/api/";
         }
 
         [HttpGet]
@@ -39,7 +43,7 @@ namespace VITBO.Controllers
             Password = model.Password
         };
 
-        var response = await _httpService.SendHttpRequestAsync(HttpMethod.Post, "auth/login", null, requestBody, userAgent: GetUserAgent());
+        var response = await _httpService.SendHttpRequestAsync(HttpMethod.Post, $"{_apiBaseUrl}/auth/login", null, requestBody, userAgent: GetUserAgent());
 
 
         var (isValid, error) = this.ValidateHttpResponse(
@@ -73,13 +77,13 @@ namespace VITBO.Controllers
                     var claims = new List<Claim>
                         {
                             new Claim(ClaimTypes.Name, model.Username),
+                            new Claim("JWToken", token)
                         };
 
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                     var authProperties = new AuthenticationProperties
                     {
-                        IsPersistent = model.RememberMe,
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+                        IsPersistent = model.RememberMe
                     };
 
                     await HttpContext.SignInAsync(

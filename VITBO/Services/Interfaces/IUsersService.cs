@@ -4,7 +4,7 @@ namespace VITBO.Services.Interfaces
 {
     public interface IUsersService
     {
-        Task<PagedResult<UserDto>> GetUsersAsync(string? query, int page);
-        Task<bool> CreateUserAsync(CreateUserRequest request);
+        Task<PagedResult<UserDto>> GetUsersAsync(string? query, int page, string sessionToken, string userAgent);
+        Task<bool> CreateUserAsync(CreateUserRequest request, string sessionToken, string userAgent);
     }
 }

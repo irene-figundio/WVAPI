@@ -7,7 +7,7 @@ namespace VITBO.Models
         public string? Title { get; set; }
         public string? Url_Video { get; set; }
         public string PublicUrl { get; set; } = string.Empty;
-        public bool? IsLandscape { get; set; }
+        public bool IsLandscape { get; set; } = false;
         public int? Play_Priority { get; set; }
         public DateTime DataCreation { get; set; }
     }

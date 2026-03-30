@@ -18,7 +18,9 @@ namespace VITBO.Controllers
         public async Task<IActionResult> Index([FromQuery] string? query = null, [FromQuery] int page = 1)
         {
             ViewData["CurrentFilter"] = query;
-            var result = await _usersService.GetUsersAsync(query, page);
+            var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            var userAgent = GetUserAgent() ?? string.Empty;
+            var result = await _usersService.GetUsersAsync(query, page, token, userAgent);
             return View(result);
         }
 
@@ -34,7 +36,9 @@ namespace VITBO.Controllers
         {
             if (ModelState.IsValid)
             {
-                var success = await _usersService.CreateUserAsync(model);
+                var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+                var userAgent = GetUserAgent() ?? string.Empty;
+                var success = await _usersService.CreateUserAsync(model, token, userAgent);
                 if (success)
                 {
                     return RedirectToAction(nameof(Index));

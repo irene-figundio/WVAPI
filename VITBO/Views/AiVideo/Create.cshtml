@@ -9,7 +9,7 @@
         <h5 class="mb-0 text-success"><i class="bi bi-camera-video me-2"></i> Add New AI Video</h5>
     </div>
     <div class="card-body">
-        <form asp-action="Create" method="post">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <div class="row g-3">
@@ -26,10 +26,10 @@
                 </div>
 
                 <div class="col-12 form-floating mb-3">
-                    <input asp-for="Url_Video" class="form-control" placeholder="example.mp4" />
-                    <label asp-for="Url_Video" class="ms-2">Video File Name / URL</label>
-                    <span asp-validation-for="Url_Video" class="text-danger"></span>
-                    <small class="text-muted d-block mt-1">Ensure the video is uploaded to the respective storage directory.</small>
+                    <input asp-for="File" type="file" class="form-control" />
+                    <label asp-for="File" class="ms-2">Video File</label>
+                    <span asp-validation-for="File" class="text-danger"></span>
+                    <small class="text-muted d-block mt-1">Select the video file to upload.</small>
                 </div>
 
                 <div class="col-md-6 form-floating mb-3">

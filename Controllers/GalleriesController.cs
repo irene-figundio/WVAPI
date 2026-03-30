@@ -1,15 +1,16 @@
+using AI_Integration.DataAccess;
+using AI_Integration.DataAccess.Database.Models;
+using AI_Integration.DataAccess.Database.Repositories.interfaces;
+using AI_Integration.Helpers;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using AI_Integration.DataAccess;
-using AI_Integration.DataAccess.Database.Models;
-using AI_Integration.DataAccess.Database.Repositories.interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using AI_Integration.Helpers;
 
 namespace AI_Integration.Controllers
 {
@@ -32,7 +33,7 @@ namespace AI_Integration.Controllers
             var sw = Stopwatch.StartNew();
             try
             {
-                var items = await _unitOfWork.Query<Gallery>()
+                var items = await _unitOfWork.Query<Gallery>().Where(e => e.IsDeleted != true)
                     .Where(g => g.LangID == langId)
                     .ToListAsync();
                 sw.Stop();
@@ -54,7 +55,7 @@ namespace AI_Integration.Controllers
             var sw = Stopwatch.StartNew();
             try
             {
-                var item = await _unitOfWork.Query<Gallery>()
+                var item = await _unitOfWork.Query<Gallery>().Where(e => e.IsDeleted != true)
                     .Where(g => g.Id == id && g.LangID == langId)
                     .FirstOrDefaultAsync();
                 if (item == null)
@@ -75,6 +76,37 @@ namespace AI_Integration.Controllers
             }
         }
 
+
+
+        [HttpGet("byevent/{eventId:int}")]
+        public async Task<IActionResult> GetByEventId(int eventId, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        {
+            var log = WebApiLogHelper.NewLog("GET", $"api/galleries/byevent/{eventId}", userAgent, "Get gallery by event id");
+            var sw = Stopwatch.StartNew();
+            try
+            {
+                var item = await _unitOfWork.Query<Gallery>().Where(e => e.IsDeleted != true)
+                    .Where(g => g.EventId == eventId)
+                    .FirstOrDefaultAsync();
+                if (item == null)
+                {
+                    sw.Stop();
+                    await WebApiLogHelper.LogNotFoundAsync(_unitOfWork, log, "{ success = false, message = 'Item not found.' }", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                    return NotFound();
+                }
+                sw.Stop();
+                await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return Ok(item);
+            }
+            catch (Exception ex)
+            {
+                sw.Stop();
+                await WebApiLogHelper.LogErrorAsync(_unitOfWork, log, ex, $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] Gallery item, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
@@ -84,7 +116,7 @@ namespace AI_Integration.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                item.CreatedAt = DateTime.Now;
+                item.CreatedAt = DateTime.Now;              
                 await _unitOfWork.InsertAsync(item);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
@@ -149,7 +181,9 @@ namespace AI_Integration.Controllers
                     await WebApiLogHelper.LogNotFoundAsync(_unitOfWork, log, "{ success = false, message = 'Item not found.' }", $"ElapsedMs={sw.ElapsedMilliseconds}");
                     return NotFound();
                 }
-                _unitOfWork.Remove(item);
+                item.IsDeleted = true;
+                item.DeletionDate = DateTime.Now;
+                _unitOfWork.Update(item);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogNoContentAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");

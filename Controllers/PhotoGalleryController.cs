@@ -32,7 +32,7 @@ namespace AI_Integration.Controllers
             var sw = Stopwatch.StartNew();
             try
             {
-                var items = await _unitOfWork.Query<PhotoGallery>()
+                var items = await _unitOfWork.Query<PhotoGallery>().Where(e => e.IsDeleted != true)
                     .Where(p => p.LangID == langId)
                     .ToListAsync();
                 sw.Stop();
@@ -54,7 +54,7 @@ namespace AI_Integration.Controllers
             var sw = Stopwatch.StartNew();
             try
             {
-                var item = await _unitOfWork.Query<PhotoGallery>()
+                var item = await _unitOfWork.Query<PhotoGallery>().Where(e => e.IsDeleted != true)
                     .Where(p => p.Id == id && p.LangID == langId)
                     .FirstOrDefaultAsync();
                 if (item == null)
@@ -90,6 +90,34 @@ namespace AI_Integration.Controllers
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
                 return Ok(new { success = true, id = item.Id });
+            }
+            catch (Exception ex)
+            {
+                sw.Stop();
+                await WebApiLogHelper.LogErrorAsync(_unitOfWork, log, ex, $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet("bygallery/{galleryId:int}")]
+        public async Task<IActionResult> GetByGalleryId(int galleryId, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        {
+            var log = WebApiLogHelper.NewLog("GET", $"api/photogallery/bygallery/{galleryId}", "", userAgent, "Get photogallery by gallery id");
+            var sw = Stopwatch.StartNew();
+            try
+            {
+                var items = await _unitOfWork.Query<PhotoGallery>().Where(e => e.IsDeleted != true)
+                    .Where(p => p.GalleryId == galleryId)
+                    .ToListAsync();
+                if (items == null || items.Count == 0)
+                {
+                    sw.Stop();
+                    await WebApiLogHelper.LogNotFoundAsync(_unitOfWork, log, "{ success = false, message = 'Items not found.' }", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                    return NotFound();
+                }
+                sw.Stop();
+                await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return Ok(items);
             }
             catch (Exception ex)
             {
@@ -149,7 +177,9 @@ namespace AI_Integration.Controllers
                     await WebApiLogHelper.LogNotFoundAsync(_unitOfWork, log, "{ success = false, message = 'Item not found.' }", $"ElapsedMs={sw.ElapsedMilliseconds}");
                     return NotFound();
                 }
-                _unitOfWork.Remove(item);
+                item.IsDeleted = true;
+                item.DeletionDate = DateTime.Now;
+                _unitOfWork.Update(item);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogNoContentAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");

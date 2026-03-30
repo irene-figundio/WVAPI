@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VITBO.Services.Interfaces;
 using VITBO.Models;
+using VITBO.Services;
 
 namespace VITBO.Controllers
 {
@@ -18,23 +19,30 @@ namespace VITBO.Controllers
         public async Task<IActionResult> Index([FromQuery] int langId = 1)
         {
             ViewData["CurrentLangId"] = langId;
-            var result = await _eventsService.GetEventsAsync(langId);
+            string sessionToken = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            string userAgent = GetUserAgent() ?? string.Empty;
+            var result = await _eventsService.GetEventsAsync(langId, sessionToken, userAgent);
             return View(result);
         }
 
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create([FromQuery] int langId = 1)
         {
-            return View(new CreateEventRequest());
+            string sessionToken = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            string userAgent = GetUserAgent() ?? string.Empty;
+            ViewBag.Categories = await _eventsService.GetEventCategoriesAsync(langId, sessionToken, userAgent);
+            return View(new CreateEventRequest { LangID = langId });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateEventRequest model)
         {
+            string sessionToken = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            string userAgent = GetUserAgent() ?? string.Empty;
             if (ModelState.IsValid)
             {
-                var success = await _eventsService.CreateEventAsync(model);
+                var success = await _eventsService.CreateEventAsync(model, sessionToken, userAgent);
                 if (success)
                 {
                     return RedirectToAction(nameof(Index));
@@ -44,6 +52,77 @@ namespace VITBO.Controllers
             return View(model);
 
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id, [FromQuery] int langId = 1)
+        {
+            string sessionToken = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            string userAgent = GetUserAgent() ?? string.Empty;
+            var eventDto = await _eventsService.GetEventByIdAsync(id, langId, sessionToken, userAgent);
+            if (eventDto == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.Categories = await _eventsService.GetEventCategoriesAsync(langId, sessionToken, userAgent);
+
+            var model = new UpdateEventRequest
+            {
+                id = eventDto.Id,
+                Title = eventDto.Title,
+                Description = eventDto.Description,
+                EventDate = eventDto.EventDate,
+                EndDate = eventDto.EndDate,
+                EndTime = eventDto.EndTime,
+                CoverImage = eventDto.CoverImage,
+                BookingEndDate = eventDto.BookingEndDate,
+                Location = eventDto.Location,
+                Organizer = eventDto.Organizer,
+                ContactInfo = eventDto.ContactInfo,
+                Price = eventDto.Price,
+                IsOnline = eventDto.IsOnline,
+                LangID = eventDto.LangID,
+                Subtitle = eventDto.Subtitle,
+                CategoryId = eventDto.CategoryId,
+                Coordinates = eventDto.Coordinates,
+                HeroImage = eventDto.HeroImage
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, UpdateEventRequest model)
+        {
+            string sessionToken = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            string userAgent = GetUserAgent() ?? string.Empty;
+            if (ModelState.IsValid)
+            {
+                var success = await _eventsService.UpdateEventAsync(id, model, sessionToken, userAgent);
+                if (success)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                ModelState.AddModelError("", "Failed to update event. Please try again.");
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int id)
+        {
+            string sessionToken = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            string userAgent = GetUserAgent() ?? string.Empty;
+            var success = await _eventsService.DeleteEventAsync(id, sessionToken, userAgent);
+            if (success)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            ModelState.AddModelError("", "Failed to delete event. Please try again.");
+            return RedirectToAction(nameof(Index));
+        }
+
         protected string? GetUserAgent()
         {
             return Request.Headers["User-Agent"].ToString();

@@ -539,7 +539,7 @@ namespace AI_Integration.Controllers
         [HttpGet("files")]
         public async Task<IActionResult> GetUploadedFiles()
         {
-            var files = await _unitOfWork.Query<UploadedFile>()
+            var files = await _unitOfWork.Query<UploadedFile>().Where(e => e.IsDeleted != true)
                 .OrderByDescending(f => f.UploadDate)
                 .Select(f => new
                 {

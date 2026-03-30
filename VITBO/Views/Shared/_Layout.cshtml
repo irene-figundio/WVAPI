@@ -80,6 +80,11 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="@Url.Action("Index", "Trips")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Trips" ? "active" : "")">
+                            <i class="bi bi-airplane me-2"></i> Viaggi
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="@Url.Action("Articles", "Contents")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Contents" && ViewContext.RouteData.Values["Action"]?.ToString() == "Articles" ? "active" : "")">
                             <i class="bi bi-file-earmark-text me-2"></i> Articles
                         </a>
@@ -87,6 +92,11 @@
                     <li class="nav-item">
                         <a href="@Url.Action("News", "Contents")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Contents" && ViewContext.RouteData.Values["Action"]?.ToString() == "News" ? "active" : "")">
                             <i class="bi bi-newspaper me-2"></i> News
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Experts")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Experts" ? "active" : "")">
+                            <i class="bi bi-person-badge me-2"></i> Experts
                         </a>
                     </li>
                 </ul>
