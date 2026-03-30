@@ -152,7 +152,7 @@ namespace AI_Integration.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, [FromBody] ItineraryStop changes, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> Put(int id, [FromBody] ItineraryStopDto changes, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
             var log = WebApiLogHelper.NewLog("PUT", $"api/itinerarystops/{id}", changes?.ToString(), userAgent, "Update itinerary stop");
             var sw = Stopwatch.StartNew();

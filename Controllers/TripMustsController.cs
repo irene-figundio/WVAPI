@@ -100,7 +100,7 @@ namespace AI_Integration.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] TripMust must, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> Add([FromBody] TripMustDto must, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
             var log = WebApiLogHelper.NewLog("POST", "api/tripmusts", must?.ToString(), userAgent, "Create trip must");
             var sw = Stopwatch.StartNew();
@@ -114,12 +114,18 @@ namespace AI_Integration.Controllers
 
             try
             {
-                must.CreationTime = DateTime.Now;
-                await _unitOfWork.InsertAsync(must);
+                var entity = new TripMust
+                {
+                    TripId = must.TripId,
+                    Text = must.Text,
+                    TypeId = must.TypeId
+                };
+                entity.CreationTime = DateTime.Now;
+                await _unitOfWork.InsertAsync(entity);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                return Ok(new { success = true, id = must.Id });
+                return Ok(new { success = true, id = entity.Id });
             }
             catch (Exception ex)
             {
@@ -130,7 +136,7 @@ namespace AI_Integration.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, [FromBody] TripMust changes, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> Put(int id, [FromBody] TripMustDto changes, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
             var log = WebApiLogHelper.NewLog("PUT", $"api/tripmusts/{id}", changes?.ToString(), userAgent, "Update trip must");
             var sw = Stopwatch.StartNew();

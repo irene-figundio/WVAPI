@@ -40,6 +40,14 @@ namespace VITBO.Services
             return eventDto;
         }
 
+        public async Task<EventDto?> GetEventByIdAbsAsync(int id, string sessionToken, string userAgent)
+        {
+            var endpoint = $"{_apiBase}/events/absolute/{id}";
+            var result = await _httpService.SendHttpRequestAsync(HttpMethod.Get, endpoint, sessionToken, userAgent);
+            var eventDto = await _httpService.GetBodyFromHttpResponseAsync<EventDto>(result);
+            return eventDto;
+        }
+
         public async Task<bool> UpdateEventAsync(int id, UpdateEventRequest request,string sessionToken, string userAgent)
         {
             var endpoint = $"{_apiBase}/events/{id}";

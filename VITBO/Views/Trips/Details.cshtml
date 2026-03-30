@@ -1,6 +1,7 @@
 @model VITBO.Models.TripDto
 @{
-    ViewData["Title"] = $"Dettagli Viaggio #{Model.Id}";
+    //ViewData["Title"] = $"Dettagli Viaggio #{Model.Id}";
+    ViewData["Title"] = $"Dettagli Viaggio : {ViewBag.Title}";
     var stays = ViewBag.Stays as List<VITBO.Models.StayDto> ?? new();
     var days = ViewBag.Days as List<VITBO.Models.ItineraryDayDto> ?? new();
     var musts = ViewBag.Musts as List<VITBO.Models.TripMustDto> ?? new();
@@ -353,5 +354,25 @@
             var modal = new bootstrap.Modal(document.getElementById('addStopModal'));
             modal.show();
         }
+         document.addEventListener("DOMContentLoaded", function () {
+            const hash = window.location.hash;
+
+            if (hash) {
+                const triggerEl = document.querySelector(hash);
+
+                if (triggerEl) {
+                    const tab = new bootstrap.Tab(triggerEl);
+                    tab.show();
+                }
+            }
+
+            // opzionale: aggiorna l'hash quando clicchi un tab
+            const tabButtons = document.querySelectorAll('#tripTabs button[data-bs-toggle="tab"]');
+            tabButtons.forEach(btn => {
+                btn.addEventListener('shown.bs.tab', function (e) {
+                    history.replaceState(null, null, '#' + e.target.id);
+                });
+            });
+        });
     </script>
 }

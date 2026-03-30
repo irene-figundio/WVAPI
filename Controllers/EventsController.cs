@@ -228,6 +228,33 @@ namespace AI_Integration.Controllers
             }
         }
 
+        [HttpGet("absolute/{id:int}")]
+        public async Task<IActionResult> GetAbsoluteById(int id, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        {
+            var log = WebApiLogHelper.NewLog("GET", $"api/events/absolute/{id}", "", userAgent, "Get event by id (absolute)");
+            var sw = Stopwatch.StartNew();
+            try
+            {
+                var @event = await _unitOfWork.GetByIdAsync<Event>(id);
+                if (@event == null || @event.IsDeleted == true)
+                {
+                    sw.Stop();
+                    await WebApiLogHelper.LogNotFoundAsync(_unitOfWork, log, "{ success = false, message = 'Event not found.' }", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                    return NotFound(new { success = false, message = "Event not found." });
+                }
+                sw.Stop();
+                await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return Ok(@event);
+            }
+            catch (Exception ex)
+            {
+                sw.Stop();
+                await WebApiLogHelper.LogErrorAsync(_unitOfWork, log, ex, $"ElapsedMs={sw.ElapsedMilliseconds}");
+                return StatusCode(500, new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] Event @event, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {

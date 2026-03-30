@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Reflection;
 using VITBO.Models;
 using VITBO.Services.Interfaces;
 
@@ -32,12 +33,18 @@ namespace VITBO.Controllers
             string ua = GetUserAgent();
             var trip = await _tripsService.GetTripByIdAsync(id, token, ua);
             if (trip == null) return NotFound();
-
+            var evetnt = await _eventsService.GetEventByIdAbsAsync(trip.EventId,token,ua);
+            if (evetnt != null)
+            {
+                ViewBag.title = evetnt.Title;
+                ViewBag.description = evetnt.Description;
+                ViewBag.imageUrl = evetnt.CoverImage;
+                ViewBag.Price = evetnt.Price;
+            }
             ViewBag.Stays = await _tripsService.GetStaysByTripIdAsync(id, token, ua);
             var days = await _tripsService.GetItineraryDaysByTripIdAsync(id, token, ua);
             ViewBag.Days = days;
             ViewBag.Musts = await _tripsService.GetTripMustsByTripIdAsync(id, token, ua);
-
             var stopsByDay = new Dictionary<int, List<ItineraryStopDto>>();
             foreach (var day in days)
             {
@@ -131,14 +138,22 @@ namespace VITBO.Controllers
             {
                 await _tripsService.CreateStayAsync(model, GetToken(), GetUserAgent());
             }
-            return RedirectToAction(nameof(Details), new { id = model.TripId });
+            return RedirectToAction(
+         nameof(Details),
+         null,
+         new { id = model.TripId },
+         "stays-tab");
         }
 
         [HttpPost]
         public async Task<IActionResult> DeleteStay(int id, int tripId)
         {
             await _tripsService.DeleteStayAsync(id, GetToken(), GetUserAgent());
-            return RedirectToAction(nameof(Details), new { id = tripId });
+            return RedirectToAction(
+         nameof(Details),
+         null,
+         new { id = tripId },
+         "stays-tab");
         }
 
         // Days
@@ -149,14 +164,22 @@ namespace VITBO.Controllers
             {
                 await _tripsService.CreateItineraryDayAsync(model, GetToken(), GetUserAgent());
             }
-            return RedirectToAction(nameof(Details), new { id = model.TripId });
+            return RedirectToAction(
+         nameof(Details),
+         null,
+         new { id = model.TripId },
+         "days-tab");
         }
 
         [HttpPost]
         public async Task<IActionResult> DeleteDay(int id, int tripId)
         {
             await _tripsService.DeleteItineraryDayAsync(id, GetToken(), GetUserAgent());
-            return RedirectToAction(nameof(Details), new { id = tripId });
+            return RedirectToAction(
+         nameof(Details),
+         null,
+         new { id = tripId },
+         "days-tab");
         }
 
         // Stops
@@ -167,15 +190,24 @@ namespace VITBO.Controllers
             {
                 await _tripsService.CreateItineraryStopAsync(model, GetToken(), GetUserAgent());
             }
-            return RedirectToAction(nameof(Details), new { id = tripId });
+            return RedirectToAction(
+        nameof(Details),
+        null,
+        new { id = tripId },
+        "days-tab");
         }
 
         [HttpPost]
         public async Task<IActionResult> DeleteStop(int id, int tripId)
         {
             await _tripsService.DeleteItineraryStopAsync(id, GetToken(), GetUserAgent());
-            return RedirectToAction(nameof(Details), new { id = tripId });
+            return RedirectToAction(
+         nameof(Details),
+         null,
+         new { id = tripId },
+         "days-tab");
         }
+
 
         // Musts
         [HttpPost]
@@ -185,14 +217,23 @@ namespace VITBO.Controllers
             {
                 await _tripsService.CreateTripMustAsync(model, GetToken(), GetUserAgent());
             }
-            return RedirectToAction(nameof(Details), new { id = model.TripId });
+            return RedirectToAction(
+        nameof(Details),
+        null,
+        new { id = model.TripId },
+        "musts-tab");
         }
+
 
         [HttpPost]
         public async Task<IActionResult> DeleteMust(int id, int tripId)
         {
             await _tripsService.DeleteTripMustAsync(id, GetToken(), GetUserAgent());
-            return RedirectToAction(nameof(Details), new { id = tripId });
+            return RedirectToAction(
+         nameof(Details),
+         null,
+         new { id = tripId },
+         "musts-tab");
         }
 
         private string GetToken() => HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;

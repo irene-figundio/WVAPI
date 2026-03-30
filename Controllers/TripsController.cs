@@ -118,7 +118,7 @@ namespace AI_Integration.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] Trip trip, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> Add([FromBody] TripDto trip, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
             var log = WebApiLogHelper.NewLog("POST", "api/trips", trip?.ToString(), userAgent, "Create trip");
             var sw = Stopwatch.StartNew();
@@ -140,12 +140,25 @@ namespace AI_Integration.Controllers
 
             try
             {
-                trip.CreationTime = DateTime.Now;
-                await _unitOfWork.InsertAsync(trip);
+                var entity = new Trip
+                {
+                    EventId = trip.EventId,
+                    DepartureCity = trip.DepartureCity,
+                    DepartureCountry = trip.DepartureCountry,
+                    ArrivalCity = trip.ArrivalCity,
+                    ArrivalCountry = trip.ArrivalCountry,
+                    DurationDays = trip.DurationDays,
+                    DurationNights = trip.DurationNights,
+                    MaxGuests = trip.MaxGuests,
+                    Status = trip.Status
+                };
+
+                entity.CreationTime = DateTime.Now;
+                await _unitOfWork.InsertAsync(entity);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                return Ok(new { success = true, id = trip.Id });
+                return Ok(new { success = true, id = entity.Id });
             }
             catch (Exception ex)
             {
@@ -156,7 +169,7 @@ namespace AI_Integration.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, [FromBody] Trip changes, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> Put(int id, [FromBody] TripDto changes, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
             var log = WebApiLogHelper.NewLog("PUT", $"api/trips/{id}", changes?.ToString(), userAgent, "Update trip");
             var sw = Stopwatch.StartNew();

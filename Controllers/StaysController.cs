@@ -112,7 +112,7 @@ namespace AI_Integration.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] Stay stay, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> Add([FromBody] StayDto stay, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
             var log = WebApiLogHelper.NewLog("POST", "api/stays", stay?.ToString(), userAgent, "Create stay");
             var sw = Stopwatch.StartNew();
@@ -125,12 +125,22 @@ namespace AI_Integration.Controllers
 
             try
             {
-                stay.CreationTime = DateTime.Now;
-                await _unitOfWork.InsertAsync(stay);
+                var entity = new Stay
+                {
+                    TripId = stay.TripId,
+                    Name = stay.Name,
+                    Description = stay.Description,
+                    Image = stay.Image,
+                    Location = stay.Location,
+                    OrderIndex = stay.OrderIndex,
+                    ItineraryDayId = stay.ItineraryDayId
+                };
+                entity.CreationTime = DateTime.Now;
+                await _unitOfWork.InsertAsync(entity);
                 await _unitOfWork.SaveChangesAsync();
                 sw.Stop();
                 await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                return Ok(new { success = true, id = stay.Id });
+                return Ok(new { success = true, id = entity.Id });
             }
             catch (Exception ex)
             {
@@ -141,7 +151,7 @@ namespace AI_Integration.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, [FromBody] Stay changes, [FromHeader(Name = "User-Agent")] string userAgent = "")
+        public async Task<IActionResult> Put(int id, [FromBody] StayDto changes, [FromHeader(Name = "User-Agent")] string userAgent = "")
         {
             var log = WebApiLogHelper.NewLog("PUT", $"api/stays/{id}", changes?.ToString(), userAgent, "Update stay");
             var sw = Stopwatch.StartNew();
