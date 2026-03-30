@@ -195,6 +195,8 @@ namespace AI_Integration.Controllers
             {
                 Subject = new ClaimsIdentity(new[] { new Claim("platform", platform) }),
                 Expires = this.expires,
+                Issuer = "Vitinerario_API",
+                Audience = "Vitinerario_API",
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var existingClaims = new ClaimsIdentity();

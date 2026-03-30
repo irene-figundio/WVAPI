@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - VITBO Dashboard</title>
+    <!-- Keep Bootstrap from template -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/VITBO.styles.css" asp-append-version="true" />
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .wrapper {
+            display: flex;
+            flex: 1;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            padding-top: 20px;
+        }
+        .sidebar a {
+            color: #adb5bd;
+            text-decoration: none;
+            padding: 10px 20px;
+            display: block;
+            border-left: 3px solid transparent;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            color: white;
+            background-color: #495057;
+            border-left-color: #0d6efd;
+        }
+        .main-content {
+            flex: 1;
+            background-color: #f8f9fa;
+        }
+        .navbar-top {
+            background-color: #ffffff;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+    </style>
+</head>
+<body>
+    @if (User.Identity != null && User.Identity.IsAuthenticated)
+    {
+        <div class="wrapper">
+            <!-- Sidebar -->
+            <nav class="sidebar d-flex flex-column">
+                <div class="px-3 mb-4 text-center">
+                    <h4 class="text-white">VITBO</h4>
+                    <span class="badge bg-primary">Admin Dashboard</span>
+                </div>
+
+                <ul class="nav flex-column mb-auto">
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Home")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")">
+                            <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Users")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Users" ? "active" : "")">
+                            <i class="bi bi-people me-2"></i> Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "AiVideo")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "AiVideo" ? "active" : "")">
+                            <i class="bi bi-camera-video me-2"></i> AI Videos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Events")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Events" ? "active" : "")">
+                            <i class="bi bi-calendar-event me-2"></i> Events
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Trips")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Trips" ? "active" : "")">
+                            <i class="bi bi-airplane me-2"></i> Viaggi
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Articles", "Contents")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Contents" && ViewContext.RouteData.Values["Action"]?.ToString() == "Articles" ? "active" : "")">
+                            <i class="bi bi-file-earmark-text me-2"></i> Articles
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("News", "Contents")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Contents" && ViewContext.RouteData.Values["Action"]?.ToString() == "News" ? "active" : "")">
+                            <i class="bi bi-newspaper me-2"></i> News
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Experts")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Experts" ? "active" : "")">
+                            <i class="bi bi-person-badge me-2"></i> Experts
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Main Content Area -->
+            <div class="main-content d-flex flex-column">
+                <!-- Top Navbar -->
+                <header class="navbar navbar-expand-lg navbar-light navbar-top px-4 py-3 border-bottom">
+                    <div class="container-fluid">
+                        <h5 class="mb-0 text-dark">@ViewData["Title"]</h5>
+
+                        <div class="ms-auto d-flex align-items-center">
+                            <span class="me-3 text-muted">Welcome, @User.Identity.Name!</span>
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Page Content -->
+                <main role="main" class="flex-grow-1 p-4">
+                    @RenderBody()
+                </main>
+
+                <!-- Footer -->
+                <footer class="bg-white border-top p-3 text-center text-muted small mt-auto">
+                    &copy; @DateTime.Now.Year - VITBO Dashboard v1.0
+                </footer>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Login Layout -->
+        <div class="bg-light h-100 min-vh-100 d-flex flex-column align-items-center justify-content-center">
+            @RenderBody()
+        </div>
+    }
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

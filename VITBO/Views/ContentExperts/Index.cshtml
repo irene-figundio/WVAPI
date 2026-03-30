@@ -1,0 +1,102 @@
+@model List<VITBO.Models.ContentExpertDto>
+
+@{
+    ViewData["Title"] = "Content Experts";
+    int contentId = ViewBag.ContentId;
+    int currentLangId = ViewBag.LangId ?? 1;
+    var availableExperts = ViewBag.AvailableExperts as List<VITBO.Models.ExpertDto> ?? new List<VITBO.Models.ExpertDto>();
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm border-start border-secondary border-4">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-secondary"><i class="bi bi-person-badge me-2"></i> Experts Linked to Content #@contentId</h5>
+                <a asp-controller="Contents" asp-action="Articles" class="btn btn-outline-secondary btn-sm">Back to Contents</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col" class="ps-4">Link ID</th>
+                                <th scope="col">Expert ID</th>
+                                <th scope="col" class="text-end pe-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.Any())
+                            {
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td class="ps-4 text-muted fw-bold">#@item.Id</td>
+                                        <td>#@item.ExpertId</td>
+                                        <td class="text-end pe-4">
+                                            <form asp-action="Delete" asp-route-id="@item.Id" asp-route-contentId="@contentId" method="post" class="d-inline" onsubmit="return confirm('Unlink this expert?');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-link-45deg"></i> Unlink</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="3" class="text-center py-4 text-muted">No experts linked.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 rounded-3 mb-4">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="m-0 font-weight-bold text-secondary">Filter Experts by Language</h6>
+            </div>
+            <div class="card-body p-4">
+                <form method="get" asp-action="Index">
+                    <input type="hidden" name="contentId" value="@contentId" />
+                    <div class="mb-3">
+                        <select name="langId" class="form-select" onchange="this.form.submit()">
+                            <!option value="1" @(currentLangId == 1 ? "selected" : "")>English (1)</!option>
+                            <!option value="2" @(currentLangId == 2 ? "selected" : "")>Italiano (2)</!option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="m-0 font-weight-bold text-secondary">Link an Expert</h6>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Add" method="post">
+                    <input type="hidden" name="ContentId" value="@contentId" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">Select Expert</label>
+                        <select name="ExpertId" class="form-select" required>
+                            <option value="">-- Select an Expert --</option>
+                            @foreach (var exp in availableExperts)
+                            {
+                                <option value="@exp.Id">@exp.Name (#@exp.Id)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-secondary text-white">
+                            <i class="bi bi-link me-1"></i> Link Expert
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

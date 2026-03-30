@@ -15,6 +15,14 @@ namespace AI_Integration.DataAccess.Database.Repositories.interfaces
         IAdSessionRepository ADSession { get; }
         IUploadedFileRepository UploadedFile { get; }
         IUsersRepository Users { get; }    // <--- nuovo
+        IContentRepository Contents { get; }
+        IContentImageRepository ContentImages { get; }
+        IContentLinkRepository ContentLinks { get; }
+        IPodcastRepository Podcasts { get; }
+        IEventRepository Events { get; }
+        IEventLinkRepository EventLinks { get; }
+        IGalleryRepository Galleries { get; }
+        IPhotoGalleryRepository PhotoGalleries { get; }
 
         void Save();
         IRepository<T> Repository<T>() where T : class;

@@ -41,7 +41,7 @@ namespace AI_Integration.Controllers
 
             try
             {
-                var q = _unitOfWork.Query<AdSession>()
+                var q = _unitOfWork.Query<AdSession>().Where(e => e.IsDeleted != true)
                                    .Where(s => s.IsDeleted != true);
 
                 if (campaignId.HasValue)
@@ -53,7 +53,7 @@ namespace AI_Integration.Controllers
                 {
                     var campaign = await _unitOfWork.GetByIdAsync<AdCampaign>(session.ID_Campaing);
                     session.Campaign = campaign;
-                    session.Videos = await _unitOfWork.Query<AIVideo>()
+                    session.Videos = await _unitOfWork.Query<AIVideo>().Where(e => e.IsDeleted != true)
                             .Where(v => v.ID_Session == session.Id && v.IsDeleted != true)
                             .ToListAsync();
                 }
@@ -93,7 +93,7 @@ namespace AI_Integration.Controllers
 
                 }
 
-                var q = _unitOfWork.Query<AdSession>()
+                var q = _unitOfWork.Query<AdSession>().Where(e => e.IsDeleted != true)
                                    .Where(s => s.IsDeleted != true && s.Id == id);
 
                 var result = await q
@@ -152,7 +152,7 @@ namespace AI_Integration.Controllers
             }
 
             // ID_Campaing è int NOT NULL: controlliamo esistenza campagna
-            var campaignExists = await _unitOfWork.Query<AdCampaign>()
+            var campaignExists = await _unitOfWork.Query<AdCampaign>().Where(e => e.IsDeleted != true)
                                                   .AnyAsync(c => c.Id == session.ID_Campaing && c.IsDeleted != true);
             if (!campaignExists)
             {

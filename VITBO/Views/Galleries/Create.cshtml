@@ -1,0 +1,63 @@
+@model VITBO.Models.GalleryDto
+
+@{
+    ViewData["Title"] = "Create Gallery";
+}
+
+<div class="container-fluid px-4 py-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col">
+            <h2 class="h3 mb-0 text-gray-800">
+                <i class="bi bi-images text-warning me-2"></i> @(Model.EventId > 0 ? $"Create Gallery for Event #{Model.EventId}" : "Create Gallery")
+            </h2>
+        </div>
+        <div class="col-auto">
+            <a asp-action="Index" asp-route-eventId="@(Model.EventId > 0 ? Model.EventId : (int?)null)" class="btn btn-outline-secondary btn-sm shadow-sm">
+                <i class="bi bi-arrow-left me-1"></i> Back to Galleries
+            </a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="m-0 font-weight-bold text-warning">Gallery Details</h6>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+                        @if (Model.EventId > 0)
+                        {
+                            <input type="hidden" asp-for="EventId" />
+                        }
+                        else
+                        {
+                            <div class="mb-3">
+                                <label asp-for="EventId" class="form-label fw-bold small text-muted">Event ID</label>
+                                <input asp-for="EventId" class="form-control" type="number" required />
+                                <span asp-validation-for="EventId" class="text-danger small"></span>
+                            </div>
+                        }
+                        <input type="hidden" asp-for="LangID" />
+
+                        <div class="mb-4">
+                            <label asp-for="Title" class="form-label fw-bold small text-muted">Title</label>
+                            <input asp-for="Title" class="form-control" placeholder="Enter gallery title..." />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-action="Index" asp-route-eventId="@Model.EventId" class="btn btn-light px-4">Cancel</a>
+                            <button type="submit" class="btn btn-warning px-4">
+                                <i class="bi bi-save me-1"></i> Create Gallery
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

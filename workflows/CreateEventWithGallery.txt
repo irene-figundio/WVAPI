@@ -1,0 +1,135 @@
+=========================================================
+WORKFLOW: CREAZIONE DI UN EVENTO CON GALLERIA IMMAGINI
+=========================================================
+
+Questo documento descrive tutti i passaggi necessari per creare un nuovo Evento e associargli una Galleria di immagini, sfruttando le API di Vitinerario AI.
+
+Prerequisiti:
+Assicurati di includere l'header di autenticazione nelle chiamate API che lo richiedono.
+Header:
+Authorization: Bearer <IL_TUO_TOKEN_JWT>
+Content-Type: application/json
+
+---
+
+### STEP 1: Autenticazione (Opzionale se possiedi già il token)
+Ottieni il token di accesso chiamando l'endpoint di login.
+
+Richiesta:
+POST /api/auth/login
+{
+  "username": "tuo_username",
+  "password": "tua_password"
+}
+
+Risposta:
+Riceverai un oggetto JSON contenente la proprietà `token`. Usa questo token nei passaggi successivi.
+
+---
+
+### STEP 2: Creazione dell'Evento Base
+Crea prima l'evento. Questo genererà un ID univoco nel database che ci servirà per la galleria. Puoi inserire i campi HTML direttamente nelle stringhe.
+NB: Abbiamo aggiunto i nuovi campi: Subtitle, CategoryId, Coordinates e HeroImage.
+
+Richiesta:
+POST /api/events
+{
+  "title": "Degustazione Vini in Toscana",
+  "description": "<p>Unisciti a noi per una <strong>degustazione indimenticabile</strong> tra i colli toscani.</p>",
+  "eventDate": "2024-10-15T18:00:00Z",
+  "coverImage": "url_immagine_copertina.jpg",
+  "bookingEndDate": "2024-10-10T23:59:59Z",
+  "location": "Tenuta San Guido, Bolgheri",
+  "organizer": "Associazione Sommelier",
+  "contactInfo": "info@sommelier.it",
+  "price": 150.00,
+  "isOnline": false,
+  "langId": 1,
+  "subtitle": "Un'esperienza unica tra i filari del Chianti",
+  "categoryId": 2,
+  "coordinates": "43.7696,11.2558",
+  "heroImage": "url_immagine_eroe_toscana.jpg"
+}
+
+Risposta Attesa:
+{
+  "success": true,
+  "id": 105
+}
+
+Prendi nota dell'ID restituito (es. 105).
+
+---
+
+### STEP 3: Creazione della Galleria Associata all'Evento
+Adesso crea l'entità Galleria e collegala all'evento usando l'`eventId`.
+
+Richiesta:
+POST /api/galleries
+{
+  "eventId": 105,
+  "title": "Foto della Tenuta",
+  "langId": 1
+}
+
+Risposta Attesa:
+{
+  "success": true,
+  "id": 34
+}
+
+Prendi nota dell'ID della galleria restituita (es. 34).
+
+---
+
+### STEP 4: Aggiornamento dell'Evento (Collegamento Inverso)
+Aggiorna l'evento creato nello Step 2 per salvare il `GalleryId` appena creato.
+
+Richiesta:
+PUT /api/events/105
+{
+  "galleryId": 34
+}
+
+Risposta Attesa:
+{
+  "success": true
+}
+
+---
+
+### STEP 5: Caricamento delle Foto nella Galleria
+Aggiungi una o più immagini alla galleria creata usando l'endpoint `/api/photogallery`. Ripeti questa chiamata per ogni immagine che vuoi aggiungere.
+
+Richiesta 1:
+POST /api/photogallery
+{
+  "galleryId": 34,
+  "imageUrl": "url_foto_1.jpg",
+  "caption": "Vista sui vigneti",
+  "langId": 1
+}
+
+Richiesta 2:
+POST /api/photogallery
+{
+  "galleryId": 34,
+  "imageUrl": "url_foto_2.jpg",
+  "caption": "Le botti in cantina",
+  "langId": 1
+}
+
+Risposta Attesa per ogni caricamento:
+{
+  "success": true,
+  "id": 88
+}
+
+---
+
+### CONCLUSIONE
+L'evento è ora configurato correttamente, comprensivo di tutti i nuovi campi richiesti (Subtitle, CategoryId, Coordinates, HeroImage) e possiede una galleria popolata da immagini.
+Puoi testare il risultato chiamando:
+GET /api/events/105
+
+La risposta includerà l'oggetto Evento con la rispettiva struttura `gallery` annidata.

@@ -36,6 +36,9 @@ namespace AI_Integration.Helpers
             log.ResponseCode = code;
             log.ResponseMessage = message;
             log.ResponseBody = responseBody;
+            log.DateTimeStamp = DateTime.Now; // Aggiorna il timestamp al momento del log
+            log.UserAgent = log.UserAgent ?? string.Empty; // Assicurati che UserAgent non sia null
+            log.IsDeleted = false; // Imposta IsDeleted a false per default
 
             if (!string.IsNullOrWhiteSpace(more))
             {

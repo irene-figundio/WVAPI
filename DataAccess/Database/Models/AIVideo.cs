@@ -19,7 +19,7 @@ namespace AI_Integration.DataAccess.Database.Models
 
         public DateTime? DataUpdate { get; set; }
         public int? LastModification_User { get; set; }     // <-- corretto a int?
-        public bool? IsDeleted { get; set; }
+        public bool? IsDeleted { get; set; } = false;
         public DateTime? DeletionTime { get; set; }
         public int? Deletion_User { get; set; }
 

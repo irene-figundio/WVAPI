@@ -75,6 +75,8 @@ namespace AI_Integration.Helpers
             {
                 Subject = identity,
                 Expires = _expires,
+                Issuer = "Vitinerario_API",      
+                Audience = "Vitinerario_API",
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
