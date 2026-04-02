@@ -50,6 +50,11 @@ namespace AI_Integration.DataAccess.Database.Models
         public decimal Price { get; set; }
         public bool IsOnline { get; set; }
 
+        public bool HasVariantPrice { get; set; } = true;
+        public bool HasNeeds { get; set; } = true;
+        [StringLength(500)]
+        public string? ProgramPdf { get; set; }
+
         public int LangID { get; set; }
         [ForeignKey("LangID")]
         public virtual Language? Language { get; set; }

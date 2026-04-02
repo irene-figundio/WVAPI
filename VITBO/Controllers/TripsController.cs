@@ -115,10 +115,13 @@ namespace VITBO.Controllers
             var trip = await _tripsService.GetTripByIdAsync(id, token, ua);
             if (trip == null) return NotFound();
 
-            ViewBag.Events = await _eventsService.GetEventsAsync(1, token, ua);
+            var ev = await _eventsService.GetEventByIdAbsAsync(trip.EventId, token, ua);
+
+            ViewBag.Events = await _eventsService.GetEventsAsync(ev?.LangID ?? 1, token, ua);
             var model = new UpdateTripRequest
             {
                 Id = trip.Id,
+                LangID = ev?.LangID ?? 1,
                 EventId = trip.EventId,
                 DepartureCity = trip.DepartureCity,
                 DepartureCountry = trip.DepartureCountry,

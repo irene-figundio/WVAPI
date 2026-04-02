@@ -52,6 +52,8 @@ namespace AI_Integration.DataAccess
         public virtual DbSet<ItineraryDay> ItineraryDays { get; set; } = null!;
         public virtual DbSet<ItineraryStop> ItineraryStops { get; set; } = null!;
         public virtual DbSet<TripMust> TripMusts { get; set; } = null!;
+        public virtual DbSet<VariantPrice> VariantPrices { get; set; } = null!;
+        public virtual DbSet<EventNeed> EventNeeds { get; set; } = null!;
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -352,6 +354,28 @@ namespace AI_Integration.DataAccess
                 e.HasOne(x => x.Trip)
                  .WithMany(t => t.TripMusts)
                  .HasForeignKey(x => x.TripId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<VariantPrice>(e =>
+            {
+                e.ToTable("VariantPrices", "dbo");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.HasOne(x => x.Event)
+                 .WithMany()
+                 .HasForeignKey(x => x.EventId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<EventNeed>(e =>
+            {
+                e.ToTable("EventNeeds", "dbo");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.HasOne(x => x.Event)
+                 .WithMany()
+                 .HasForeignKey(x => x.EventId)
                  .OnDelete(DeleteBehavior.Cascade);
             });
 

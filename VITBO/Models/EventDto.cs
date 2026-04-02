@@ -22,5 +22,8 @@ namespace VITBO.Models
         public int? CategoryId { get; set; }
         public string? Coordinates { get; set; }
         public string? HeroImage { get; set; }
+        public bool HasVariantPrice { get; set; }
+        public bool HasNeeds { get; set; }
+        public string? ProgramPdf { get; set; }
     }
 }

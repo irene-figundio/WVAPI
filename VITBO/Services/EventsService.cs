@@ -20,7 +20,7 @@ namespace VITBO.Services
         {
             var endpoint = $"{_apiBase}/api/events";
            // var jsonRequest = System.Text.Json.JsonSerializer.Serialize(request);
-            return await _httpService.SendHttpRequestAsync(HttpMethod.Post, endpoint, sessionToken, userAgent) is HttpResponseMessage response && response.IsSuccessStatusCode;
+            return await _httpService.SendHttpRequestAsync(HttpMethod.Post, endpoint, sessionToken, request, userAgent) is HttpResponseMessage response && response.IsSuccessStatusCode;
         }
 
         public async Task<List<EventDto>> GetEventsAsync(int langId, string sessionToken, string userAgent)
@@ -52,7 +52,7 @@ namespace VITBO.Services
         {
             var endpoint = $"{_apiBase}/api/events/{id}";
             //var jsonRequest = System.Text.Json.JsonSerializer.Serialize(request);
-            return await _httpService.SendHttpRequestAsync(HttpMethod.Put, endpoint,sessionToken, userAgent) is HttpResponseMessage response && response.IsSuccessStatusCode;
+            return await _httpService.SendHttpRequestAsync(HttpMethod.Put, endpoint, sessionToken, request, userAgent) is HttpResponseMessage response && response.IsSuccessStatusCode;
         } 
 
         public async Task<bool> DeleteEventAsync(int id, string sessionToken, string userAgent)
@@ -78,6 +78,9 @@ namespace VITBO.Services
         public string Description { get; set; } = string.Empty;
         public DateTime EventDate { get; set; }
         public DateTime? EndDate { get; set; } = null;
+        public bool HasVariantPrice { get; set; } = true;
+        public bool HasNeeds { get; set; } = true;
+        public string? ProgramPdf { get; set; }
         public TimeSpan? EndTime { get; set; } = TimeSpan.Zero;
         public string? CoverImage { get; set; } = null;
         public DateTime? BookingEndDate { get; set; } = null;

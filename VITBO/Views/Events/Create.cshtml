@@ -29,6 +29,12 @@
                 </div>
 
                 <div class="col-md-6 form-floating mb-3">
+                    <input asp-for="EndDate" type="date" class="form-control" />
+                    <label asp-for="EndDate" class="ms-2">End Date (Optional)</label>
+                    <span asp-validation-for="EndDate" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 form-floating mb-3">
                     <input asp-for="HeroImage" class="form-control" placeholder="Hero Image URL" />
                     <label asp-for="HeroImage" class="ms-2">Hero Image URL</label>
                     <span asp-validation-for="HeroImage" class="text-danger"></span>
@@ -64,11 +70,31 @@
                     <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
 
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-3">
                     <div class="form-check form-switch mt-2">
                         <input asp-for="IsOnline" class="form-check-input" type="checkbox" role="switch" />
                         <label asp-for="IsOnline" class="form-check-label text-muted fw-bold">Online Event</label>
                     </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <div class="form-check form-switch mt-2">
+                        <input asp-for="HasVariantPrice" class="form-check-input" type="checkbox" role="switch" />
+                        <label asp-for="HasVariantPrice" class="form-check-label text-muted fw-bold">Has Variant Price</label>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <div class="form-check form-switch mt-2">
+                        <input asp-for="HasNeeds" class="form-check-input" type="checkbox" role="switch" />
+                        <label asp-for="HasNeeds" class="form-check-label text-muted fw-bold">Has Needs</label>
+                    </div>
+                </div>
+
+                <div class="col-md-12 form-floating mb-3">
+                    <input asp-for="ProgramPdf" class="form-control" placeholder="Program PDF URL" />
+                    <label asp-for="ProgramPdf" class="ms-2">Program PDF URL</label>
+                    <span asp-validation-for="ProgramPdf" class="text-danger"></span>
                 </div>
 
                 <div class="col-md-6 form-floating mb-3">
