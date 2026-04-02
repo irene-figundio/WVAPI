@@ -63,6 +63,9 @@ namespace VITBO.Models
         public int DayNumber { get; set; }
         public string Title { get; set; } = null!;
         public string? Description { get; set; }
+        public string? Image1 { get; set; }
+        public string? Image2 { get; set; }
+        public string? Image3 { get; set; }
     }
 
     public class CreateItineraryDayRequest
@@ -71,6 +74,9 @@ namespace VITBO.Models
         public int DayNumber { get; set; }
         public string Title { get; set; } = null!;
         public string? Description { get; set; }
+        public string? Image1 { get; set; }
+        public string? Image2 { get; set; }
+        public string? Image3 { get; set; }
     }
 
     public class ItineraryStopDto

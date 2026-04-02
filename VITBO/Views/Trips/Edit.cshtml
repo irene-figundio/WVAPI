@@ -39,6 +39,7 @@
                                 <span asp-validation-for="EventId" class="text-danger"></span>
                             </div>
                         </div>
+                        <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label asp-for="Status" class="form-label">Status</label>
                                 <select asp-for="Status" class="form-select">
@@ -110,3 +111,30 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            function loadEvents(langId) {
+                $.getJSON('@Url.Action("GetEventsByLang", "Events")', { langId: langId }, function (data) {
+                    var items = '<option value="">Seleziona Evento</option>';
+                    $.each(data, function (i, ev) {
+                        if (ev.categoryId == 3 || ev.categoryId == 4) {
+                            var selected = ev.id == "@Model.EventId" ? "selected" : "";
+                            items += "<option value='" + ev.id + "' " + selected + ">" + ev.title + " (#" + ev.id + ")</option>";
+                        }
+                    });
+                    $('#eventSelect').html(items);
+                });
+            }
+
+            $('#langSelect').change(function () {
+                loadEvents($(this).val());
+            });
+
+            // Initial load
+            loadEvents($('#langSelect').val());
+        });
+    </script>
+}

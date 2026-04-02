@@ -25,3 +25,8 @@ CREATE TABLE [dbo].[EventNeeds] (
     CONSTRAINT [PK_EventNeeds] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_EventNeeds_Events] FOREIGN KEY ([EventId]) REFERENCES [dbo].[Events] ([Id]) ON DELETE CASCADE
 );
+
+-- Add image fields to ItineraryDays table
+ALTER TABLE [dbo].[ItineraryDays] ADD [Image1] NVARCHAR(500) NULL;
+ALTER TABLE [dbo].[ItineraryDays] ADD [Image2] NVARCHAR(500) NULL;
+ALTER TABLE [dbo].[ItineraryDays] ADD [Image3] NVARCHAR(500) NULL;
