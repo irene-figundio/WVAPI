@@ -1,0 +1,122 @@
+===============================================================
+FLUSSO DI LETTURA VIAGGI (VITINERARIO AI WEB API)
+===============================================================
+
+Il modulo Viaggi è strutturato in modo gerarchico:
+Trip -> ItineraryDays -> ItineraryStops
+     -> Stays
+     -> TripMusts
+
+Tutte le chiamate GET seguenti sono protette da [Authorize] e richiedono un Bearer Token.
+
+---------------------------------------------------------------
+1. LISTA VIAGGI (TRIPS)
+---------------------------------------------------------------
+
+# A. Ottieni tutti i viaggi (con filtro opzionale per EventId)
+GET /api/trips
+GET /api/trips?eventId=5
+
+[Esempio Risposta]:
+[
+  {
+    "id": 1,
+    "eventId": 5,
+    "departureCity": "Roma",
+    "departureCountry": "Italia",
+    "arrivalCity": "Tokyo",
+    "arrivalCountry": "Giappone",
+    "durationDays": 10,
+    "durationNights": 9,
+    "maxGuests": 15,
+    "status": "booking"
+  }
+]
+
+# B. Ottieni dettaglio singolo viaggio
+GET /api/trips/1
+
+---------------------------------------------------------------
+2. GIORNI DELL'ITINERARIO (ITINERARY DAYS)
+---------------------------------------------------------------
+
+# A. Ottieni i giorni per un viaggio specifico
+GET /api/itinerarydays?tripId=1
+
+[Esempio Risposta]:
+[
+  {
+    "id": 10,
+    "tripId": 1,
+    "dayNumber": 1,
+    "title": "Arrivo a Tokyo",
+    "description": "Trasferimento in hotel e prima cena tipica.",
+    "image1": "https://server.com/img/tokyo1.jpg",
+    "image2": "https://server.com/img/tokyo2.jpg",
+    "image3": "https://server.com/img/tokyo3.jpg"
+  }
+]
+
+---------------------------------------------------------------
+3. TAPPE DEL GIORNO (ITINERARY STOPS)
+---------------------------------------------------------------
+
+# A. Ottieni le tappe per un giorno specifico
+GET /api/itinerarystops?dayId=10
+
+[Esempio Risposta]:
+[
+  {
+    "id": 50,
+    "dayId": 10,
+    "time": "14:30:00",
+    "title": "Visita Tempio Senso-ji",
+    "description": "Passeggiata nel quartiere di Asakusa.",
+    "type": "activity",
+    "orderIndex": 1
+  }
+]
+
+---------------------------------------------------------------
+4. SOGGIORNI (STAYS)
+---------------------------------------------------------------
+
+# A. Ottieni i soggiorni per un viaggio specifico
+GET /api/stays?tripId=1
+
+[Esempio Risposta]:
+[
+  {
+    "id": 5,
+    "tripId": 1,
+    "name": "Park Hyatt Tokyo",
+    "description": "Hotel di lusso con vista panoramica.",
+    "image": "https://server.com/img/hotel.jpg",
+    "location": "Shinjuku, Tokyo",
+    "orderIndex": 1,
+    "itineraryDayId": 10
+  }
+]
+
+---------------------------------------------------------------
+5. COSA INCLUDE / ESCLUDE (TRIP MUSTS)
+---------------------------------------------------------------
+
+# A. Ottieni inclusioni/esclusioni per un viaggio
+GET /api/tripmusts?tripId=1
+
+[Esempio Risposta]:
+[
+  {
+    "id": 20,
+    "tripId": 1,
+    "text": "Voli internazionali A/R",
+    "typeId": 1  // 1 = Include, 2 = Esclude
+  },
+  {
+    "id": 21,
+    "tripId": 1,
+    "text": "Assicurazione annullamento",
+    "typeId": 2
+  }
+]
