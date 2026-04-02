@@ -84,7 +84,16 @@ namespace VITBO.Services
         }
         public async Task<List<PhotoGalleryDto>> GetPhotosByGalleryIdAsync(int? galleryId, string token, string userAgent)
         {
-            var endpoint = $"{_baseUrl}/api/photogallery/bygallery/{galleryId}";
+            var endpoint = string.Empty;
+            if (galleryId != 0)
+            {
+                endpoint = $"{_baseUrl}/api/photogallery/bygallery/{galleryId}";
+            }
+            else
+            {
+                endpoint = $"{_baseUrl}/api/photogallery";
+            }
+            
             var result = await _httpService.SendHttpRequestAsync(HttpMethod.Get, endpoint, token, userAgent, null);
             var list = await _httpService.GetBodyFromHttpResponseAsync<List<PhotoGalleryDto>>(result);
             return list ?? new List<PhotoGalleryDto>();

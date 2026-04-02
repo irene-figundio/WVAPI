@@ -75,6 +75,7 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
+
             function loadEvents(langId) {
                 $.getJSON('@Url.Action("GetEventsByLang", "Events")', { langId: langId }, function (data) {
                     var items = '<option value="">-- Select Event --</option>';
