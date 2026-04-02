@@ -51,7 +51,7 @@ namespace VITBO.Services
         public async Task<bool> UpdateEventAsync(int id, UpdateEventRequest request,string sessionToken, string userAgent)
         {
             var endpoint = $"{_apiBase}/api/events/{id}";
-            //var jsonRequest = System.Text.Json.JsonSerializer.Serialize(request);
+            var jsonRequest = System.Text.Json.JsonSerializer.Serialize(request);
             return await _httpService.SendHttpRequestAsync(HttpMethod.Put, endpoint, sessionToken, request, userAgent) is HttpResponseMessage response && response.IsSuccessStatusCode;
         } 
 

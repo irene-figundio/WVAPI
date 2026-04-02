@@ -43,7 +43,7 @@ namespace VITBO.Controllers
             Password = model.Password
         };
 
-        var response = await _httpService.SendHttpRequestAsync(HttpMethod.Post, $"{_apiBaseUrl}/auth/login", null, requestBody, userAgent: GetUserAgent());
+        var response = await _httpService.SendHttpRequestAsync(HttpMethod.Post, $"{_apiBaseUrl}/api/auth/login", null, requestBody, userAgent: GetUserAgent());
 
 
         var (isValid, error) = this.ValidateHttpResponse(

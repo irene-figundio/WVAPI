@@ -93,7 +93,10 @@ namespace VITBO.Controllers
                 Subtitle = eventDto.Subtitle,
                 CategoryId = eventDto.CategoryId,
                 Coordinates = eventDto.Coordinates,
-                HeroImage = eventDto.HeroImage
+                HeroImage = eventDto.HeroImage,
+                HasNeeds = eventDto.HasNeeds,
+                HasVariantPrice = eventDto.HasVariantPrice,
+                ProgramPdf = eventDto.ProgramPdf
             };
 
             return View(model);

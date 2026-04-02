@@ -262,6 +262,8 @@ namespace AI_Integration.DataAccess
                 e.Property(x => x.EventDate).HasColumnType("date");
                 e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSDATETIME()");
             });
+            modelBuilder.Entity<Event>()
+    .ToTable("Events", "dbo", tb => tb.HasTrigger("trg_Events_SetStartParts"));
 
             modelBuilder.Entity<EventLink>(e =>
             {
