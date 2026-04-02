@@ -26,4 +26,19 @@ namespace VITBO.Models
         public bool HasNeeds { get; set; }
         public string? ProgramPdf { get; set; }
     }
+
+    public class VariantPriceDto
+    {
+        public int Id { get; set; }
+        public int EventId { get; set; }
+        public decimal Price { get; set; }
+        public string? Description { get; set; }
+    }
+
+    public class EventNeedDto
+    {
+        public int Id { get; set; }
+        public int EventId { get; set; }
+        public string Description { get; set; } = null!;
+    }
 }
