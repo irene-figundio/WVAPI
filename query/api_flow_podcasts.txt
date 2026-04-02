@@ -1,0 +1,22 @@
+=============================================================
+FLUSSO API PER L'INSERIMENTO DI UN PODCAST
+=============================================================
+I podcast utilizzano la tabella Podcasts. Le informazioni del podcast includono titolo, descrizione, data di pubblicazione, un'immagine di copertina e gli URL per YouTube e Spotify.
+
+### 1. Inserimento di un Podcast
+Endpoint: POST /api/Podcasts
+Header facoltativo: User-Agent
+Body:
+{
+  "title": "Episodio 2: Il Futuro dell'AI",
+  "description": "In questo episodio discutiamo delle implicazioni future dell'Intelligenza Artificiale.",
+  "publishDate": "2024-10-05T15:00:00Z",
+  "coverImage": "https://example.com/images/podcast-ep2.jpg",
+  "youtubeUrl": "https://youtube.com/watch?v=example123",
+  "spotifyUrl": "https://open.spotify.com/episode/example123",
+  "createdAt": "2024-10-05T10:00:00Z"
+}
+
+La risposta conterrà l'entità creata e il suo `id` (es. `id = 3`).
+
+*Nota: Diversamente da News, Blog o Eventi, l'entità Podcast non ha relazioni complesse o sotto-tabelle (come gallerie, immagini multiple o link aggiuntivi) gestite da controller separati, quindi l'inserimento si esaurisce con questa singola chiamata API.*
