@@ -9,6 +9,13 @@
 
         <form method="get" asp-action="Index" class="row g-2 align-items-center mb-0">
             <input type="hidden" name="eventId" value="@ViewBag.EventId" />
+            <div class="col-auto d-flex align-items-center">
+                <label class="me-2 text-muted small fw-bold">Lingua:</label>
+                <select name="langId" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <!option value="1" @(ViewData["CurrentLangId"]?.ToString() == "1" ? "selected" : "")>English (1)</!option>
+                    <!option value="2" @(ViewData["CurrentLangId"]?.ToString() == "2" ? "selected" : "")>Italiano (2)</!option>
+                </select>
+            </div>
             <div class="col-auto">
                 <div class="input-group input-group-sm">
                     <input type="text" name="search" class="form-control" placeholder="Cerca città/paese..." value="@ViewData["SearchTerm"]">

@@ -26,10 +26,11 @@ namespace VITBO.Controllers
             string ua = GetUserAgent();
             var trips = await _tripsService.GetTripsAsync(eventId, token, ua);
 
-            // Note: Trips themselves don't have LangID, but they are linked to Events which do.
-            // However, we added LangID to CreateTripRequest for UI filtering.
-            // If the API doesn't support LangID on Trips, we might need to filter by related Event.
-            // For now, let's filter by search term on departure/arrival cities.
+            // Filter by language (trips are linked to events which have LangID)
+            var eventsInLang = await _eventsService.GetEventsAsync(langId, token, ua);
+            var eventIdsInLang = eventsInLang.Select(e => e.Id).ToHashSet();
+
+            trips = trips.Where(t => eventIdsInLang.Contains(t.EventId)).ToList();
 
             if (!string.IsNullOrEmpty(search))
             {
