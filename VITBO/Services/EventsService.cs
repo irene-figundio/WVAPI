@@ -68,6 +68,48 @@ namespace VITBO.Services
             var list = await _httpService.GetBodyFromHttpResponseAsync<List<EventCategoryDto>>(result);
             return list ?? new List<EventCategoryDto>();
         }
+
+        // Variant Prices
+        public async Task<List<VariantPriceDto>> GetVariantPricesAsync(int? eventId, string token, string userAgent)
+        {
+            var endpoint = $"{_apiBase}/api/variantprices" + (eventId.HasValue ? $"?eventId={eventId}" : "");
+            var result = await _httpService.SendHttpRequestAsync(HttpMethod.Get, endpoint, token, userAgent, null);
+            var list = await _httpService.GetBodyFromHttpResponseAsync<List<VariantPriceDto>>(result);
+            return list ?? new List<VariantPriceDto>();
+        }
+
+        public async Task<bool> CreateVariantPriceAsync(VariantPriceDto model, string token, string userAgent)
+        {
+            var endpoint = $"{_apiBase}/api/variantprices";
+            return await _httpService.SendHttpRequestAsync(HttpMethod.Post, endpoint, token, model, userAgent) is HttpResponseMessage response && response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> DeleteVariantPriceAsync(int id, string token, string userAgent)
+        {
+            var endpoint = $"{_apiBase}/api/variantprices/{id}";
+            return await _httpService.SendHttpRequestAsync(HttpMethod.Delete, endpoint, token, userAgent, null) is HttpResponseMessage response && response.IsSuccessStatusCode;
+        }
+
+        // Event Needs
+        public async Task<List<EventNeedDto>> GetEventNeedsAsync(int? eventId, string token, string userAgent)
+        {
+            var endpoint = $"{_apiBase}/api/eventneeds" + (eventId.HasValue ? $"?eventId={eventId}" : "");
+            var result = await _httpService.SendHttpRequestAsync(HttpMethod.Get, endpoint, token, userAgent, null);
+            var list = await _httpService.GetBodyFromHttpResponseAsync<List<EventNeedDto>>(result);
+            return list ?? new List<EventNeedDto>();
+        }
+
+        public async Task<bool> CreateEventNeedAsync(EventNeedDto model, string token, string userAgent)
+        {
+            var endpoint = $"{_apiBase}/api/eventneeds";
+            return await _httpService.SendHttpRequestAsync(HttpMethod.Post, endpoint, token, model, userAgent) is HttpResponseMessage response && response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> DeleteEventNeedAsync(int id, string token, string userAgent)
+        {
+            var endpoint = $"{_apiBase}/api/eventneeds/{id}";
+            return await _httpService.SendHttpRequestAsync(HttpMethod.Delete, endpoint, token, userAgent, null) is HttpResponseMessage response && response.IsSuccessStatusCode;
+        }
     }
 
 

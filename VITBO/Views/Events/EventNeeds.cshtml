@@ -1,0 +1,77 @@
+@model List<VITBO.Models.EventNeedDto>
+
+@{
+    ViewData["Title"] = "Event Needs";
+    int eventId = ViewBag.EventId;
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm border-start border-warning border-4">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-warning"><i class="bi bi-exclamation-triangle me-2"></i> Event Needs for Event #@eventId</h5>
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Back to Events</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col" class="ps-4">ID</th>
+                                <th scope="col">Description (HTML)</th>
+                                <th scope="col" class="text-end pe-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.Any())
+                            {
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td class="ps-4 text-muted fw-bold">#@item.Id</td>
+                                        <td>@Html.Raw(item.Description)</td>
+                                        <td class="text-end pe-4">
+                                            <form asp-action="DeleteEventNeed" asp-route-id="@item.Id" asp-route-eventId="@eventId" method="post" class="d-inline" onsubmit="return confirm('Delete this need?');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="3" class="text-center py-4 text-muted">No specific needs found.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="m-0 font-weight-bold text-warning">Add Event Need</h6>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="AddEventNeed" method="post">
+                    <input type="hidden" name="EventId" value="@eventId" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">Description (HTML)</label>
+                        <textarea name="Description" class="form-control" rows="10" required placeholder="<p>Enter HTML content...</p>"></textarea>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-warning text-dark">
+                            <i class="bi bi-plus-circle me-1"></i> Add Need
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

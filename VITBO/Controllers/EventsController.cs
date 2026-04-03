@@ -152,6 +152,72 @@ namespace VITBO.Controllers
             return Json(categories.Select(c => new { id = c.Id, name = c.Name }));
         }
 
+        [HttpGet]
+        public async Task<IActionResult> VariantPrices(int eventId)
+        {
+            ViewBag.EventId = eventId;
+            var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            var userAgent = GetUserAgent() ?? string.Empty;
+            var list = await _eventsService.GetVariantPricesAsync(eventId, token, userAgent);
+            return View(list);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddVariantPrice(VariantPriceDto model)
+        {
+            if (ModelState.IsValid)
+            {
+                var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+                var userAgent = GetUserAgent() ?? string.Empty;
+                await _eventsService.CreateVariantPriceAsync(model, token, userAgent);
+            }
+            return RedirectToAction(nameof(VariantPrices), new { eventId = model.EventId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteVariantPrice(int id, int eventId)
+        {
+            var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            var userAgent = GetUserAgent() ?? string.Empty;
+            await _eventsService.DeleteVariantPriceAsync(id, token, userAgent);
+            return RedirectToAction(nameof(VariantPrices), new { eventId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EventNeeds(int eventId)
+        {
+            ViewBag.EventId = eventId;
+            var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            var userAgent = GetUserAgent() ?? string.Empty;
+            var list = await _eventsService.GetEventNeedsAsync(eventId, token, userAgent);
+            return View(list);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddEventNeed(EventNeedDto model)
+        {
+            if (ModelState.IsValid)
+            {
+                var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+                var userAgent = GetUserAgent() ?? string.Empty;
+                await _eventsService.CreateEventNeedAsync(model, token, userAgent);
+            }
+            return RedirectToAction(nameof(EventNeeds), new { eventId = model.EventId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteEventNeed(int id, int eventId)
+        {
+            var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            var userAgent = GetUserAgent() ?? string.Empty;
+            await _eventsService.DeleteEventNeedAsync(id, token, userAgent);
+            return RedirectToAction(nameof(EventNeeds), new { eventId });
+        }
+
         protected string? GetUserAgent()
         {
             return Request.Headers["User-Agent"].ToString();
