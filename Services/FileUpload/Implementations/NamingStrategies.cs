@@ -131,7 +131,7 @@ namespace AI_Integration.Services.FileUpload.Implementations
 
         public Task<(string FolderPath, string FileName, string StorageArea, bool Overwrite)> GetNamingInfoAsync(FileUploadRequest request, int progressiveN)
         {
-            string storageArea = "Hero";
+            string storageArea = "Other";
             string folderPath = storageArea;
             int i = _progressiveResolver.ResolveNextFileNumber(_fileStorageService.GetPhysicalPath(folderPath), "hero", "");
             string fileName = $"hero{i}.png";

@@ -25,6 +25,13 @@ namespace VITBO.Controllers
             var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
             var userAgent = GetUserAgent() ?? string.Empty;
             var list = await _mediaService.GetEventExpertsAsync(eventId, token, userAgent);
+
+            // Get ALL experts to match details (regardless of lang filtering in the "Link" select)
+            var allExperts = new List<ExpertDto>();
+            allExperts.AddRange(await _expertsService.GetExpertsAsync(1, token, userAgent));
+            allExperts.AddRange(await _expertsService.GetExpertsAsync(2, token, userAgent));
+            ViewBag.AllExperts = allExperts.GroupBy(e => e.Id).Select(g => g.First()).ToList();
+
             var expertsList = await _expertsService.GetExpertsAsync(langId, token, userAgent);
             ViewBag.AvailableExperts = expertsList;
             return View(list);
