@@ -3,13 +3,10 @@ using AI_Integration.DataAccess.Database.Repositories.interfaces;
 
 namespace AI_Integration.DataAccess.Database.Repositories
 {
-    public class GalleryRepository : IGalleryRepository
+    public class GalleryRepository : EfRepository<Gallery>, IGalleryRepository
     {
-        private readonly ApplicationDbContext _db;
-
-        public GalleryRepository(ApplicationDbContext db)
+        public GalleryRepository(ApplicationDbContext db) : base(db)
         {
-            _db = db;
         }
     }
 }

@@ -3,13 +3,10 @@ using AI_Integration.DataAccess.Database.Repositories.interfaces;
 
 namespace AI_Integration.DataAccess.Database.Repositories
 {
-    public class ContentRepository : IContentRepository
+    public class ContentRepository : EfRepository<Content>, IContentRepository
     {
-        private readonly ApplicationDbContext _db;
-
-        public ContentRepository(ApplicationDbContext db)
+        public ContentRepository(ApplicationDbContext db) : base(db)
         {
-            _db = db;
         }
     }
 }

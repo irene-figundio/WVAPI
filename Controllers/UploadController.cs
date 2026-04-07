@@ -1,56 +1,49 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
+using AI_Integration.Model.FileUpload;
+using AI_Integration.Services.FileUpload.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Hosting;
 
 namespace AI_Integration.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UploadController : ControllerBase
     {
-        private readonly IWebHostEnvironment _env;
+        private readonly IFileUploadService _fileUploadService;
+        private readonly ILogger<UploadController> _logger;
 
-        public UploadController(IWebHostEnvironment env)
+        public UploadController(IFileUploadService fileUploadService, ILogger<UploadController> logger)
         {
-            _env = env;
+            _fileUploadService = fileUploadService;
+            _logger = logger;
         }
 
         [HttpPost]
-        public async Task<IActionResult> UploadImage([FromForm] IFormFile file, [FromForm] string subpath = "images")
+        [Consumes("multipart/form-data")]
+        [ProducesResponseType(typeof(FileUploadResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Upload([FromForm] FileUploadRequest request)
         {
-            if (file == null || file.Length == 0)
-                return BadRequest(new { success = false, message = "No file uploaded." });
+            if (request.File == null || request.File.Length == 0)
+            {
+                return BadRequest("No file uploaded.");
+            }
 
             try
             {
-                var safeSubpath = subpath.Trim('/').Replace("..", "");
-                var uploadsFolder = Path.Combine(_env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), safeSubpath);
-
-                if (!Directory.Exists(uploadsFolder))
+                var response = await _fileUploadService.UploadFileAsync(request);
+                if (response.Success)
                 {
-                    Directory.CreateDirectory(uploadsFolder);
+                    return Ok(response);
                 }
-
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                var filePath = Path.Combine(uploadsFolder, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
-
-                var fileUrl = $"{Request.Scheme}://{Request.Host}/{safeSubpath}/{fileName}";
-
-                return Ok(new { success = true, url = fileUrl, message = "File uploaded successfully." });
+                return BadRequest(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { success = false, message = ex.Message });
+                _logger.LogError(ex, "Error during file upload");
+                return StatusCode(500, new FileUploadResponse { Success = false, Message = ex.Message });
             }
         }
     }

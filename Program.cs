@@ -72,6 +72,17 @@ builder.Services.Configure<OpenAISettings>(
 builder.Services.AddSingleton<VideoHelper>();
 builder.Services.AddSingleton<PromptModel>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+// File Upload Services
+builder.Services.AddSingleton<AI_Integration.Services.FileUpload.Interfaces.IProgressiveResolver, AI_Integration.Services.FileUpload.Implementations.ProgressiveResolver>();
+builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IStorageMappingService, AI_Integration.Services.FileUpload.Implementations.StorageMappingService>();
+builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IFileStorageService, AI_Integration.Services.FileUpload.Implementations.FileStorageService>();
+builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IImageConversionService, AI_Integration.Services.FileUpload.Implementations.ImageConversionService>();
+builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IUploadNamingStrategy, AI_Integration.Services.FileUpload.Implementations.EventNamingStrategy>();
+builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IUploadNamingStrategy, AI_Integration.Services.FileUpload.Implementations.ContentNamingStrategy>();
+builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IUploadNamingStrategy, AI_Integration.Services.FileUpload.Implementations.HeroNamingStrategy>();
+builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IFileUploadService, AI_Integration.Services.FileUpload.Implementations.FileUploadService>();
+
 // add db context
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")

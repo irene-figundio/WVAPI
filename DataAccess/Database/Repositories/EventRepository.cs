@@ -3,13 +3,10 @@ using AI_Integration.DataAccess.Database.Repositories.interfaces;
 
 namespace AI_Integration.DataAccess.Database.Repositories
 {
-    public class EventRepository : IEventRepository
+    public class EventRepository : EfRepository<Event>, IEventRepository
     {
-        private readonly ApplicationDbContext _db;
-
-        public EventRepository(ApplicationDbContext db)
+        public EventRepository(ApplicationDbContext db) : base(db)
         {
-            _db = db;
         }
     }
 }
