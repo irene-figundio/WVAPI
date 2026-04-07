@@ -23,7 +23,8 @@ namespace AI_Integration.Model.FileUpload
     public class FileUploadRequest
     {
         public ParentType ParentType { get; set; }
-        public int ParentId { get; set; }
+        public int? ParentId { get; set; }
+        public Guid? ParentGuid { get; set; }
         public UploadType UploadType { get; set; }
         public IFormFile File { get; set; } = null!;
         public string? Caption { get; set; }

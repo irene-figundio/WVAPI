@@ -177,6 +177,40 @@
     </div>
 </div>
 
+<!-- Stage Images Modal -->
+<div class="modal fade" id="stageImagesModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Stage Images (Max 3)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info py-2 small">
+                    <i class="bi bi-info-circle me-1"></i> These images are linked to a specific Trip and Day.
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label small">Trip ID</label>
+                        <input type="number" id="stageTripId" class="form-control" value="@Model.id" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small">Day Number</label>
+                        <input type="number" id="stageDayNumber" class="form-control" value="1" />
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Upload Image</label>
+                    <div class="input-group">
+                        <input type="file" id="stageImageUpload" class="form-control" accept="image/*" />
+                        <button class="btn btn-info text-white" type="button" id="btnUploadStage">Upload</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
@@ -268,7 +302,25 @@
 
                 if (res.success) {
                     alert('Photo added!');
-                    // reload gallery...
+                    $('#galleryUpload').val('');
+                    $('#galleryCaption').val('');
+                } else {
+                    alert(res.message);
+                }
+            });
+
+            $('#btnUploadStage').click(async function() {
+                const file = $('#stageImageUpload')[0].files[0];
+                if (!file) { alert('Select a file'); return; }
+
+                const res = await performUpload(file, 'Events', 'EventStageImage', {
+                    TripId: $('#stageTripId').val(),
+                    DayNumber: $('#stageDayNumber').val()
+                });
+
+                if (res.success) {
+                    alert('Stage image uploaded!');
+                    $('#stageImageUpload').val('');
                 } else {
                     alert(res.message);
                 }

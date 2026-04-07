@@ -14,24 +14,33 @@ namespace AI_Integration.Services.FileUpload.Implementations
         private readonly IStorageMappingService _storageMappingService;
         private readonly IFileStorageService _fileStorageService;
         private readonly IImageConversionService _imageConversionService;
+        private readonly IParentResolver _parentResolver;
 
         public FileUploadService(
             IUnitOfWork unitOfWork,
             IEnumerable<IUploadNamingStrategy> namingStrategies,
             IStorageMappingService storageMappingService,
             IFileStorageService fileStorageService,
-            IImageConversionService imageConversionService)
+            IImageConversionService imageConversionService,
+            IParentResolver parentResolver)
         {
             _unitOfWork = unitOfWork;
             _namingStrategies = namingStrategies;
             _storageMappingService = storageMappingService;
             _fileStorageService = fileStorageService;
             _imageConversionService = imageConversionService;
+            _parentResolver = parentResolver;
         }
 
         public async Task<FileUploadResponse> UploadFileAsync(FileUploadRequest request)
         {
-            // 1. Validate Parent
+            // 1. Resolve and Validate Parent
+            var resolution = await _parentResolver.ResolveParentAsync(request);
+            if (!resolution.Success) return new FileUploadResponse { Success = false, Message = resolution.Error };
+
+            // Update request with resolved Id for downstream logic (N calculation, DB updates)
+            request.ParentId = resolution.Id;
+
             var parentValidated = await ValidateParentAsync(request);
             if (!parentValidated.Success) return parentValidated;
 
@@ -48,7 +57,7 @@ namespace AI_Integration.Services.FileUpload.Implementations
                 // We need to know which storage area to use for mapping.
                 // Let's peek at the strategy or define it. Most are Events or Articles.
                 string mappingArea = request.ParentType == ParentType.Events ? "Events" : "Articles";
-                progressiveN = await _storageMappingService.GetOrAddProgressiveNumberAsync(request.ParentType, request.ParentId, mappingArea);
+                progressiveN = await _storageMappingService.GetOrAddProgressiveNumberAsync(request.ParentType, request.ParentId.Value, mappingArea);
             }
 
             // 4. Determine naming
@@ -95,8 +104,8 @@ namespace AI_Integration.Services.FileUpload.Implementations
 
             if (request.ParentType == ParentType.Events)
             {
-                var ev = await _unitOfWork.Events.GetByIdAsync(request.ParentId);
-                if (ev == null) return new FileUploadResponse { Success = false, Message = "Event not found" };
+                // Parent was already resolved and existence checked in resolver
+                var ev = await _unitOfWork.Events.GetByIdAsync(request.ParentId!.Value);
 
                 if (request.UploadType == UploadType.EventStageImage)
                 {
@@ -109,8 +118,7 @@ namespace AI_Integration.Services.FileUpload.Implementations
             }
             else if (request.ParentType == ParentType.Content)
             {
-                var content = await _unitOfWork.Contents.GetByIdAsync(request.ParentId);
-                if (content == null) return new FileUploadResponse { Success = false, Message = "Content not found" };
+                // Parent already resolved
             }
 
             return new FileUploadResponse { Success = true };
@@ -121,10 +129,10 @@ namespace AI_Integration.Services.FileUpload.Implementations
             switch (request.UploadType)
             {
                 case UploadType.EventGalleryImage:
-                    var evG = await _unitOfWork.Events.GetByIdAsync(request.ParentId);
+                    var evG = await _unitOfWork.Events.GetByIdAsync(request.ParentId!.Value);
                     if (evG.GalleryId == null)
                     {
-                        var gallery = new Gallery { EventId = request.ParentId, CreatedAt = DateTime.UtcNow };
+                        var gallery = new Gallery { EventId = request.ParentId.Value, CreatedAt = DateTime.UtcNow };
                         await _unitOfWork.Galleries.InsertAsync(gallery);
                         await _unitOfWork.SaveChangesAsync();
                         evG.GalleryId = gallery.Id;
@@ -157,13 +165,13 @@ namespace AI_Integration.Services.FileUpload.Implementations
                     break;
 
                 case UploadType.EventProgramPdf:
-                    var evP = await _unitOfWork.Events.GetByIdAsync(request.ParentId);
+                    var evP = await _unitOfWork.Events.GetByIdAsync(request.ParentId!.Value);
                     evP.ProgramPdf = url;
                     _unitOfWork.Events.Update(evP);
                     break;
 
                 case UploadType.EventCoverImage:
-                    var evC = await _unitOfWork.Events.GetByIdAsync(request.ParentId);
+                    var evC = await _unitOfWork.Events.GetByIdAsync(request.ParentId!.Value);
                     evC.CoverImage = url;
                     _unitOfWork.Events.Update(evC);
                     break;
@@ -173,7 +181,7 @@ namespace AI_Integration.Services.FileUpload.Implementations
                     int pos = match.Success ? int.Parse(match.Groups[1].Value) : 1;
                     var cImg = new ContentImage
                     {
-                        ContentId = request.ParentId,
+                        ContentId = request.ParentId!.Value,
                         ImageUrl = url,
                         Caption = request.Caption,
                         Position = pos,
@@ -184,7 +192,7 @@ namespace AI_Integration.Services.FileUpload.Implementations
                     break;
 
                 case UploadType.ContentCoverImage:
-                    var cont = await _unitOfWork.Contents.GetByIdAsync(request.ParentId);
+                    var cont = await _unitOfWork.Contents.GetByIdAsync(request.ParentId!.Value);
                     cont.CoverImage = url;
                     _unitOfWork.Contents.Update(cont);
                     break;

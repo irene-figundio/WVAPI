@@ -211,6 +211,8 @@ namespace AI_Integration.DataAccess
                 e.ToTable("Contents", "dbo");
                 e.HasKey(x => x.Id);
                 e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.Property(x => x.Guid).HasDefaultValueSql("NEWID()");
+                e.HasIndex(x => x.Guid).IsUnique();
                 e.Property(x => x.Title).IsRequired().HasMaxLength(255);
                 e.Property(x => x.Text).IsRequired();
                 e.Property(x => x.PublishDate).HasColumnType("date");
@@ -259,6 +261,8 @@ namespace AI_Integration.DataAccess
                 e.ToTable("Events", "dbo");
                 e.HasKey(x => x.Id);
                 e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.Property(x => x.Guid).HasDefaultValueSql("NEWID()");
+                e.HasIndex(x => x.Guid).IsUnique();
                 e.Property(x => x.Title).IsRequired().HasMaxLength(255);
                 e.Property(x => x.Description).IsRequired();
                 e.Property(x => x.EventDate).HasColumnType("date");
