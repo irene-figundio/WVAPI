@@ -19,7 +19,7 @@ namespace AI_Integration.DataAccess.Database.Models
 
         [Required]
         [StringLength(50)]
-        public string Type { get; set; } = null!; // activity, meal, transfer, experience
+        public string Type { get; set; } = null!; // activity, meal, transfer, experience,stay
 
         public int OrderIndex { get; set; }
 
