@@ -36,5 +36,8 @@ namespace VITBO.Models
         public bool HasVariantPrice { get; set; } = true;
         public bool HasNeeds { get; set; } = true;
         public string? ProgramPdf { get; set; }
+
+        public Microsoft.AspNetCore.Http.IFormFile? CoverImageFile { get; set; }
+        public Microsoft.AspNetCore.Http.IFormFile? ProgramPdfFile { get; set; }
     }
 }

@@ -99,8 +99,12 @@ namespace VITBO.Controllers
         }
 
         [HttpGet]
-        public IActionResult CreateArticle()
+        public async Task<IActionResult> CreateArticle()
         {
+            var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            var userAgent = GetUserAgent() ?? string.Empty;
+            ViewBag.Categories = await _contentsService.GetContentCategoriesAsync(1, token, userAgent);
+            ViewBag.HeroImages = await _mediaService.GetHeroImagesAsync(token, userAgent);
             return View(new CreateContentRequest { ContentType = "blog" });
         }
 
@@ -109,47 +113,75 @@ namespace VITBO.Controllers
         public async Task<IActionResult> CreateArticle(CreateContentRequest model)
         {
             model.ContentType = "blog";
+            var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            var userAgent = GetUserAgent() ?? string.Empty;
+
             if (ModelState.IsValid)
             {
-                var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
-                var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
-                
-                var success = await _contentsService.CreateContent(model, token, userAgent);
-                if (success)
+                var newId = await _contentsService.CreateContent(model, token, userAgent);
+                if (newId.HasValue)
                 {
-                    return RedirectToAction(nameof(Articles));
+                    if (model.CoverImageFile != null)
+                    {
+                        using var content = new MultipartFormDataContent();
+                        var fileContent = new StreamContent(model.CoverImageFile.OpenReadStream());
+                        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(model.CoverImageFile.ContentType);
+                        content.Add(fileContent, "File", model.CoverImageFile.FileName);
+                        content.Add(new StringContent("Content"), "ParentType");
+                        content.Add(new StringContent(newId.Value.ToString()), "ParentId");
+                        content.Add(new StringContent("ContentCoverImage"), "UploadType");
+                        await _mediaService.UploadFileAsync(content, token, userAgent);
+                    }
+                    return RedirectToAction(nameof(Edit), new { id = newId.Value });
                 }
                 ModelState.AddModelError("", "Failed to create article. Please try again.");
             }
+            ViewBag.Categories = await _contentsService.GetContentCategoriesAsync(model.LangID, token, userAgent);
+            ViewBag.HeroImages = await _mediaService.GetHeroImagesAsync(token, userAgent);
             return View(model);
         }
 
         [HttpGet]
-        public IActionResult CreateNews()
+        public async Task<IActionResult> CreateNews()
         {
+            var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            var userAgent = GetUserAgent() ?? string.Empty;
+            ViewBag.Categories = await _contentsService.GetContentCategoriesAsync(1, token, userAgent);
+            ViewBag.HeroImages = await _mediaService.GetHeroImagesAsync(token, userAgent);
             return View(new CreateContentRequest { ContentType = "news" });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateNewsAsync(CreateContentRequest model)
+        public async Task<IActionResult> CreateNews(CreateContentRequest model)
         {
             model.ContentType = "news";
+            var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            var userAgent = GetUserAgent() ?? string.Empty;
 
             if (ModelState.IsValid)
             {
-                var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
-                                var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
-               
-                var success = await _contentsService.CreateContent(model, token, userAgent);
-                if (success)
+                var newId = await _contentsService.CreateContent(model, token, userAgent);
+                if (newId.HasValue)
                 {
-                    return RedirectToAction(nameof(News));
+                    if (model.CoverImageFile != null)
+                    {
+                        using var content = new MultipartFormDataContent();
+                        var fileContent = new StreamContent(model.CoverImageFile.OpenReadStream());
+                        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(model.CoverImageFile.ContentType);
+                        content.Add(fileContent, "File", model.CoverImageFile.FileName);
+                        content.Add(new StringContent("Content"), "ParentType");
+                        content.Add(new StringContent(newId.Value.ToString()), "ParentId");
+                        content.Add(new StringContent("ContentCoverImage"), "UploadType");
+                        await _mediaService.UploadFileAsync(content, token, userAgent);
+                    }
+                    return RedirectToAction(nameof(Edit), new { id = newId.Value });
                 }
                 ModelState.AddModelError("", "Failed to create news. Please try again.");
             }
+            ViewBag.Categories = await _contentsService.GetContentCategoriesAsync(model.LangID, token, userAgent);
+            ViewBag.HeroImages = await _mediaService.GetHeroImagesAsync(token, userAgent);
             return View(model);
-
         }
 
         [HttpGet]
@@ -226,10 +258,10 @@ namespace VITBO.Controllers
             var success = await _contentsService.DeleteContentAsync(id, token, userAgent);
             if (success)
             {
-                return RedirectToAction(contentType == "News" ? nameof(News) : nameof(Articles));
+                return RedirectToAction(contentType.Equals("News", StringComparison.OrdinalIgnoreCase) ? nameof(News) : nameof(Articles));
             }
             ModelState.AddModelError("", "Failed to delete content. Please try again.");
-            return RedirectToAction(contentType == "News" ? nameof(News) : nameof(Articles));
+            return RedirectToAction(contentType.Equals("News", StringComparison.OrdinalIgnoreCase) ? nameof(News) : nameof(Articles));
         }
 
         [HttpGet]

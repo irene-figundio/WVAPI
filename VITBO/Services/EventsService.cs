@@ -16,11 +16,19 @@ namespace VITBO.Services
             _apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
         }
 
-        public async Task<bool> CreateEventAsync(CreateEventRequest request, string sessionToken, string userAgent)
+        public async Task<int?> CreateEventAsync(CreateEventRequest request, string sessionToken, string userAgent)
         {
             var endpoint = $"{_apiBase}/api/events";
-           // var jsonRequest = System.Text.Json.JsonSerializer.Serialize(request);
-            return await _httpService.SendHttpRequestAsync(HttpMethod.Post, endpoint, sessionToken, request, userAgent) is HttpResponseMessage response && response.IsSuccessStatusCode;
+            var response = await _httpService.SendHttpRequestAsync(HttpMethod.Post, endpoint, sessionToken, request, userAgent);
+            if (response != null && response.IsSuccessStatusCode)
+            {
+                var body = await _httpService.GetBodyFromHttpResponseAsync<dynamic>(response);
+                if (body != null && body.GetProperty("id").ValueKind != System.Text.Json.JsonValueKind.Null)
+                {
+                    return body.GetProperty("id").GetInt32();
+                }
+            }
+            return null;
         }
 
         public async Task<List<EventDto>> GetEventsAsync(int langId, string sessionToken, string userAgent)

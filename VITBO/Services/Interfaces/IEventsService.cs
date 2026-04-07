@@ -5,7 +5,7 @@ namespace VITBO.Services.Interfaces
     public interface IEventsService
     {
         Task<List<EventDto>> GetEventsAsync(int langId, string sessionToken, string userAgent);
-        Task<bool> CreateEventAsync(CreateEventRequest request, string sessionToken, string userAgent);
+        Task<int?> CreateEventAsync(CreateEventRequest request, string sessionToken, string userAgent);
         Task<EventDto?> GetEventByIdAsync(int id, int langId, string sessionToken, string userAgent);
         Task<EventDto?> GetEventByIdAbsAsync(int id, string sessionToken, string userAgent);
         Task<bool> UpdateEventAsync(int id, UpdateEventRequest request, string sessionToken, string userAgent);

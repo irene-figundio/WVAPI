@@ -50,17 +50,45 @@ namespace VITBO.Controllers
         {
             string sessionToken = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
             string userAgent = GetUserAgent() ?? string.Empty;
+
             if (ModelState.IsValid)
             {
-                var success = await _eventsService.CreateEventAsync(model, sessionToken, userAgent);
-                if (success)
+                var newId = await _eventsService.CreateEventAsync(model, sessionToken, userAgent);
+                if (newId.HasValue)
                 {
-                    return RedirectToAction(nameof(Index));
+                    // Handle Cover Upload
+                    if (model.CoverImageFile != null)
+                    {
+                        using var content = new MultipartFormDataContent();
+                        var fileContent = new StreamContent(model.CoverImageFile.OpenReadStream());
+                        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(model.CoverImageFile.ContentType);
+                        content.Add(fileContent, "File", model.CoverImageFile.FileName);
+                        content.Add(new StringContent("Events"), "ParentType");
+                        content.Add(new StringContent(newId.Value.ToString()), "ParentId");
+                        content.Add(new StringContent("EventCoverImage"), "UploadType");
+                        await _mediaService.UploadFileAsync(content, sessionToken, userAgent);
+                    }
+
+                    // Handle Program PDF Upload
+                    if (model.ProgramPdfFile != null)
+                    {
+                        using var content = new MultipartFormDataContent();
+                        var fileContent = new StreamContent(model.ProgramPdfFile.OpenReadStream());
+                        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(model.ProgramPdfFile.ContentType);
+                        content.Add(fileContent, "File", model.ProgramPdfFile.FileName);
+                        content.Add(new StringContent("Events"), "ParentType");
+                        content.Add(new StringContent(newId.Value.ToString()), "ParentId");
+                        content.Add(new StringContent("EventProgramPdf"), "UploadType");
+                        await _mediaService.UploadFileAsync(content, sessionToken, userAgent);
+                    }
+
+                    return RedirectToAction(nameof(Edit), new { id = newId.Value });
                 }
                 ModelState.AddModelError("", "Failed to create event. Please try again.");
             }
+            ViewBag.Categories = await _eventsService.GetEventCategoriesAsync(model.LangID, sessionToken, userAgent);
+            ViewBag.HeroImages = await _mediaService.GetHeroImagesAsync(sessionToken, userAgent);
             return View(model);
-
         }
 
         [HttpGet]

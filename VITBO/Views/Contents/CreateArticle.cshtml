@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Create New Article";
+    var heroImages = ViewBag.HeroImages as List<VITBO.Models.HeroImageDto> ?? new List<VITBO.Models.HeroImageDto>();
 }
 
 <div class="card border-0 shadow-sm border-start border-danger border-4">
@@ -9,7 +10,7 @@
         <h5 class="mb-0 text-danger"><i class="bi bi-file-earmark-plus me-2"></i> Create New Article</h5>
     </div>
     <div class="card-body">
-        <form asp-action="CreateArticle" method="post">
+        <form asp-action="CreateArticle" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <div class="row g-3">
@@ -55,16 +56,21 @@
                     </div>
                 </div>
 
-                <div class="col-md-6 form-floating mb-3">
-                    <input asp-for="CoverImage" class="form-control" placeholder="Cover Image URL" />
-                    <label asp-for="CoverImage" class="ms-2">Cover Image URL</label>
-                    <span asp-validation-for="CoverImage" class="text-danger"></span>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="CoverImageFile" class="form-label">Cover Image</label>
+                    <input asp-for="CoverImageFile" type="file" class="form-control" accept="image/*" />
+                    <div class="form-text small">Will be converted to PNG automatically.</div>
                 </div>
 
                 <div class="col-md-6 form-floating mb-3">
-                    <input asp-for="HeroImage" class="form-control" placeholder="Hero Image URL" />
-                    <label asp-for="HeroImage" class="ms-2">Hero Image URL</label>
-                    <span asp-validation-for="HeroImage" class="text-danger"></span>
+                    <select asp-for="HeroImage" class="form-select">
+                        <option value="">-- No Hero Image --</option>
+                        @foreach (var hero in heroImages)
+                        {
+                            <option value="@hero.ImageUrl">@hero.Name</option>
+                        }
+                    </select>
+                    <label asp-for="HeroImage" class="ms-2">Hero Image</label>
                 </div>
 
                 <div class="col-12 mt-4 d-flex justify-content-between">
@@ -94,7 +100,6 @@
                 loadCategories($(this).val());
             });
 
-            // Initial load
             loadCategories($('#langSelect').val());
         });
     </script>
