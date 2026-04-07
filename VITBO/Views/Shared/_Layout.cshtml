@@ -133,6 +133,11 @@
                             <i class="bi bi-person-badge me-2"></i> Experts
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "HeroImages")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "HeroImages" ? "active" : "")">
+                            <i class="bi bi-star-fill me-2"></i> Hero Images
+                        </a>
+                    </li>
                 </ul>
             </nav>
 

@@ -9,10 +9,12 @@ namespace VITBO.Controllers
     public class ContentsController : Controller
     {
         private readonly IContentsService _contentsService;
+        private readonly IMediaService _mediaService;
 
-        public ContentsController(IContentsService contentsService)
+        public ContentsController(IContentsService contentsService, IMediaService mediaService)
         {
             _contentsService = contentsService;
+            _mediaService = mediaService;
         }
 
         public async Task<IActionResult> Articles([FromQuery] int langId = 1, string? search = null)
@@ -162,6 +164,7 @@ namespace VITBO.Controllers
             }
             var categories = await _contentsService.GetContentCategoriesAsync(langId, token, userAgent);
             ViewBag.Categories = categories;
+            ViewBag.HeroImages = await _mediaService.GetHeroImagesAsync(token, userAgent);
 
             var model = new EditContentRequest
             {
@@ -236,6 +239,30 @@ namespace VITBO.Controllers
             var userAgent = GetUserAgent() ?? string.Empty;
             var categories = await _contentsService.GetContentCategoriesAsync(langId, token, userAgent);
             return Json(categories.Select(c => new { id = c.Id, name = c.Name }));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AjaxUpload()
+        {
+            var file = Request.Form.Files["File"];
+            if (file == null) return Json(new { success = false, message = "No file" });
+
+            var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            var userAgent = GetUserAgent() ?? string.Empty;
+
+            using var content = new MultipartFormDataContent();
+            var fileContent = new StreamContent(file.OpenReadStream());
+            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+            content.Add(fileContent, "File", file.FileName);
+
+            foreach (var key in Request.Form.Keys)
+            {
+                if (key == "File") continue;
+                content.Add(new StringContent(Request.Form[key].ToString()), key);
+            }
+
+            var res = await _mediaService.UploadFileAsync(content, token, userAgent);
+            return Json(res);
         }
 
         protected string? GetUserAgent()
