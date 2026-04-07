@@ -203,6 +203,20 @@ namespace VITBO.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> EditDay(CreateItineraryDayRequest model, int id)
+        {
+            if (ModelState.IsValid)
+            {
+                await _tripsService.UpdateItineraryDayAsync(id, model, GetToken(), GetUserAgent());
+            }
+            return RedirectToAction(
+         nameof(Details),
+         null,
+         new { id = model.TripId },
+         "days-tab");
+        }
+
+        [HttpPost]
         public async Task<IActionResult> DeleteDay(int id, int tripId)
         {
             await _tripsService.DeleteItineraryDayAsync(id, GetToken(), GetUserAgent());
