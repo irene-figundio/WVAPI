@@ -31,6 +31,9 @@ namespace AI_Integration.Controllers
             public int DayNumber { get; set; }
             public string Title { get; set; } = null!;
             public string? Description { get; set; }
+            public string? Image1 { get; set; }
+            public string? Image2 { get; set; }
+            public string? Image3 { get; set; }
         }
 
         [HttpGet]
@@ -52,7 +55,10 @@ namespace AI_Integration.Controllers
                     TripId = d.TripId,
                     DayNumber = d.DayNumber,
                     Title = d.Title,
-                    Description = d.Description
+                    Description = d.Description,
+                    Image1 = d.Image1,
+                    Image2 = d.Image2,
+                    Image3 = d.Image3
                 }).ToListAsync();
 
                 sw.Stop();
@@ -81,7 +87,10 @@ namespace AI_Integration.Controllers
                         TripId = d.TripId,
                         DayNumber = d.DayNumber,
                         Title = d.Title,
-                        Description = d.Description
+                        Description = d.Description,
+                        Image1 = d.Image1,
+                        Image2 = d.Image2,
+                        Image3 = d.Image3
                     }).FirstOrDefaultAsync();
 
                 if (day == null)
@@ -123,7 +132,10 @@ namespace AI_Integration.Controllers
                     DayNumber = day.DayNumber,
                     Title = day.Title,
                     TripId = day.TripId,
-                    Description = day.Description
+                    Description = day.Description,
+                    Image1 = day.Image1,
+                    Image2 = day.Image2,
+                    Image3 = day.Image3
                 };
                 
                 dad.CreationTime = DateTime.Now;
@@ -157,6 +169,9 @@ namespace AI_Integration.Controllers
                 day.DayNumber = changes.DayNumber > 0 ? changes.DayNumber : day.DayNumber;
                 day.Title = changes.Title ?? day.Title;
                 day.Description = changes.Description ?? day.Description;
+                day.Image1 = changes.Image1 ?? day.Image1;
+                day.Image2 = changes.Image2 ?? day.Image2;
+                day.Image3 = changes.Image3 ?? day.Image3;
 
                 day.LastModificationTime = DateTime.Now;
                 _unitOfWork.Update(day);

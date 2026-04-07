@@ -1,0 +1,73 @@
+===============================================================
+LETTURA VARIANTI PREZZO ED ESIGENZE EVENTO (VITINERARIO AI API)
+===============================================================
+
+Questi endpoint permettono di leggere i dati relativi alle tabelle VariantPrices ed EventNeeds.
+Entrambi i set di API supportano il filtraggio per EventId.
+
+Tutte le chiamate GET seguenti sono protette da [Authorize] e richiedono un Bearer Token.
+
+---------------------------------------------------------------
+1. VARIANTI DI PREZZO (VARIANT PRICES)
+---------------------------------------------------------------
+Le varianti di prezzo permettono di definire listini multipli per lo stesso evento (es. Early Bird, VIP, Ridotto).
+
+# A. Ottieni tutte le varianti di prezzo
+GET /api/variantprices
+
+# B. Ottieni varianti di prezzo per un Evento specifico
+GET /api/variantprices?eventId=10
+
+[Esempio Risposta]:
+[
+  {
+    "id": 1,
+    "eventId": 10,
+    "price": 45.00,
+    "description": "Biglietto VIP con degustazione inclusa",
+    "isDeleted": false
+  },
+  {
+    "id": 2,
+    "eventId": 10,
+    "price": 25.00,
+    "description": "Early Bird (fino al 30/11)",
+    "isDeleted": false
+  }
+]
+
+# C. Ottieni dettaglio singola variante
+GET /api/variantprices/1
+
+
+---------------------------------------------------------------
+2. ESIGENZE EVENTO (EVENT NEEDS)
+---------------------------------------------------------------
+Questa tabella contiene descrizioni dettagliate in formato HTML su cosa è necessario o consigliato per l'evento (es. abbigliamento, attrezzatura, requisiti fisici).
+
+# A. Ottieni tutte le esigenze registrate
+GET /api/eventneeds
+
+# B. Ottieni esigenze per un Evento specifico
+GET /api/eventneeds?eventId=10
+
+[Esempio Risposta]:
+[
+  {
+    "id": 5,
+    "eventId": 10,
+    "description": "<ul><li>Scarpe comode</li><li>Giacca a vento</li><li>Prenotazione obbligatoria 48h prima</li></ul>",
+    "isDeleted": false
+  }
+]
+
+# C. Ottieni dettaglio singola esigenza
+GET /api/eventneeds/5
+
+
+---------------------------------------------------------------
+NOTE TECNICHE
+---------------------------------------------------------------
+- Gli oggetti restituiti contengono anche il campo "isDeleted" per la gestione del soft-delete lato database.
+- Il campo "description" in EventNeeds è pensato per ospitare frammenti HTML da renderizzare direttamente nelle interfacce client.
+- Negli Eventi (GET /api/events), la presenza di questi dati può essere verificata tramite i flag "hasVariantPrice" e "hasNeeds".

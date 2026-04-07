@@ -77,6 +77,9 @@ namespace AI_Integration.Controllers
             public int? CategoryId { get; set; }
             public string? Coordinates { get; set; }
             public string? HeroImage { get; set; }
+            public bool HasVariantPrice { get; set; }
+            public bool HasNeeds { get; set; }
+            public string? ProgramPdf { get; set; }
             public List<EventLinkDto> Links { get; set; } = new();
             public GalleryDto? Gallery { get; set; }
             public List<ExpertDto> Authors { get; set; } = new();
@@ -114,6 +117,9 @@ namespace AI_Integration.Controllers
                         CategoryId = e.CategoryId,
                         Coordinates = e.Coordinates,
                         HeroImage = e.HeroImage,
+                        HasVariantPrice = e.HasVariantPrice,
+                        HasNeeds = e.HasNeeds,
+                        ProgramPdf = e.ProgramPdf,
                         Links = e.EventLinks.Select(l => new EventLinkDto
                         {
                             Id = l.Id,
@@ -183,6 +189,9 @@ namespace AI_Integration.Controllers
                         CategoryId = e.CategoryId,
                         Coordinates = e.Coordinates,
                         HeroImage = e.HeroImage,
+                        HasVariantPrice = e.HasVariantPrice,
+                        HasNeeds = e.HasNeeds,
+                        ProgramPdf = e.ProgramPdf,
                         Links = e.EventLinks.Select(l => new EventLinkDto
                         {
                             Id = l.Id,
@@ -311,6 +320,9 @@ namespace AI_Integration.Controllers
                 @event.CategoryId = changes.CategoryId ?? @event.CategoryId;
                 @event.Coordinates = changes.Coordinates ?? @event.Coordinates;
                 @event.HeroImage = changes.HeroImage ?? @event.HeroImage;
+                @event.HasVariantPrice = changes.HasVariantPrice;
+                @event.HasNeeds = changes.HasNeeds;
+                @event.ProgramPdf = changes.ProgramPdf ?? @event.ProgramPdf;
 
                 _unitOfWork.Update(@event);
                 await _unitOfWork.SaveChangesAsync();

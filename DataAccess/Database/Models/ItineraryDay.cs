@@ -17,6 +17,13 @@ namespace AI_Integration.DataAccess.Database.Models
 
         public string? Description { get; set; }
 
+        [StringLength(500)]
+        public string? Image1 { get; set; }
+        [StringLength(500)]
+        public string? Image2 { get; set; }
+        [StringLength(500)]
+        public string? Image3 { get; set; }
+
         // Auditing
         public DateTime? CreationTime { get; set; }
         public int? Creation_User { get; set; }

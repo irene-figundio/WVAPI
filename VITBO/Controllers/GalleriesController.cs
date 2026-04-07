@@ -16,15 +16,28 @@ namespace VITBO.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int? eventId)
+        public async Task<IActionResult> Index(int? eventId, [FromQuery] int langId = 1, string? search = null)
         {
+            ViewData["CurrentLangId"] = langId;
+            ViewData["SearchTerm"] = search;
             ViewBag.EventId = eventId;
             var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
             var userAgent = GetUserAgent() ?? string.Empty;
-            var list = await _mediaService.GetGalleriesByEventIdAsync(eventId, token, userAgent);
-            var t = new List<GalleryDto>();
-            t.Add(list);
-            return View(t);
+
+            var list = await _mediaService.GetGalleriesAsync(token, userAgent);
+
+            if (eventId.HasValue) {
+                list = list.Where(g => g.EventId == eventId.Value).ToList();
+            }
+
+            list = list.Where(g => g.LangID == langId).ToList();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                list = list.Where(g => g.Title?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false).ToList();
+            }
+
+            return View(list);
         }
 
         [HttpGet]
@@ -44,7 +57,7 @@ namespace VITBO.Controllers
                 var success = await _mediaService.CreateGalleryAsync(model, token, userAgent);
                 if (success)
                 {
-                    return RedirectToAction(nameof(Index), new { eventId = model.EventId });
+                    return RedirectToAction(nameof(Index));
                 }
                 ModelState.AddModelError("", "Failed to create gallery.");
             }

@@ -11,10 +11,10 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="bi bi-airplane me-2"></i> @ViewData["Title"]</h2>
         <div>
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary shadow-sm">
                 <i class="bi bi-pencil me-1"></i> Modifica Generale
             </a>
-            <a asp-action="Index" class="btn btn-outline-secondary">
+            <a asp-action="Index" class="btn btn-outline-secondary shadow-sm">
                 <i class="bi bi-arrow-left me-1"></i> Torna alla lista
             </a>
         </div>
@@ -62,7 +62,7 @@
         <div class="tab-pane fade" id="stays" role="tabpanel">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5>Gestione Soggiorni</h5>
-                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#addStayModal">
+                <button type="button" class="btn btn-sm btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#addStayModal">
                     <i class="bi bi-plus-circle me-1"></i> Aggiungi Soggiorno
                 </button>
             </div>
@@ -103,7 +103,7 @@
         <div class="tab-pane fade" id="days" role="tabpanel">
              <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5>Itinerario Giornaliero</h5>
-                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#addDayModal">
+                <button type="button" class="btn btn-sm btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#addDayModal">
                     <i class="bi bi-plus-circle me-1"></i> Aggiungi Giorno
                 </button>
             </div>
@@ -113,6 +113,9 @@
                     <div class="card-header bg-light d-flex justify-content-between align-items-center">
                         <h6 class="mb-0">Giorno @day.DayNumber: @day.Title</h6>
                         <div class="btn-group btn-group-sm">
+                             <button type="button" class="btn btn-outline-primary" onclick="openEditDayModal(@day.Id, @day.DayNumber, '@Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(day.Title))', '@Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(day.Description ?? ""))', '@day.Image1', '@day.Image2', '@day.Image3')" title="Modifica Giorno">
+                                <i class="bi bi-pencil"></i>
+                            </button>
                              <button type="button" class="btn btn-outline-success" onclick="openAddStopModal(@day.Id, @day.DayNumber)" title="Aggiungi Tappa">
                                 <i class="bi bi-plus"></i> Tappa
                             </button>
@@ -290,10 +293,66 @@
                     <label class="form-label">Descrizione</label>
                     <textarea name="Description" class="form-control" rows="3"></textarea>
                 </div>
+                <div class="mb-3">
+                    <label class="form-label">Image 1 URL</label>
+                    <input name="Image1" class="form-control" placeholder="https://..." />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Image 2 URL</label>
+                    <input name="Image2" class="form-control" placeholder="https://..." />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Image 3 URL</label>
+                    <input name="Image3" class="form-control" placeholder="https://..." />
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
                 <button type="submit" class="btn btn-primary">Salva Giorno</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Day Modal -->
+<div class="modal fade" id="editDayModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form asp-action="EditDay" method="post" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modifica Giorno Itinerario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="TripId" value="@Model.Id" />
+                <input type="hidden" name="id" id="edit-day-id" />
+                <div class="mb-3">
+                    <label class="form-label">Numero Giorno</label>
+                    <input name="DayNumber" id="edit-day-number" type="number" class="form-control" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Titolo Giorno</label>
+                    <input name="Title" id="edit-day-title" class="form-control" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Descrizione</label>
+                    <textarea name="Description" id="edit-day-description" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Image 1 URL</label>
+                    <input name="Image1" id="edit-day-image1" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Image 2 URL</label>
+                    <input name="Image2" id="edit-day-image2" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Image 3 URL</label>
+                    <input name="Image3" id="edit-day-image3" class="form-control" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                <button type="submit" class="btn btn-primary">Salva Modifiche</button>
             </div>
         </form>
     </div>
@@ -326,6 +385,7 @@
                             <option value="meal">Pasto</option>
                             <option value="transfer">Spostamento</option>
                             <option value="experience">Esperienza</option>
+                            <option value="stay">Soggiorno</option>
                         </select>
                     </div>
                 </div>
@@ -348,6 +408,18 @@
 
 @section Scripts {
     <script>
+        function openEditDayModal(id, dayNumber, title, description, img1, img2, img3) {
+            document.getElementById('edit-day-id').value = id;
+            document.getElementById('edit-day-number').value = dayNumber;
+            document.getElementById('edit-day-title').value = title;
+            document.getElementById('edit-day-description').value = description;
+            document.getElementById('edit-day-image1').value = img1;
+            document.getElementById('edit-day-image2').value = img2;
+            document.getElementById('edit-day-image3').value = img3;
+            var modal = new bootstrap.Modal(document.getElementById('editDayModal'));
+            modal.show();
+        }
+
         function openAddStopModal(dayId, dayNumber) {
             document.getElementById('modal-day-id').value = dayId;
             document.getElementById('modal-day-number').innerText = dayNumber;

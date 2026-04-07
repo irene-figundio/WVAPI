@@ -18,11 +18,30 @@ namespace VITBO.Controllers
             _eventsService = eventsService;
         }
 
-        public async Task<IActionResult> Index(int? eventId)
+        public async Task<IActionResult> Index(int? eventId, [FromQuery] int langId = 1, string? search = null)
         {
+            ViewData["CurrentLangId"] = langId;
+            ViewData["SearchTerm"] = search;
             string token = GetToken();
             string ua = GetUserAgent();
             var trips = await _tripsService.GetTripsAsync(eventId, token, ua);
+
+            // Filter by language (trips are linked to events which have LangID)
+            var eventsInLang = await _eventsService.GetEventsAsync(langId, token, ua);
+            var eventIdsInLang = eventsInLang.Select(e => e.Id).ToHashSet();
+
+            trips = trips.Where(t => eventIdsInLang.Contains(t.EventId)).ToList();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                trips = trips.Where(t =>
+                    (t.DepartureCity?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (t.ArrivalCity?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (t.DepartureCountry?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (t.ArrivalCountry?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false)
+                ).ToList();
+            }
+
             ViewBag.EventId = eventId;
             return View(trips);
         }
@@ -72,6 +91,15 @@ namespace VITBO.Controllers
             {
                 string token = GetToken();
                 string ua = GetUserAgent();
+
+                // Validation: prevent multiple trips for the same EventId
+                var existingTrips = await _tripsService.GetTripsAsync(model.EventId, token, ua);
+                if (existingTrips != null && existingTrips.Any(t => t.EventId == model.EventId))
+                {
+                    ModelState.AddModelError("EventId", "A trip is already associated with this Event ID.");
+                    return View(model);
+                }
+
                 var success = await _tripsService.CreateTripAsync(model, token, ua);
                 if (success) return RedirectToAction(nameof(Index));
                 ModelState.AddModelError("", "Error creating trip.");
@@ -87,10 +115,13 @@ namespace VITBO.Controllers
             var trip = await _tripsService.GetTripByIdAsync(id, token, ua);
             if (trip == null) return NotFound();
 
-            ViewBag.Events = await _eventsService.GetEventsAsync(1, token, ua);
+            var ev = await _eventsService.GetEventByIdAbsAsync(trip.EventId, token, ua);
+
+            ViewBag.Events = await _eventsService.GetEventsAsync(ev?.LangID ?? 1, token, ua);
             var model = new UpdateTripRequest
             {
                 Id = trip.Id,
+                LangID = ev?.LangID ?? 1,
                 EventId = trip.EventId,
                 DepartureCity = trip.DepartureCity,
                 DepartureCountry = trip.DepartureCountry,
@@ -163,6 +194,20 @@ namespace VITBO.Controllers
             if (ModelState.IsValid)
             {
                 await _tripsService.CreateItineraryDayAsync(model, GetToken(), GetUserAgent());
+            }
+            return RedirectToAction(
+         nameof(Details),
+         null,
+         new { id = model.TripId },
+         "days-tab");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditDay(CreateItineraryDayRequest model, int id)
+        {
+            if (ModelState.IsValid)
+            {
+                await _tripsService.UpdateItineraryDayAsync(id, model, GetToken(), GetUserAgent());
             }
             return RedirectToAction(
          nameof(Details),

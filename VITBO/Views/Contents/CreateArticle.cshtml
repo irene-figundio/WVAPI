@@ -20,14 +20,20 @@
                 </div>
 
                 <div class="col-md-4 form-floating mb-3">
-                    <select asp-for="LangID" class="form-select">
+                    <select asp-for="LangID" class="form-select" id="langSelect">
                         <option value="1">English (1)</option>
                         <option value="2">Italiano (2)</option>
-                       @*  <option value="3">French (3)</option>
-                        <option value="4">German (4)</option> *@
                     </select>
                     <label asp-for="LangID" class="ms-2">Language</label>
                     <span asp-validation-for="LangID" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-12 form-floating mb-3">
+                    <select asp-for="CategoryId" class="form-select" id="categorySelect">
+                        <option value="">-- Select Category --</option>
+                    </select>
+                    <label asp-for="CategoryId" class="ms-2">Category</label>
+                    <span asp-validation-for="CategoryId" class="text-danger"></span>
                 </div>
 
                 <div class="col-12 form-floating mb-3">
@@ -72,4 +78,24 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            function loadCategories(langId) {
+                $.getJSON('@Url.Action("GetCategoriesByLang", "Contents")', { langId: langId }, function (data) {
+                    var items = '<option value="">-- Select Category --</option>';
+                    $.each(data, function (i, category) {
+                        items += "<option value='" + category.id + "'>" + category.name + " (#" + category.id + ")</option>";
+                    });
+                    $('#categorySelect').html(items);
+                });
+            }
+
+            $('#langSelect').change(function () {
+                loadCategories($(this).val());
+            });
+
+            // Initial load
+            loadCategories($('#langSelect').val());
+        });
+    </script>
 }

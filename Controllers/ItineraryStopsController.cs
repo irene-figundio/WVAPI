@@ -118,7 +118,7 @@ namespace AI_Integration.Controllers
             if (stop.DayId <= 0) ModelState.AddModelError("DayId", "DayId is required.");
             if (string.IsNullOrWhiteSpace(stop.Title)) ModelState.AddModelError("Title", "Title is required.");
 
-            var validTypes = new[] { "activity", "meal", "transfer", "experience" };
+            var validTypes = new[] { "activity", "meal", "transfer", "experience","stay" };
             if (!validTypes.Contains(stop.Type)) ModelState.AddModelError("Type", "Invalid type.");
 
             if (!ModelState.IsValid) return BadRequest(ModelState);

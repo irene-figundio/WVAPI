@@ -94,7 +94,7 @@ BEGIN
         [Time] [time](7) NULL,
         [Title] [nvarchar](255) NOT NULL,
         [Description] [nvarchar](max) NULL,
-        [Type] [nvarchar](50) NOT NULL, -- activity, meal, transfer, experience
+        [Type] [nvarchar](50) NOT NULL, -- activity, meal, transfer, experience, stay
         [OrderIndex] [int] NOT NULL DEFAULT 0,
 
         -- Audit fields

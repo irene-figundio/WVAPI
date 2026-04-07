@@ -1,15 +1,16 @@
-@model VITBO.Models.CreateEventRequest
+@model VITBO.Services.UpdateEventRequest
 
 @{
-    ViewData["Title"] = "Create New Event";
+    ViewData["Title"] = "Edit Event";
 }
 
 <div class="card border-0 shadow-sm border-start border-warning border-4">
     <div class="card-header bg-white border-bottom py-3">
-        <h5 class="mb-0 text-warning"><i class="bi bi-calendar-plus me-2"></i> Create New Event</h5>
+        <h5 class="mb-0 text-warning"><i class="bi bi-pencil-square me-2"></i> Edit Event #@Model.id</h5>
     </div>
     <div class="card-body">
-        <form asp-action="Create" method="post">
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="id" />
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <div class="row g-3">
@@ -29,7 +30,7 @@
                 </div>
 
                 <div class="col-md-6 form-floating mb-3">
-                    <input asp-for="EndDate" type="date" class="form-control" />
+                    <input asp-for="EndDate" type="date" class="form-control" value="@Model.EndDate?.ToString("yyyy-MM-dd")" />
                     <label asp-for="EndDate" class="ms-2">End Date (Optional)</label>
                     <span asp-validation-for="EndDate" class="text-danger"></span>
                 </div>
@@ -47,7 +48,7 @@
                 </div>
 
                 <div class="col-md-6 form-floating mb-3">
-                    <input asp-for="EventDate" type="date" class="form-control" />
+                    <input asp-for="EventDate" type="date" class="form-control" value="@Model.EventDate.ToString("yyyy-MM-dd")" />
                     <label asp-for="EventDate" class="ms-2">Event Date</label>
                     <span asp-validation-for="EventDate" class="text-danger"></span>
                 </div>
@@ -65,7 +66,7 @@
                 </div>
 
                 <div class="col-12 form-floating mb-3">
-                    <textarea asp-for="Description" class="form-control" placeholder="Description" style="height: 120px"></textarea>
+                    <textarea asp-for="Description" class="form-control" placeholder="Description" style="height: 120px">@Model.Description</textarea>
                     <label asp-for="Description" class="ms-2">Event Description</label>
                     <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
@@ -107,7 +108,7 @@
 
                 <div class="col-12 mt-4 d-flex justify-content-between">
                     <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
-                    <button type="submit" class="btn btn-warning text-dark px-5 fw-bold"><i class="bi bi-save me-2"></i> Create Event</button>
+                    <button type="submit" class="btn btn-warning text-dark px-5 fw-bold"><i class="bi bi-save me-2"></i> Update Event</button>
                 </div>
             </div>
         </form>
@@ -118,22 +119,23 @@
     <partial name="_ValidationScriptsPartial" />
     <script>
         $(document).ready(function () {
-            function loadCategories(langId) {
+            function loadCategories(langId, selectedCategoryId) {
                 $.getJSON('@Url.Action("GetCategoriesByLang", "Events")', { langId: langId }, function (data) {
                     var items = '<option value="">-- Select Category --</option>';
                     $.each(data, function (i, category) {
-                        items += "<option value='" + category.id + "'>" + category.name + " (#" + category.id + ")</option>";
+                        var selected = category.id == selectedCategoryId ? "selected" : "";
+                        items += "<option value='" + category.id + "' " + selected + ">" + category.name + " (#" + category.id + ")</option>";
                     });
                     $('#categorySelect').html(items);
                 });
             }
 
             $('#langSelect').change(function () {
-                loadCategories($(this).val());
+                loadCategories($(this).val(), null);
             });
 
             // Initial load
-            loadCategories($('#langSelect').val());
+            loadCategories($('#langSelect').val(), '@Model.CategoryId');
         });
     </script>
 }

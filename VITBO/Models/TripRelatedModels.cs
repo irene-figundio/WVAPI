@@ -16,6 +16,7 @@ namespace VITBO.Models
 
     public class CreateTripRequest
     {
+        public int LangID { get; set; } = 1;
         public int EventId { get; set; }
         public string DepartureCity { get; set; } = null!;
         public string DepartureCountry { get; set; } = null!;
@@ -62,6 +63,9 @@ namespace VITBO.Models
         public int DayNumber { get; set; }
         public string Title { get; set; } = null!;
         public string? Description { get; set; }
+        public string? Image1 { get; set; }
+        public string? Image2 { get; set; }
+        public string? Image3 { get; set; }
     }
 
     public class CreateItineraryDayRequest
@@ -70,6 +74,9 @@ namespace VITBO.Models
         public int DayNumber { get; set; }
         public string Title { get; set; } = null!;
         public string? Description { get; set; }
+        public string? Image1 { get; set; }
+        public string? Image2 { get; set; }
+        public string? Image3 { get; set; }
     }
 
     public class ItineraryStopDto

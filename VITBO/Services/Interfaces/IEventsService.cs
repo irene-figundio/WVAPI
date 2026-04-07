@@ -12,5 +12,15 @@ namespace VITBO.Services.Interfaces
         Task<bool> DeleteEventAsync(int id, string sessionToken, string userAgent);
 
         Task<List<EventCategoryDto>> GetEventCategoriesAsync(int langId, string token, string userAgent);
+
+        // Variant Prices
+        Task<List<VariantPriceDto>> GetVariantPricesAsync(int? eventId, string token, string userAgent);
+        Task<bool> CreateVariantPriceAsync(VariantPriceDto model, string token, string userAgent);
+        Task<bool> DeleteVariantPriceAsync(int id, string token, string userAgent);
+
+        // Event Needs
+        Task<List<EventNeedDto>> GetEventNeedsAsync(int? eventId, string token, string userAgent);
+        Task<bool> CreateEventNeedAsync(EventNeedDto model, string token, string userAgent);
+        Task<bool> DeleteEventNeedAsync(int id, string token, string userAgent);
     }
 }

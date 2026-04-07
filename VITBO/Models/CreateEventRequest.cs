@@ -12,6 +12,8 @@ namespace VITBO.Models
         [Required]
         public DateTime EventDate { get; set; } = DateTime.Today;
 
+        public DateTime? EndDate { get; set; }
+
         [Required]
         public DateTime BookingEndDate { get; set; } = DateTime.Today;
 
@@ -30,5 +32,9 @@ namespace VITBO.Models
         public int LangID { get; set; } = 1;
 
         public int? CategoryId { get; set; } = 1;
+
+        public bool HasVariantPrice { get; set; } = true;
+        public bool HasNeeds { get; set; } = true;
+        public string? ProgramPdf { get; set; }
     }
 }

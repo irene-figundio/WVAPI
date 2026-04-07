@@ -6,8 +6,26 @@
 }
 
 <div class="card border-0 shadow-sm border-start border-warning border-4">
-    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+    <div class="card-header bg-white border-bottom py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
         <h5 class="mb-0 text-warning"><i class="bi bi-images me-2"></i> @(eventId != null ? $"Galleries for Event #{eventId}" : "All Galleries")</h5>
+
+        <form method="get" asp-action="Index" class="row g-2 align-items-center mb-0">
+            <input type="hidden" name="eventId" value="@eventId" />
+            <div class="col-auto d-flex align-items-center">
+                <label class="me-2 text-muted small fw-bold">Language:</label>
+                <select name="langId" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <!option value="1" @(ViewData["CurrentLangId"]?.ToString() == "1" ? "selected" : "")>English (1)</!option>
+                    <!option value="2" @(ViewData["CurrentLangId"]?.ToString() == "2" ? "selected" : "")>Italiano (2)</!option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <div class="input-group input-group-sm">
+                    <input type="text" name="search" class="form-control" placeholder="Search title..." value="@ViewData["SearchTerm"]">
+                    <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </form>
+
         <div>
             <a asp-action="Create" asp-route-eventId="@eventId" class="btn btn-warning btn-sm text-dark"><i class="bi bi-plus-circle me-1"></i> New Gallery</a>
             @if(eventId != null) {

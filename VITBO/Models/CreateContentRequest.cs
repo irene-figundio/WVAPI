@@ -19,6 +19,8 @@ namespace VITBO.Models
 
         public int LangID { get; set; } = 1;
 
+        public int? CategoryId { get; set; }
+
         public string? CoverImage { get; set; }
         public string? HeroImage { get; set; }
     }
