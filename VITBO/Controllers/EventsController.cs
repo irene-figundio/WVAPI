@@ -66,7 +66,11 @@ namespace VITBO.Controllers
                         content.Add(new StringContent("Events"), "ParentType");
                         content.Add(new StringContent(newId.Value.ToString()), "ParentId");
                         content.Add(new StringContent("EventCoverImage"), "UploadType");
-                        await _mediaService.UploadFileAsync(content, sessionToken, userAgent);
+                        var uploadRes = await _mediaService.UploadFileAsync(content, sessionToken, userAgent);
+                        if (!uploadRes.Success)
+                        {
+                             TempData["Error"] = "Event created but Cover Image upload failed: " + uploadRes.Message;
+                        }
                     }
 
                     // Handle Program PDF Upload
@@ -79,7 +83,11 @@ namespace VITBO.Controllers
                         content.Add(new StringContent("Events"), "ParentType");
                         content.Add(new StringContent(newId.Value.ToString()), "ParentId");
                         content.Add(new StringContent("EventProgramPdf"), "UploadType");
-                        await _mediaService.UploadFileAsync(content, sessionToken, userAgent);
+                        var uploadRes = await _mediaService.UploadFileAsync(content, sessionToken, userAgent);
+                        if (!uploadRes.Success)
+                        {
+                             TempData["Error"] = (TempData["Error"]?.ToString() ?? "") + " Program PDF upload failed: " + uploadRes.Message;
+                        }
                     }
 
                     return RedirectToAction(nameof(Edit), new { id = newId.Value });

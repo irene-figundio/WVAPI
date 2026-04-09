@@ -154,6 +154,20 @@ var app = builder.Build();
 var webEnvironment = app.Services.GetRequiredService<IWebHostEnvironment>();
 webEnvironment.WebRootPath = Path.Combine(webEnvironment.ContentRootPath, "wwwroot");
 app.UseStaticFiles(); // wwwroot
+
+// Serve images from external folder
+var basePhysicalPath = builder.Configuration["FileStorage:BasePhysicalPath"] ?? @"C:\inetpub\VitinerarioImages\";
+if (!Directory.Exists(basePhysicalPath))
+{
+    Directory.CreateDirectory(basePhysicalPath);
+}
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(basePhysicalPath),
+    RequestPath = "/Images"
+});
+
 var provider = new FileExtensionContentTypeProvider();
 provider.Mappings[".mkv"] = "video/x-matroska";
 provider.Mappings[".mov"] = "video/quicktime";

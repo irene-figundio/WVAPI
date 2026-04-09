@@ -19,7 +19,7 @@ namespace VITBO.Models
 
         [Required]
         public string? Location { get; set; }
-        [Required]
+
         public string? CoverImage { get; set; }
         public string? HeroImage { get; set; }
 
