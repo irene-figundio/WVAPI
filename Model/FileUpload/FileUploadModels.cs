@@ -6,7 +6,8 @@ namespace AI_Integration.Model.FileUpload
     {
         Events,
         Content,
-        HeroImage
+        HeroImage,
+        Podcast
     }
 
     public enum UploadType
@@ -17,7 +18,8 @@ namespace AI_Integration.Model.FileUpload
         EventCoverImage,
         ContentGalleryImage,
         ContentCoverImage,
-        HeroImage
+        HeroImage,
+        PodcastCoverImage
     }
 
     public class FileUploadRequest

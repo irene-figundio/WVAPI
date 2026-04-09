@@ -64,6 +64,13 @@ namespace AI_Integration.Services.FileUpload.Implementations
                 resolvedId = content.Id;
                 resolvedGuid = content.Guid;
             }
+            else if (request.ParentType == ParentType.Podcast)
+            {
+                var podcast = await _unitOfWork.Repository<Podcast>().GetByIdAsync(request.ParentId.Value);
+                if (podcast == null) return (0, Guid.Empty, false, "Podcast not found.");
+                resolvedId = podcast.Id;
+                // Podcast doesn't have GUID yet, so we return empty or skip validation
+            }
 
             // Validation: if both provided, they must match
             if (request.ParentId != null && request.ParentId != resolvedId)

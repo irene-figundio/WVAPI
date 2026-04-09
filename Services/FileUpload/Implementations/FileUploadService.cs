@@ -56,7 +56,7 @@ namespace AI_Integration.Services.FileUpload.Implementations
             {
                 // We need to know which storage area to use for mapping.
                 // Let's peek at the strategy or define it. Most are Events or Articles.
-                string mappingArea = request.ParentType == ParentType.Events ? "Events" : "Articles";
+                string mappingArea = request.ParentType == ParentType.Events ? "Events" : (request.ParentType == ParentType.Podcast ? "Other" : "Articles");
                 progressiveN = await _storageMappingService.GetOrAddProgressiveNumberAsync(request.ParentType, request.ParentId.Value, mappingArea);
             }
 
@@ -205,6 +205,15 @@ namespace AI_Integration.Services.FileUpload.Implementations
                         CreatedAt = DateTime.UtcNow
                     };
                     await _unitOfWork.Repository<HeroImage>().InsertAsync(hero);
+                    break;
+
+                case UploadType.PodcastCoverImage:
+                    var pod = await _unitOfWork.Repository<Podcast>().GetByIdAsync(request.ParentId!.Value);
+                    if (pod != null)
+                    {
+                        pod.CoverImage = url;
+                        _unitOfWork.Repository<Podcast>().Update(pod);
+                    }
                     break;
             }
 

@@ -1,0 +1,82 @@
+@model List<VITBO.Models.PodcastDto>
+
+@{
+    ViewData["Title"] = "Podcasts Management";
+    int currentLangId = ViewData["CurrentLangId"] != null ? (int)ViewData["CurrentLangId"]! : 1;
+}
+
+<div class="card border-0 shadow-sm border-start border-danger border-4">
+    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-danger"><i class="bi bi-mic-fill me-2"></i> Podcasts Directory</h5>
+        <a asp-action="Create" class="btn btn-danger btn-sm"><i class="bi bi-plus-circle me-1"></i> New Podcast</a>
+
+        <form method="get" asp-action="Index" class="row g-2 align-items-center">
+            <div class="col-auto d-flex align-items-center">
+                <label class="me-2 text-muted small fw-bold">Language:</label>
+                <select name="langId" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <!option value="1" @(currentLangId == 1 ? "selected" : "")>English (1)</!option>
+                    <!option value="2" @(currentLangId == 2 ? "selected" : "")>Italiano (2)</!option>
+                </select>
+            </div>
+        </form>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" class="ps-4">ID</th>
+                        <th scope="col">Cover</th>
+                        <th scope="col">Title</th>
+                        <th scope="col">Links</th>
+                        <th scope="col" class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 text-muted fw-bold">#@item.Id</td>
+                                <td>
+                                    @if(!string.IsNullOrEmpty(item.CoverImage)) {
+                                        <img src="@item.CoverImage" class="rounded shadow-sm" style="width: 50px; height: 50px; object-fit: cover;" />
+                                    } else {
+                                        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <i class="bi bi-music-note text-muted"></i>
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="d-block fw-bold text-dark">@item.Title</span>
+                                    <small class="text-muted d-block text-truncate" style="max-width: 300px;">@item.Description</small>
+                                </td>
+                                <td>
+                                    @if(!string.IsNullOrEmpty(item.YoutubeUrl)) {
+                                        <a href="@item.YoutubeUrl" target="_blank" class="text-danger me-2"><i class="bi bi-youtube"></i></a>
+                                    }
+                                    @if(!string.IsNullOrEmpty(item.SpotifyUrl)) {
+                                        <a href="@item.SpotifyUrl" target="_blank" class="text-success"><i class="bi bi-spotify"></i></a>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Are you sure?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">No podcasts found for this language.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

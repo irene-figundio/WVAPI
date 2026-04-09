@@ -81,6 +81,7 @@ builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IImageC
 builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IUploadNamingStrategy, AI_Integration.Services.FileUpload.Implementations.EventNamingStrategy>();
 builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IUploadNamingStrategy, AI_Integration.Services.FileUpload.Implementations.ContentNamingStrategy>();
 builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IUploadNamingStrategy, AI_Integration.Services.FileUpload.Implementations.HeroNamingStrategy>();
+builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IUploadNamingStrategy, AI_Integration.Services.FileUpload.Implementations.PodcastNamingStrategy>();
 builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IParentResolver, AI_Integration.Services.FileUpload.Implementations.ParentResolver>();
 builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IFileUploadService, AI_Integration.Services.FileUpload.Implementations.FileUploadService>();
 

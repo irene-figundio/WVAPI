@@ -139,4 +139,30 @@ namespace AI_Integration.Services.FileUpload.Implementations
             return Task.FromResult((folderPath, fileName, storageArea, false));
         }
     }
+
+    public class PodcastNamingStrategy : IUploadNamingStrategy
+    {
+        private readonly IProgressiveResolver _progressiveResolver;
+        private readonly IFileStorageService _fileStorageService;
+
+        public PodcastNamingStrategy(IProgressiveResolver progressiveResolver, IFileStorageService fileStorageService)
+        {
+            _progressiveResolver = progressiveResolver;
+            _fileStorageService = fileStorageService;
+        }
+
+        public bool CanHandle(UploadType uploadType)
+        {
+            return uploadType == UploadType.PodcastCoverImage;
+        }
+
+        public Task<(string FolderPath, string FileName, string StorageArea, bool Overwrite)> GetNamingInfoAsync(FileUploadRequest request, int progressiveN)
+        {
+            string storageArea = "Other";
+            string folderPath = storageArea;
+            string fileName = $"podcast{progressiveN}_cover.png";
+
+            return Task.FromResult((folderPath, fileName, storageArea, true));
+        }
+    }
 }
