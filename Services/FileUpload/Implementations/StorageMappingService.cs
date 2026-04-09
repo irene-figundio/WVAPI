@@ -7,17 +7,33 @@ using Microsoft.Extensions.Configuration;
 
 namespace AI_Integration.Services.FileUpload.Implementations
 {
+    using Microsoft.AspNetCore.Hosting;
+
     public class StorageMappingService : IStorageMappingService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IProgressiveResolver _progressiveResolver;
         private readonly string _basePhysicalPath;
 
-        public StorageMappingService(IUnitOfWork unitOfWork, IProgressiveResolver progressiveResolver, IConfiguration configuration)
+        public StorageMappingService(IUnitOfWork unitOfWork, IProgressiveResolver progressiveResolver, IConfiguration configuration, IWebHostEnvironment environment)
         {
             _unitOfWork = unitOfWork;
             _progressiveResolver = progressiveResolver;
-            _basePhysicalPath = configuration["FileStorage:BasePhysicalPath"] ?? @"C:\inetpub\VitinerarioImages\";
+
+            var configuredPath = configuration["FileStorage:BasePhysicalPath"];
+            if (string.IsNullOrEmpty(configuredPath))
+            {
+                _basePhysicalPath = Path.Combine(environment.ContentRootPath, "VitinerarioImages");
+            }
+            else
+            {
+                _basePhysicalPath = configuredPath;
+            }
+
+            if (!Path.IsPathRooted(_basePhysicalPath))
+            {
+                _basePhysicalPath = Path.GetFullPath(_basePhysicalPath);
+            }
         }
 
         public async Task<int> GetOrAddProgressiveNumberAsync(ParentType parentType, int parentId, string storageArea)

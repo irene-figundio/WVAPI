@@ -3,15 +3,31 @@ using Microsoft.Extensions.Configuration;
 
 namespace AI_Integration.Services.FileUpload.Implementations
 {
+    using Microsoft.AspNetCore.Hosting;
+
     public class FileStorageService : IFileStorageService
     {
         private readonly string _basePhysicalPath;
         private readonly string _baseVirtualUrl;
 
-        public FileStorageService(IConfiguration configuration)
+        public FileStorageService(IConfiguration configuration, IWebHostEnvironment environment)
         {
-            _basePhysicalPath = configuration["FileStorage:BasePhysicalPath"] ?? @"C:\inetpub\VitinerarioImages\";
-            _baseVirtualUrl = configuration["FileStorage:BaseVirtualUrl"] ?? "https://localhost/Images/";
+            var configuredPath = configuration["FileStorage:BasePhysicalPath"];
+            if (string.IsNullOrEmpty(configuredPath))
+            {
+                _basePhysicalPath = Path.Combine(environment.ContentRootPath, "VitinerarioImages");
+            }
+            else
+            {
+                _basePhysicalPath = configuredPath;
+            }
+
+            if (!Path.IsPathRooted(_basePhysicalPath))
+            {
+                _basePhysicalPath = Path.GetFullPath(_basePhysicalPath);
+            }
+
+            _baseVirtualUrl = configuration["FileStorage:BaseVirtualUrl"] ?? "/Images/";
         }
 
         public async Task<string> SaveFileAsync(string folderPath, string fileName, Stream fileStream, bool overwrite = false)
