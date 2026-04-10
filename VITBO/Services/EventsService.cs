@@ -127,6 +127,8 @@ namespace VITBO.Services
         public string Title { get; set; }
         public string Description { get; set; } = string.Empty;
         public DateTime EventDate { get; set; }
+        public DateTime? StartDate { get; set; }
+        public TimeSpan? StartTime { get; set; }
         public DateTime? EndDate { get; set; } = null;
         public bool HasVariantPrice { get; set; } = true;
         public bool HasNeeds { get; set; } = true;
@@ -144,6 +146,6 @@ namespace VITBO.Services
         public int? CategoryId { get; set; }
         public string? Coordinates { get; set; }
         public string? HeroImage { get; set; } = null;
-        public int GalleryId { get; set; }
+        public int? GalleryId { get; set; }
     }
 }

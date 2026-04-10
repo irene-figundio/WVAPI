@@ -12,7 +12,10 @@ namespace VITBO.Models
         [Required]
         public DateTime EventDate { get; set; } = DateTime.Today;
 
+        public DateTime? StartDate { get; set; }
+        public TimeSpan? StartTime { get; set; }
         public DateTime? EndDate { get; set; }
+        public TimeSpan? EndTime { get; set; }
 
         [Required]
         public DateTime BookingEndDate { get; set; } = DateTime.Today;
@@ -21,9 +24,12 @@ namespace VITBO.Models
         public string? Location { get; set; }
 
         public string? CoverImage { get; set; }
+        public string? Subtitle { get; set; }
         public string? HeroImage { get; set; }
+        public string? Coordinates { get; set; }
 
        public string Organizer { get; set; } = "Vitinerario®";
+       public string? ContactInfo { get; set; }
 
         public decimal Price { get; set; } = 0;
 
