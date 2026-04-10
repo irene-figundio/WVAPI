@@ -69,6 +69,22 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+// Serve images from the shared folder
+var basePhysicalPath = builder.Configuration["FileStorage:BasePhysicalPath"] ?? Path.Combine(builder.Environment.ContentRootPath, "..", "VitinerarioImages");
+
+if (!Path.IsPathRooted(basePhysicalPath)) {
+    basePhysicalPath = Path.GetFullPath(basePhysicalPath);
+}
+
+if (Directory.Exists(basePhysicalPath))
+{
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(basePhysicalPath),
+        RequestPath = "/Images"
+    });
+}
+
 app.UseRouting();
 app.UseHttpMethodOverride(new HttpMethodOverrideOptions
 {
