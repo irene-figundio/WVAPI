@@ -1,21 +1,22 @@
 @model VITBO.Models.CreateContentRequest
 
 @{
-    ViewData["Title"] = "Create New News";
+    ViewData["Title"] = "Create New News Entry";
+    var heroImages = ViewBag.HeroImages as List<VITBO.Models.HeroImageDto> ?? new List<VITBO.Models.HeroImageDto>();
 }
 
 <div class="card border-0 shadow-sm border-start border-danger border-4">
     <div class="card-header bg-white border-bottom py-3">
-        <h5 class="mb-0 text-danger"><i class="bi bi-file-earmark-plus me-2"></i> Create New News</h5>
+        <h5 class="mb-0 text-danger"><i class="bi bi-newspaper me-2"></i> Create New News Entry</h5>
     </div>
     <div class="card-body">
-        <form asp-action="CreateNews" method="post">
+        <form asp-action="CreateNews" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <div class="row g-3">
                 <div class="col-md-8 form-floating mb-3">
-                    <input asp-for="Title" class="form-control" placeholder="News Title" />
-                    <label asp-for="Title" class="ms-2">News Title</label>
+                    <input asp-for="Title" class="form-control" placeholder="Headline" />
+                    <label asp-for="Title" class="ms-2">Headline</label>
                     <span asp-validation-for="Title" class="text-danger"></span>
                 </div>
 
@@ -37,7 +38,7 @@
                 </div>
 
                 <div class="col-12 form-floating mb-3">
-                    <textarea asp-for="Text" class="form-control" placeholder="Full article content" style="height: 250px"></textarea>
+                    <textarea asp-for="Text" class="form-control" placeholder="Full news text" style="height: 250px"></textarea>
                     <label asp-for="Text" class="ms-2">News Content</label>
                     <span asp-validation-for="Text" class="text-danger"></span>
                 </div>
@@ -51,25 +52,30 @@
                 <div class="col-md-6 mb-3">
                     <div class="form-check form-switch mt-3 ms-2">
                         <input asp-for="IsPublished" class="form-check-input" type="checkbox" role="switch" />
-                        <label asp-for="IsPublished" class="form-check-label text-muted fw-bold">Publish Immediately</label>
+                        <label asp-for="IsPublished" class="form-check-label text-muted fw-bold">Live</label>
                     </div>
                 </div>
 
-                <div class="col-md-6 form-floating mb-3">
-                    <input asp-for="CoverImage" class="form-control" placeholder="Cover Image URL" />
-                    <label asp-for="CoverImage" class="ms-2">Cover Image URL</label>
-                    <span asp-validation-for="CoverImage" class="text-danger"></span>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="CoverImageFile" class="form-label">Cover Image</label>
+                    <input asp-for="CoverImageFile" type="file" class="form-control" accept="image/*" />
+                    <div class="form-text small">Will be converted to PNG automatically.</div>
                 </div>
 
                 <div class="col-md-6 form-floating mb-3">
-                    <input asp-for="HeroImage" class="form-control" placeholder="Hero Image URL" />
-                    <label asp-for="HeroImage" class="ms-2">Hero Image URL</label>
-                    <span asp-validation-for="HeroImage" class="text-danger"></span>
+                    <select asp-for="HeroImage" class="form-select">
+                        <option value="">-- No Hero Image --</option>
+                        @foreach (var hero in heroImages)
+                        {
+                            <option value="@hero.ImageUrl">@hero.Name</option>
+                        }
+                    </select>
+                    <label asp-for="HeroImage" class="ms-2">Hero Image</label>
                 </div>
 
                 <div class="col-12 mt-4 d-flex justify-content-between">
                     <a asp-action="News" class="btn btn-outline-secondary px-4">Cancel</a>
-                    <button type="submit" class="btn btn-danger px-5"><i class="bi bi-save me-2"></i> Create News</button>
+                    <button type="submit" class="btn btn-danger px-5"><i class="bi bi-save me-2"></i> Create News Entry</button>
                 </div>
             </div>
         </form>
@@ -94,7 +100,6 @@
                 loadCategories($(this).val());
             });
 
-            // Initial load
             loadCategories($('#langSelect').val());
         });
     </script>

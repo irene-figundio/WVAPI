@@ -59,6 +59,30 @@ namespace VITBO.Controllers
             return RedirectToAction(nameof(Index), new { contentId });
         }
 
+        [HttpPost]
+        public async Task<IActionResult> AjaxUpload()
+        {
+            var file = Request.Form.Files["File"];
+            if (file == null) return Json(new { success = false, message = "No file" });
+
+            var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            var userAgent = GetUserAgent() ?? string.Empty;
+
+            using var content = new MultipartFormDataContent();
+            var fileContent = new StreamContent(file.OpenReadStream());
+            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+            content.Add(fileContent, "File", file.FileName);
+
+            foreach (var key in Request.Form.Keys)
+            {
+                if (key == "File") continue;
+                content.Add(new StringContent(Request.Form[key].ToString()), key);
+            }
+
+            var res = await _mediaService.UploadFileAsync(content, token, userAgent);
+            return Json(res);
+        }
+
         protected string? GetUserAgent()
         {
             return Request.Headers["User-Agent"].ToString();

@@ -23,5 +23,7 @@ namespace VITBO.Models
 
         public string? CoverImage { get; set; }
         public string? HeroImage { get; set; }
+
+        public Microsoft.AspNetCore.Http.IFormFile? CoverImageFile { get; set; }
     }
 }

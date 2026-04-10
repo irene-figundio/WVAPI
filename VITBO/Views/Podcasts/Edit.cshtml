@@ -1,0 +1,107 @@
+@model VITBO.Models.PodcastDto
+
+@{
+    ViewData["Title"] = "Edit Podcast";
+}
+
+<div class="card border-0 shadow-sm border-start border-danger border-4">
+    <div class="card-header bg-white border-bottom py-3">
+        <h5 class="mb-0 text-danger"><i class="bi bi-pencil-square me-2"></i> Edit Podcast #@Model.Id</h5>
+    </div>
+    <div class="card-body">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="CoverImage" id="hiddenCoverImage" />
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="row g-3">
+                <div class="col-md-8 form-floating mb-3">
+                    <input asp-for="Title" class="form-control" placeholder="Title" />
+                    <label asp-for="Title" class="ms-2">Podcast Title</label>
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4 form-floating mb-3">
+                    <select asp-for="LangID" class="form-select">
+                        <option value="1">English (1)</option>
+                        <option value="2">Italiano (2)</option>
+                    </select>
+                    <label asp-for="LangID" class="ms-2">Language</label>
+                </div>
+
+                <div class="col-12 form-floating mb-3">
+                    <textarea asp-for="Description" class="form-control" placeholder="Description" style="height: 100px">@Model.Description</textarea>
+                    <label asp-for="Description" class="ms-2">Short Description</label>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 form-floating mb-3">
+                    <input asp-for="PublishDate" type="datetime-local" class="form-control" value="@Model.PublishDate.ToString("yyyy-MM-ddTHH:mm")" />
+                    <label asp-for="PublishDate" class="ms-2">Publish Date</label>
+                    <span asp-validation-for="PublishDate" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label d-block">Cover Image</label>
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="@(string.IsNullOrEmpty(Model.CoverImage) ? "/images/no-image.png" : Model.CoverImage)" id="previewCover" class="img-thumbnail" style="height: 80px; width: 80px; object-fit: cover;" />
+                        <div class="flex-grow-1">
+                            <input type="file" id="uploadCover" class="form-control form-control-sm" accept="image/*" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 form-floating mb-3">
+                    <input asp-for="YoutubeUrl" class="form-control" placeholder="URL" />
+                    <label asp-for="YoutubeUrl" class="ms-2"><i class="bi bi-youtube me-1"></i> YouTube URL</label>
+                </div>
+
+                <div class="col-md-6 form-floating mb-3">
+                    <input asp-for="SpotifyUrl" class="form-control" placeholder="URL" />
+                    <label asp-for="SpotifyUrl" class="ms-2"><i class="bi bi-spotify me-1"></i> Spotify URL</label>
+                </div>
+
+                <div class="col-12 mt-4 d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+                    <button type="submit" class="btn btn-danger px-5"><i class="bi bi-save me-2"></i> Update Podcast</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            $('#uploadCover').change(async function() {
+                const file = this.files[0];
+                if (!file) return;
+
+                const formData = new FormData();
+                formData.append('File', file);
+                formData.append('ParentType', 'Podcast');
+                formData.append('ParentId', '@Model.Id');
+                formData.append('UploadType', 'PodcastCoverImage');
+
+                try {
+                    const response = await fetch('@Url.Action("AjaxUpload", "Podcasts")', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const res = await response.json();
+                    if (res.success) {
+                        $('#hiddenCoverImage').val(res.fileUrl);
+                        $('#previewCover').attr('src', res.fileUrl);
+                        alert('Image uploaded!');
+                    } else {
+                        alert('Upload failed: ' + res.message);
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            });
+        });
+    </script>
+}

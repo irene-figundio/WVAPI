@@ -16,11 +16,19 @@ namespace VITBO.Services
             _apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
         }
 
-        public async Task<bool> CreateEventAsync(CreateEventRequest request, string sessionToken, string userAgent)
+        public async Task<int?> CreateEventAsync(CreateEventRequest request, string sessionToken, string userAgent)
         {
             var endpoint = $"{_apiBase}/api/events";
-           // var jsonRequest = System.Text.Json.JsonSerializer.Serialize(request);
-            return await _httpService.SendHttpRequestAsync(HttpMethod.Post, endpoint, sessionToken, request, userAgent) is HttpResponseMessage response && response.IsSuccessStatusCode;
+            var response = await _httpService.SendHttpRequestAsync(HttpMethod.Post, endpoint, sessionToken, request, userAgent);
+            if (response != null && response.IsSuccessStatusCode)
+            {
+                var body = await _httpService.GetBodyFromHttpResponseAsync<dynamic>(response);
+                if (body != null && body.GetProperty("id").ValueKind != System.Text.Json.JsonValueKind.Null)
+                {
+                    return body.GetProperty("id").GetInt32();
+                }
+            }
+            return null;
         }
 
         public async Task<List<EventDto>> GetEventsAsync(int langId, string sessionToken, string userAgent)
@@ -119,6 +127,8 @@ namespace VITBO.Services
         public string Title { get; set; }
         public string Description { get; set; } = string.Empty;
         public DateTime EventDate { get; set; }
+        public DateTime? StartDate { get; set; }
+        public TimeSpan? StartTime { get; set; }
         public DateTime? EndDate { get; set; } = null;
         public bool HasVariantPrice { get; set; } = true;
         public bool HasNeeds { get; set; } = true;
@@ -136,6 +146,6 @@ namespace VITBO.Services
         public int? CategoryId { get; set; }
         public string? Coordinates { get; set; }
         public string? HeroImage { get; set; } = null;
-        public int GalleryId { get; set; }
+        public int? GalleryId { get; set; }
     }
 }

@@ -2,11 +2,15 @@
 
 @{
     ViewData["Title"] = "Edit Content";
+    var heroImages = ViewBag.HeroImages as List<VITBO.Models.HeroImageDto> ?? new List<VITBO.Models.HeroImageDto>();
 }
 
 <div class="card border-0 shadow-sm border-start border-danger border-4">
-    <div class="card-header bg-white border-bottom py-3">
+    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
         <h5 class="mb-0 text-danger"><i class="bi bi-pencil-square me-2"></i> Edit Content #@Model.Id</h5>
+        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#galleryModal">
+            <i class="bi bi-images me-1"></i> Gallery
+        </button>
     </div>
     <div class="card-body">
         <form asp-action="Edit" method="post">
@@ -39,15 +43,36 @@
                     <span asp-validation-for="Preview" class="text-danger"></span>
                 </div>
 
-                <div class="col-md-6 form-floating mb-3">
-                    <input asp-for="CoverImage" class="form-control" placeholder="Cover Image URL" />
-                    <label asp-for="CoverImage" class="ms-2">Cover Image URL</label>
-                    <span asp-validation-for="CoverImage" class="text-danger"></span>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label d-block">Cover Image</label>
+                    <div class="d-flex align-items-center gap-3">
+                        @if (!string.IsNullOrEmpty(Model.CoverImage))
+                        {
+                            <img src="@Model.CoverImage" id="previewCover" class="img-thumbnail" style="height: 100px; width: 100px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div id="previewCover" class="bg-light border d-flex align-items-center justify-content-center" style="height: 100px; width: 100px;">
+                                <i class="bi bi-image text-muted"></i>
+                            </div>
+                        }
+                        <div class="flex-grow-1">
+                            <input type="file" id="uploadCover" class="form-control" accept="image/*" />
+                            <input type="hidden" asp-for="CoverImage" id="hiddenCoverImage" />
+                            <div class="mt-1 small text-muted">Click to change cover. Will be converted to PNG.</div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="col-md-6 form-floating mb-3">
-                    <input asp-for="HeroImage" class="form-control" placeholder="Hero Image URL" />
-                    <label asp-for="HeroImage" class="ms-2">Hero Image URL</label>
+                    <select asp-for="HeroImage" class="form-select">
+                        <option value="">-- No Hero Image --</option>
+                        @foreach (var hero in heroImages)
+                        {
+                            <option value="@hero.ImageUrl">@hero.Name</option>
+                        }
+                    </select>
+                    <label asp-for="HeroImage" class="ms-2">Hero Image</label>
                     <span asp-validation-for="HeroImage" class="text-danger"></span>
                 </div>
 
@@ -64,9 +89,6 @@
                     </select>
                     <label asp-for="CategoryId" class="ms-2">Category</label>
                     <span asp-validation-for="CategoryId" class="text-danger"></span>
-                    <div class="form-text text-muted small mt-1">
-                        <i class="bi bi-info-circle"></i> Select the primary grouping context for this content to help users find related items.
-                    </div>
                 </div>
 
                 <div class="col-md-4 form-floating mb-3">
@@ -91,6 +113,81 @@
     </div>
 </div>
 
+<!-- Gallery Modal -->
+<div class="modal fade" id="galleryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Content Gallery</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Upload New Photo</label>
+                    <div class="input-group">
+                        <input type="file" id="galleryUpload" class="form-control" accept="image/*" />
+                        <input type="text" id="galleryCaption" class="form-control" placeholder="Caption (optional)" />
+                        <button class="btn btn-danger" type="button" id="btnUploadGallery">Upload</button>
+                    </div>
+                </div>
+                <hr />
+                <div id="galleryContainer" class="row g-2">
+                    <!-- Photos will be loaded here via AJAX -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            const contentId = @Model.Id;
+
+            $('#uploadCover').change(async function() {
+                const file = this.files[0];
+                if (!file) return;
+
+                const res = await performUpload(file, 'Content', 'ContentCoverImage');
+                if (res.success) {
+                    $('#hiddenCoverImage').val(res.fileUrl);
+                    $('#previewCover').attr('src', res.fileUrl).removeClass('bg-light');
+                    alert('Cover updated!');
+                } else {
+                    alert('Upload failed: ' + res.message);
+                }
+            });
+
+            async function performUpload(file, parentType, uploadType, extra = {}) {
+                const formData = new FormData();
+                formData.append('File', file);
+                formData.append('ParentType', parentType);
+                formData.append('ParentId', contentId);
+                formData.append('UploadType', uploadType);
+                for (const key in extra) formData.append(key, extra[key]);
+
+                const response = await fetch('@Url.Action("AjaxUpload", "Contents")', {
+                    method: 'POST',
+                    body: formData
+                });
+                return await response.json();
+            }
+
+            $('#btnUploadGallery').click(async function() {
+                const file = $('#galleryUpload')[0].files[0];
+                if (!file) { alert('Select a file'); return; }
+
+                const res = await performUpload(file, 'Content', 'ContentGalleryImage', {
+                    Caption: $('#galleryCaption').val()
+                });
+
+                if (res.success) {
+                    alert('Photo added!');
+                } else {
+                    alert(res.message);
+                }
+            });
+        });
+    </script>
 }

@@ -10,10 +10,12 @@ namespace VITBO.Controllers
     public class EventsController : Controller
     {
         private readonly IEventsService _eventsService;
+        private readonly IMediaService _mediaService;
 
-        public EventsController(IEventsService eventsService)
+        public EventsController(IEventsService eventsService, IMediaService mediaService)
         {
             _eventsService = eventsService;
+            _mediaService = mediaService;
         }
 
         public async Task<IActionResult> Index([FromQuery] int langId = 1, string? search = null)
@@ -48,17 +50,53 @@ namespace VITBO.Controllers
         {
             string sessionToken = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
             string userAgent = GetUserAgent() ?? string.Empty;
+
             if (ModelState.IsValid)
             {
-                var success = await _eventsService.CreateEventAsync(model, sessionToken, userAgent);
-                if (success)
+                var newId = await _eventsService.CreateEventAsync(model, sessionToken, userAgent);
+                if (newId.HasValue)
                 {
-                    return RedirectToAction(nameof(Index));
+                    // Handle Cover Upload
+                    if (model.CoverImageFile != null)
+                    {
+                        using var content = new MultipartFormDataContent();
+                        var fileContent = new StreamContent(model.CoverImageFile.OpenReadStream());
+                        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(model.CoverImageFile.ContentType);
+                        content.Add(fileContent, "File", model.CoverImageFile.FileName);
+                        content.Add(new StringContent("Events"), "ParentType");
+                        content.Add(new StringContent(newId.Value.ToString()), "ParentId");
+                        content.Add(new StringContent("EventCoverImage"), "UploadType");
+                        var uploadRes = await _mediaService.UploadFileAsync(content, sessionToken, userAgent);
+                        if (!uploadRes.Success)
+                        {
+                             TempData["Error"] = "Event created but Cover Image upload failed: " + uploadRes.Message;
+                        }
+                    }
+
+                    // Handle Program PDF Upload
+                    if (model.ProgramPdfFile != null)
+                    {
+                        using var content = new MultipartFormDataContent();
+                        var fileContent = new StreamContent(model.ProgramPdfFile.OpenReadStream());
+                        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(model.ProgramPdfFile.ContentType);
+                        content.Add(fileContent, "File", model.ProgramPdfFile.FileName);
+                        content.Add(new StringContent("Events"), "ParentType");
+                        content.Add(new StringContent(newId.Value.ToString()), "ParentId");
+                        content.Add(new StringContent("EventProgramPdf"), "UploadType");
+                        var uploadRes = await _mediaService.UploadFileAsync(content, sessionToken, userAgent);
+                        if (!uploadRes.Success)
+                        {
+                             TempData["Error"] = (TempData["Error"]?.ToString() ?? "") + " Program PDF upload failed: " + uploadRes.Message;
+                        }
+                    }
+
+                    return RedirectToAction(nameof(Edit), new { id = newId.Value });
                 }
                 ModelState.AddModelError("", "Failed to create event. Please try again.");
             }
+            ViewBag.Categories = await _eventsService.GetEventCategoriesAsync(model.LangID, sessionToken, userAgent);
+            ViewBag.HeroImages = await _mediaService.GetHeroImagesAsync(sessionToken, userAgent);
             return View(model);
-
         }
 
         [HttpGet]
@@ -73,6 +111,7 @@ namespace VITBO.Controllers
             }
 
             ViewBag.Categories = await _eventsService.GetEventCategoriesAsync(langId, sessionToken, userAgent);
+            ViewBag.HeroImages = await _mediaService.GetHeroImagesAsync(sessionToken, userAgent);
 
             var model = new UpdateEventRequest
             {
@@ -150,6 +189,30 @@ namespace VITBO.Controllers
             string userAgent = GetUserAgent() ?? string.Empty;
             var categories = await _eventsService.GetEventCategoriesAsync(langId, sessionToken, userAgent);
             return Json(categories.Select(c => new { id = c.Id, name = c.Name }));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AjaxUpload()
+        {
+            var file = Request.Form.Files["File"];
+            if (file == null) return Json(new { success = false, message = "No file" });
+
+            var token = HttpContext.User.FindFirst("JWToken")?.Value ?? HttpContext.Session.GetString("JWToken") ?? string.Empty;
+            var userAgent = GetUserAgent() ?? string.Empty;
+
+            using var content = new MultipartFormDataContent();
+            var fileContent = new StreamContent(file.OpenReadStream());
+            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+            content.Add(fileContent, "File", file.FileName);
+
+            foreach (var key in Request.Form.Keys)
+            {
+                if (key == "File") continue;
+                content.Add(new StringContent(Request.Form[key].ToString()), key);
+            }
+
+            var res = await _mediaService.UploadFileAsync(content, token, userAgent);
+            return Json(res);
         }
 
         [HttpGet]

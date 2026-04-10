@@ -54,6 +54,8 @@ namespace AI_Integration.DataAccess
         public virtual DbSet<TripMust> TripMusts { get; set; } = null!;
         public virtual DbSet<VariantPrice> VariantPrices { get; set; } = null!;
         public virtual DbSet<EventNeed> EventNeeds { get; set; } = null!;
+        public virtual DbSet<StorageMapping> StorageMappings { get; set; } = null!;
+        public virtual DbSet<HeroImage> HeroImages { get; set; } = null!;
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -209,6 +211,8 @@ namespace AI_Integration.DataAccess
                 e.ToTable("Contents", "dbo");
                 e.HasKey(x => x.Id);
                 e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.Property(x => x.Guid).HasDefaultValueSql("NEWID()");
+                e.HasIndex(x => x.Guid).IsUnique();
                 e.Property(x => x.Title).IsRequired().HasMaxLength(255);
                 e.Property(x => x.Text).IsRequired();
                 e.Property(x => x.PublishDate).HasColumnType("date");
@@ -257,6 +261,8 @@ namespace AI_Integration.DataAccess
                 e.ToTable("Events", "dbo");
                 e.HasKey(x => x.Id);
                 e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.Property(x => x.Guid).HasDefaultValueSql("NEWID()");
+                e.HasIndex(x => x.Guid).IsUnique();
                 e.Property(x => x.Title).IsRequired().HasMaxLength(255);
                 e.Property(x => x.Description).IsRequired();
                 e.Property(x => x.EventDate).HasColumnType("date");
@@ -379,6 +385,21 @@ namespace AI_Integration.DataAccess
                  .WithMany()
                  .HasForeignKey(x => x.EventId)
                  .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<StorageMapping>(e =>
+            {
+                e.ToTable("StorageMappings", "dbo");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Id).ValueGeneratedOnAdd();
+                e.HasIndex(x => new { x.ParentType, x.ParentId, x.StorageArea }).HasDatabaseName("IX_StorageMappings_Parent");
+            });
+
+            modelBuilder.Entity<HeroImage>(e =>
+            {
+                e.ToTable("HeroImages", "dbo");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Id).ValueGeneratedOnAdd();
             });
 
             OnModelCreatingPartial(modelBuilder);

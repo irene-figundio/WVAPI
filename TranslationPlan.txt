@@ -1,0 +1,37 @@
+PIANO PER L'IMPLEMENTAZIONE DELLE TRADUZIONI AUTOMATICHE (AI-INTEGRATED)
+
+OBIETTIVO
+Automatizzare la traduzione dei contenuti (Titoli, Descrizioni, Testi) tra i diversi LangID (es: IT -> EN) utilizzando un assistente AI (OpenAI o Azure AI).
+
+1. INFRASTRUTTURA BACKEND
+   - Creazione di un servizio `ITranslationService` che incapsula la logica di chiamata all'AI.
+   - Integrazione di un client per OpenAI (già presente nel progetto tramite `OpenAIController`).
+   - Metodo principale: `TranslateAsync(string text, string targetLanguage)`.
+
+2. LOGICA DI TRIGGHERING
+   - Aggiunta di un flag `AutoTranslate` nei DTO di creazione/modifica (Events, Contents).
+   - Nel `FileUploadService` o nei controller specifici, se il flag è attivo:
+     a. Identificare i campi localizzabili.
+     b. Ciclo su tutti i `LangID` configurati nel sistema (escluso quello corrente).
+     c. Per ogni lingua:
+        - Tradurre il testo tramite l'AI.
+        - Salvare una nuova entry (o aggiornare l'esistente) con il `LangID` di destinazione.
+
+3. INTEGRAZIONE DATABASE
+   - Attualmente le tabelle `Events` e `Contents` hanno una colonna `LangID`.
+   - La logica deve gestire il "clonaggio" del record per le altre lingue, mantenendo un riferimento comune (es: tramite il GUID introdotto precedentemente).
+   - Il GUID diventerà il collante tra le diverse versioni linguistiche dello stesso contenuto.
+
+4. INTERFACCIA UTENTE (BO)
+   - Accanto ai campi di testo, aggiungere un pulsante "AI Translate".
+   - Al click, invocare un endpoint API `api/Translation/AutoFill` che restituisce la traduzione in tempo reale.
+   - Oppure, aggiungere una checkbox "Translate to all languages" nel form di salvataggio.
+
+5. OTTIMIZZAZIONE E COSTI
+   - Implementare una cache per evitare di tradurre stringhe identiche più volte.
+   - Logging accurato dei token consumati per il monitoraggio dei costi AI.
+
+6. PROSSIMI PASSI TECNICI
+   - Implementare `TranslationService.cs`.
+   - Aggiornare `UnitOfWork` per supportare query trasversali per GUID.
+   - Aggiungere il pulsante magico nella UI di editing.

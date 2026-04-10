@@ -5,6 +5,7 @@
     int contentId = ViewBag.ContentId;
     int currentLangId = ViewBag.LangId ?? 1;
     var availableExperts = ViewBag.AvailableExperts as List<VITBO.Models.ExpertDto> ?? new List<VITBO.Models.ExpertDto>();
+    var allExperts = ViewBag.AllExperts as List<VITBO.Models.ExpertDto> ?? new List<VITBO.Models.ExpertDto>();
 }
 
 <div class="row">
@@ -20,7 +21,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th scope="col" class="ps-4">Link ID</th>
-                                <th scope="col">Expert ID</th>
+                                <th scope="col">Expert</th>
                                 <th scope="col" class="text-end pe-4">Actions</th>
                             </tr>
                         </thead>
@@ -29,9 +30,30 @@
                             {
                                 @foreach (var item in Model)
                                 {
+                                    var expert = allExperts.FirstOrDefault(e => e.Id == item.ExpertId);
                                     <tr>
                                         <td class="ps-4 text-muted fw-bold">#@item.Id</td>
-                                        <td>#@item.ExpertId</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                @if (expert != null && !string.IsNullOrEmpty(expert.PhotoUrl))
+                                                {
+                                                    <img src="@expert.PhotoUrl" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;" />
+                                                }
+                                                else
+                                                {
+                                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                                        <i class="bi bi-person text-muted"></i>
+                                                    </div>
+                                                }
+                                                <div>
+                                                    <span class="fw-bold">@(expert?.Name ?? $"Unknown (#{item.ExpertId})")</span>
+                                                    @if (expert != null)
+                                                    {
+                                                        <small class="text-muted d-block">@expert.Email</small>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
                                         <td class="text-end pe-4">
                                             <form asp-action="Delete" asp-route-id="@item.Id" asp-route-contentId="@contentId" method="post" class="d-inline" onsubmit="return confirm('Unlink this expert?');">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-link-45deg"></i> Unlink</button>

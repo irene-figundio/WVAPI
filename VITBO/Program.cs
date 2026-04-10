@@ -52,6 +52,7 @@ builder.Services.AddScoped<VITBO.Services.Interfaces.IAiVideoService, VITBO.Serv
 builder.Services.AddScoped<VITBO.Services.Interfaces.IEventsService, VITBO.Services.EventsService>();
 builder.Services.AddScoped<VITBO.Services.Interfaces.ITripsService, VITBO.Services.TripsService>();
 builder.Services.AddScoped<VITBO.Services.Interfaces.IContentsService, VITBO.Services.ContentsService>();
+builder.Services.AddScoped<VITBO.Services.Interfaces.IPodcastsService, VITBO.Services.PodcastsService>();
 builder.Services.AddScoped<VITBO.Services.Interfaces.IExpertsService, VITBO.Services.ExpertsService>();
 builder.Services.AddScoped<VITBO.Services.Interfaces.IMediaService, VITBO.Services.MediaService>();
 
@@ -67,6 +68,33 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+// Serve images from the shared folder
+string? configuredPath = builder.Configuration["FileStorage:BasePhysicalPath"];
+string basePhysicalPath;
+
+if (string.IsNullOrEmpty(configuredPath) || configuredPath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+{
+    basePhysicalPath = Path.Combine(builder.Environment.ContentRootPath, "..", "VitinerarioImages");
+}
+else
+{
+    basePhysicalPath = configuredPath;
+}
+
+if (!Path.IsPathRooted(basePhysicalPath))
+{
+    basePhysicalPath = Path.GetFullPath(basePhysicalPath);
+}
+
+if (Directory.Exists(basePhysicalPath))
+{
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(basePhysicalPath),
+        RequestPath = "/Images"
+    });
+}
 
 app.UseRouting();
 app.UseHttpMethodOverride(new HttpMethodOverrideOptions

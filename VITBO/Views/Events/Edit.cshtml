@@ -2,11 +2,20 @@
 
 @{
     ViewData["Title"] = "Edit Event";
+    var heroImages = ViewBag.HeroImages as List<VITBO.Models.HeroImageDto> ?? new List<VITBO.Models.HeroImageDto>();
 }
 
 <div class="card border-0 shadow-sm border-start border-warning border-4">
-    <div class="card-header bg-white border-bottom py-3">
+    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
         <h5 class="mb-0 text-warning"><i class="bi bi-pencil-square me-2"></i> Edit Event #@Model.id</h5>
+        <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#galleryModal">
+                <i class="bi bi-images me-1"></i> Gallery
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#stageImagesModal" id="btnStageImages" style="display:none;">
+                <i class="bi bi-map me-1"></i> Stage Images
+            </button>
+        </div>
     </div>
     <div class="card-body">
         <form asp-action="Edit" method="post">
@@ -29,40 +38,103 @@
                     <span asp-validation-for="LangID" class="text-danger"></span>
                 </div>
 
-                <div class="col-md-6 form-floating mb-3">
+                <div class="col-md-3 form-floating mb-3">
+                    <input asp-for="StartDate" type="date" class="form-control" value="@Model.StartDate?.ToString("yyyy-MM-dd")" />
+                    <label asp-for="StartDate" class="ms-2">Start Date</label>
+                    <span asp-validation-for="StartDate" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-3 form-floating mb-3">
+                    <input asp-for="StartTime" type="time" class="form-control" value="@Model.StartTime?.ToString(@"hh\:mm")" />
+                    <label asp-for="StartTime" class="ms-2">Start Time</label>
+                    <span asp-validation-for="StartTime" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-3 form-floating mb-3">
                     <input asp-for="EndDate" type="date" class="form-control" value="@Model.EndDate?.ToString("yyyy-MM-dd")" />
-                    <label asp-for="EndDate" class="ms-2">End Date (Optional)</label>
+                    <label asp-for="EndDate" class="ms-2">End Date</label>
                     <span asp-validation-for="EndDate" class="text-danger"></span>
                 </div>
 
+                <div class="col-md-3 form-floating mb-3">
+                    <input asp-for="EndTime" type="time" class="form-control" value="@Model.EndTime?.ToString(@"hh\:mm")" />
+                    <label asp-for="EndTime" class="ms-2">End Time</label>
+                    <span asp-validation-for="EndTime" class="text-danger"></span>
+                </div>
+
                 <div class="col-md-6 form-floating mb-3">
-                    <input asp-for="HeroImage" class="form-control" placeholder="Hero Image URL" />
-                    <label asp-for="HeroImage" class="ms-2">Hero Image URL</label>
+                    <select asp-for="HeroImage" class="form-select">
+                        <option value="">-- No Hero Image --</option>
+                        @foreach (var hero in heroImages)
+                        {
+                            <option value="@hero.ImageUrl">@hero.Name</option>
+                        }
+                    </select>
+                    <label asp-for="HeroImage" class="ms-2">Hero Image</label>
                     <span asp-validation-for="HeroImage" class="text-danger"></span>
                 </div>
 
-                <div class="col-md-6 form-floating mb-3">
-                    <input asp-for="CoverImage" class="form-control" placeholder="Cover Image URL" />
-                    <label asp-for="CoverImage" class="ms-2">Cover Image URL</label>
-                    <span asp-validation-for="CoverImage" class="text-danger"></span>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label d-block">Cover Image</label>
+                    <div class="d-flex align-items-center gap-3">
+                        @if (!string.IsNullOrEmpty(Model.CoverImage))
+                        {
+                            <img src="@Model.CoverImage" id="previewCover" class="img-thumbnail" style="height: 100px; width: 100px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div id="previewCover" class="bg-light border d-flex align-items-center justify-content-center" style="height: 100px; width: 100px;">
+                                <i class="bi bi-image text-muted"></i>
+                            </div>
+                        }
+                        <div class="flex-grow-1">
+                            <input type="file" id="uploadCover" class="form-control" accept="image/*" />
+                            <input type="hidden" asp-for="CoverImage" id="hiddenCoverImage" />
+                            <div class="mt-1 small text-muted">Click to change cover. Will be converted to PNG.</div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="col-md-6 form-floating mb-3">
+                <div class="col-md-4 form-floating mb-3">
                     <input asp-for="EventDate" type="date" class="form-control" value="@Model.EventDate.ToString("yyyy-MM-dd")" />
-                    <label asp-for="EventDate" class="ms-2">Event Date</label>
+                    <label asp-for="EventDate" class="ms-2">Legacy Event Date</label>
                     <span asp-validation-for="EventDate" class="text-danger"></span>
                 </div>
 
-                <div class="col-md-6 form-floating mb-3">
+                <div class="col-md-4 form-floating mb-3">
                     <input asp-for="Price" type="number" step="0.01" class="form-control" placeholder="0.00" />
                     <label asp-for="Price" class="ms-2">Ticket Price (€)</label>
                     <span asp-validation-for="Price" class="text-danger"></span>
                 </div>
 
-                <div class="col-12 form-floating mb-3">
+                <div class="col-md-4 form-floating mb-3">
+                    <input asp-for="Coordinates" class="form-control" placeholder="45.0, 9.0" />
+                    <label asp-for="Coordinates" class="ms-2">Coordinates (Lat, Long)</label>
+                    <span asp-validation-for="Coordinates" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4 form-floating mb-3">
                     <input asp-for="Location" class="form-control" placeholder="Location" />
                     <label asp-for="Location" class="ms-2">Location / Venue</label>
                     <span asp-validation-for="Location" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4 form-floating mb-3">
+                    <input asp-for="Organizer" class="form-control" placeholder="Organizer Name" />
+                    <label asp-for="Organizer" class="ms-2">Organizer</label>
+                    <span asp-validation-for="Organizer" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4 form-floating mb-3">
+                    <input asp-for="ContactInfo" class="form-control" placeholder="Email / Phone" />
+                    <label asp-for="ContactInfo" class="ms-2">Contact Info</label>
+                    <span asp-validation-for="ContactInfo" class="text-danger"></span>
+                </div>
+
+                <div class="col-12 form-floating mb-3">
+                    <input asp-for="Subtitle" class="form-control" placeholder="Subtitle" />
+                    <label asp-for="Subtitle" class="ms-2">Subtitle</label>
+                    <span asp-validation-for="Subtitle" class="text-danger"></span>
                 </div>
 
                 <div class="col-12 form-floating mb-3">
@@ -92,10 +164,16 @@
                     </div>
                 </div>
 
-                <div class="col-md-12 form-floating mb-3">
-                    <input asp-for="ProgramPdf" class="form-control" placeholder="Program PDF URL" />
-                    <label asp-for="ProgramPdf" class="ms-2">Program PDF URL</label>
-                    <span asp-validation-for="ProgramPdf" class="text-danger"></span>
+                <div class="col-md-12 mb-3" id="programPdfSection" style="display:none;">
+                    <label class="form-label">Program PDF</label>
+                    <div class="input-group">
+                        <input type="file" id="uploadPdf" class="form-control" accept="application/pdf" />
+                        @if (!string.IsNullOrEmpty(Model.ProgramPdf))
+                        {
+                            <a href="@Model.ProgramPdf" target="_blank" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-pdf"></i> View Current</a>
+                        }
+                    </div>
+                    <input type="hidden" asp-for="ProgramPdf" id="hiddenProgramPdf" />
                 </div>
 
                 <div class="col-md-6 form-floating mb-3">
@@ -115,10 +193,73 @@
     </div>
 </div>
 
+<!-- Gallery Modal -->
+<div class="modal fade" id="galleryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Event Gallery</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Upload New Photo</label>
+                    <div class="input-group">
+                        <input type="file" id="galleryUpload" class="form-control" accept="image/*" />
+                        <input type="text" id="galleryCaption" class="form-control" placeholder="Caption (optional)" />
+                        <button class="btn btn-warning" type="button" id="btnUploadGallery">Upload</button>
+                    </div>
+                </div>
+                <hr />
+                <div id="galleryContainer" class="row g-2">
+                    <!-- Photos will be loaded here via AJAX -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stage Images Modal -->
+<div class="modal fade" id="stageImagesModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Stage Images (Max 3)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info py-2 small">
+                    <i class="bi bi-info-circle me-1"></i> These images are linked to a specific Trip and Day.
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label small">Trip ID</label>
+                        <input type="number" id="stageTripId" class="form-control" value="@Model.id" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small">Day Number</label>
+                        <input type="number" id="stageDayNumber" class="form-control" value="1" />
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Upload Image</label>
+                    <div class="input-group">
+                        <input type="file" id="stageImageUpload" class="form-control" accept="image/*" />
+                        <button class="btn btn-info text-white" type="button" id="btnUploadStage">Upload</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
         $(document).ready(function () {
+            const apiBase = '@ViewBag.ApiBase'; // Ensure this is passed or use a fixed one
+            const eventId = @Model.id;
+
             function loadCategories(langId, selectedCategoryId) {
                 $.getJSON('@Url.Action("GetCategoriesByLang", "Events")', { langId: langId }, function (data) {
                     var items = '<option value="">-- Select Category --</option>';
@@ -126,9 +267,20 @@
                         var selected = category.id == selectedCategoryId ? "selected" : "";
                         items += "<option value='" + category.id + "' " + selected + ">" + category.name + " (#" + category.id + ")</option>";
                     });
-                    $('#categorySelect').html(items);
+                    $('#categorySelect').html(items).trigger('change');
                 });
             }
+
+            $('#categorySelect').change(function() {
+                const catId = $(this).val();
+                if (catId == 3 || catId == 4) {
+                    $('#programPdfSection').show();
+                    $('#btnStageImages').show();
+                } else {
+                    $('#programPdfSection').hide();
+                    $('#btnStageImages').hide();
+                }
+            });
 
             $('#langSelect').change(function () {
                 loadCategories($(this).val(), null);
@@ -136,6 +288,85 @@
 
             // Initial load
             loadCategories($('#langSelect').val(), '@Model.CategoryId');
+
+            // --- AJAX Uploads ---
+            $('#uploadCover').change(async function() {
+                const file = this.files[0];
+                if (!file) return;
+
+                const res = await performUpload(file, 'Events', 'EventCoverImage');
+                if (res.success) {
+                    $('#hiddenCoverImage').val(res.fileUrl);
+                    $('#previewCover').attr('src', res.fileUrl).removeClass('bg-light');
+                    alert('Cover updated!');
+                } else {
+                    alert('Upload failed: ' + res.message);
+                }
+            });
+
+            $('#uploadPdf').change(async function() {
+                const file = this.files[0];
+                if (!file) return;
+
+                const res = await performUpload(file, 'Events', 'EventProgramPdf');
+                if (res.success) {
+                    $('#hiddenProgramPdf').val(res.fileUrl);
+                    alert('PDF updated!');
+                } else {
+                    alert('Upload failed: ' + res.message);
+                }
+            });
+
+            async function performUpload(file, parentType, uploadType, extra = {}) {
+                const formData = new FormData();
+                formData.append('File', file);
+                formData.append('ParentType', parentType);
+                formData.append('ParentId', eventId);
+                formData.append('UploadType', uploadType);
+                formData.append('LangId', $('#langSelect').val());
+                for (const key in extra) formData.append(key, extra[key]);
+
+                // We'll use a simple proxy in the controller for this
+                const response = await fetch('@Url.Action("AjaxUpload", "Events")', {
+                    method: 'POST',
+                    body: formData
+                });
+                return await response.json();
+            }
+
+            $('#btnUploadGallery').click(async function() {
+                const file = $('#galleryUpload')[0].files[0];
+                if (!file) { alert('Select a file'); return; }
+
+                const res = await performUpload(file, 'Events', 'EventGalleryImage', {
+                    Caption: $('#galleryCaption').val()
+                });
+
+                if (res.success) {
+                    alert('Photo added!');
+                    $('#galleryUpload').val('');
+                    $('#galleryCaption').val('');
+                } else {
+                    alert(res.message);
+                }
+            });
+
+            $('#btnUploadStage').click(async function() {
+                const file = $('#stageImageUpload')[0].files[0];
+                if (!file) { alert('Select a file'); return; }
+
+                const res = await performUpload(file, 'Events', 'EventStageImage', {
+                    TripId: $('#stageTripId').val(),
+                    DayNumber: $('#stageDayNumber').val()
+                });
+
+                if (res.success) {
+                    alert('Stage image uploaded!');
+                    $('#stageImageUpload').val('');
+                } else {
+                    alert(res.message);
+                }
+            });
         });
     </script>
 }

@@ -72,6 +72,19 @@ builder.Services.Configure<OpenAISettings>(
 builder.Services.AddSingleton<VideoHelper>();
 builder.Services.AddSingleton<PromptModel>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+// File Upload Services
+builder.Services.AddSingleton<AI_Integration.Services.FileUpload.Interfaces.IProgressiveResolver, AI_Integration.Services.FileUpload.Implementations.ProgressiveResolver>();
+builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IStorageMappingService, AI_Integration.Services.FileUpload.Implementations.StorageMappingService>();
+builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IFileStorageService, AI_Integration.Services.FileUpload.Implementations.FileStorageService>();
+builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IImageConversionService, AI_Integration.Services.FileUpload.Implementations.ImageConversionService>();
+builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IUploadNamingStrategy, AI_Integration.Services.FileUpload.Implementations.EventNamingStrategy>();
+builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IUploadNamingStrategy, AI_Integration.Services.FileUpload.Implementations.ContentNamingStrategy>();
+builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IUploadNamingStrategy, AI_Integration.Services.FileUpload.Implementations.HeroNamingStrategy>();
+builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IUploadNamingStrategy, AI_Integration.Services.FileUpload.Implementations.PodcastNamingStrategy>();
+builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IParentResolver, AI_Integration.Services.FileUpload.Implementations.ParentResolver>();
+builder.Services.AddScoped<AI_Integration.Services.FileUpload.Interfaces.IFileUploadService, AI_Integration.Services.FileUpload.Implementations.FileUploadService>();
+
 // add db context
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")
@@ -142,6 +155,48 @@ var app = builder.Build();
 var webEnvironment = app.Services.GetRequiredService<IWebHostEnvironment>();
 webEnvironment.WebRootPath = Path.Combine(webEnvironment.ContentRootPath, "wwwroot");
 app.UseStaticFiles(); // wwwroot
+
+// Serve images from external folder
+string? configuredPath = builder.Configuration["FileStorage:BasePhysicalPath"];
+string basePhysicalPath;
+
+// Fallback logic if path is missing or looks like a URL
+if (string.IsNullOrEmpty(configuredPath) || configuredPath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+{
+    basePhysicalPath = Path.Combine(builder.Environment.ContentRootPath, "VitinerarioImages");
+}
+else
+{
+    basePhysicalPath = configuredPath;
+}
+
+// Ensure directory exists with absolute path
+if (!Path.IsPathRooted(basePhysicalPath))
+{
+    basePhysicalPath = Path.GetFullPath(basePhysicalPath);
+}
+
+if (!Directory.Exists(basePhysicalPath))
+{
+    try
+    {
+        Directory.CreateDirectory(basePhysicalPath);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"WARNING: Could not create images directory {basePhysicalPath}: {ex.Message}");
+        // Ultimate fallback to wwwroot if creation failed
+        basePhysicalPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "Images");
+        if (!Directory.Exists(basePhysicalPath)) Directory.CreateDirectory(basePhysicalPath);
+    }
+}
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(basePhysicalPath),
+    RequestPath = "/Images"
+});
+
 var provider = new FileExtensionContentTypeProvider();
 provider.Mappings[".mkv"] = "video/x-matroska";
 provider.Mappings[".mov"] = "video/quicktime";

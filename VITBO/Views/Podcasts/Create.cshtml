@@ -1,0 +1,68 @@
+@model VITBO.Models.CreatePodcastRequest
+
+@{
+    ViewData["Title"] = "Create Podcast";
+}
+
+<div class="card border-0 shadow-sm border-start border-danger border-4">
+    <div class="card-header bg-white border-bottom py-3">
+        <h5 class="mb-0 text-danger"><i class="bi bi-mic-fill me-2"></i> Create New Podcast</h5>
+    </div>
+    <div class="card-body">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="row g-3">
+                <div class="col-md-8 form-floating mb-3">
+                    <input asp-for="Title" class="form-control" placeholder="Title" />
+                    <label asp-for="Title" class="ms-2">Podcast Title</label>
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4 form-floating mb-3">
+                    <select asp-for="LangID" class="form-select">
+                        <option value="1">English (1)</option>
+                        <option value="2">Italiano (2)</option>
+                    </select>
+                    <label asp-for="LangID" class="ms-2">Language</label>
+                </div>
+
+                <div class="col-12 form-floating mb-3">
+                    <textarea asp-for="Description" class="form-control" placeholder="Description" style="height: 100px"></textarea>
+                    <label asp-for="Description" class="ms-2">Short Description</label>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 form-floating mb-3">
+                    <input asp-for="PublishDate" type="datetime-local" class="form-control" />
+                    <label asp-for="PublishDate" class="ms-2">Publish Date</label>
+                    <span asp-validation-for="PublishDate" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Cover Image</label>
+                    <input type="file" name="CoverImageFile" class="form-control" accept="image/*" />
+                </div>
+
+                <div class="col-md-6 form-floating mb-3">
+                    <input asp-for="YoutubeUrl" class="form-control" placeholder="URL" />
+                    <label asp-for="YoutubeUrl" class="ms-2"><i class="bi bi-youtube me-1"></i> YouTube URL</label>
+                </div>
+
+                <div class="col-md-6 form-floating mb-3">
+                    <input asp-for="SpotifyUrl" class="form-control" placeholder="URL" />
+                    <label asp-for="SpotifyUrl" class="ms-2"><i class="bi bi-spotify me-1"></i> Spotify URL</label>
+                </div>
+
+                <div class="col-12 mt-4 d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+                    <button type="submit" class="btn btn-danger px-5"><i class="bi bi-save me-2"></i> Create Podcast</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

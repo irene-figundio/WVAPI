@@ -1,7 +1,8 @@
 @model VITBO.Models.CreateEventRequest
 
 @{
-    ViewData["Title"] = "Create New Event";
+    ViewData["Title"] = "Create Event";
+    var heroImages = ViewBag.HeroImages as List<VITBO.Models.HeroImageDto> ?? new List<VITBO.Models.HeroImageDto>();
 }
 
 <div class="card border-0 shadow-sm border-start border-warning border-4">
@@ -9,7 +10,7 @@
         <h5 class="mb-0 text-warning"><i class="bi bi-calendar-plus me-2"></i> Create New Event</h5>
     </div>
     <div class="card-body">
-        <form asp-action="Create" method="post">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <div class="row g-3">
@@ -28,40 +29,94 @@
                     <span asp-validation-for="LangID" class="text-danger"></span>
                 </div>
 
-                <div class="col-md-6 form-floating mb-3">
+                <div class="col-md-3 form-floating mb-3">
+                    <input asp-for="StartDate" type="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    <label asp-for="StartDate" class="ms-2">Start Date</label>
+                    <span asp-validation-for="StartDate" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-3 form-floating mb-3">
+                    <input asp-for="StartTime" type="time" class="form-control" value="09:00" />
+                    <label asp-for="StartTime" class="ms-2">Start Time</label>
+                    <span asp-validation-for="StartTime" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-3 form-floating mb-3">
                     <input asp-for="EndDate" type="date" class="form-control" />
-                    <label asp-for="EndDate" class="ms-2">End Date (Optional)</label>
+                    <label asp-for="EndDate" class="ms-2">End Date</label>
                     <span asp-validation-for="EndDate" class="text-danger"></span>
                 </div>
 
-                <div class="col-md-6 form-floating mb-3">
-                    <input asp-for="HeroImage" class="form-control" placeholder="Hero Image URL" />
-                    <label asp-for="HeroImage" class="ms-2">Hero Image URL</label>
-                    <span asp-validation-for="HeroImage" class="text-danger"></span>
+                <div class="col-md-3 form-floating mb-3">
+                    <input asp-for="EndTime" type="time" class="form-control" value="18:00" />
+                    <label asp-for="EndTime" class="ms-2">End Time</label>
+                    <span asp-validation-for="EndTime" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="CoverImageFile" class="form-label">Cover Image</label>
+                    <input asp-for="CoverImageFile" type="file" class="form-control" accept="image/*" />
+                    <span asp-validation-for="CoverImageFile" class="text-danger"></span>
+                    <div class="form-text small">Image will be automatically converted to PNG.</div>
                 </div>
 
                 <div class="col-md-6 form-floating mb-3">
-                    <input asp-for="CoverImage" class="form-control" placeholder="Cover Image URL" />
-                    <label asp-for="CoverImage" class="ms-2">Cover Image URL</label>
-                    <span asp-validation-for="CoverImage" class="text-danger"></span>
+                    <select asp-for="HeroImage" class="form-select">
+                        <option value="">-- No Hero Image --</option>
+                        @foreach (var hero in heroImages)
+                        {
+                            <option value="@hero.ImageUrl">@hero.Name</option>
+                        }
+                    </select>
+                    <label asp-for="HeroImage" class="ms-2">Hero Image</label>
                 </div>
 
-                <div class="col-md-6 form-floating mb-3">
-                    <input asp-for="EventDate" type="date" class="form-control" />
-                    <label asp-for="EventDate" class="ms-2">Event Date</label>
+                <div class="col-md-4 form-floating mb-3">
+                    <input asp-for="EventDate" type="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    <label asp-for="EventDate" class="ms-2">Legacy Event Date</label>
                     <span asp-validation-for="EventDate" class="text-danger"></span>
                 </div>
 
-                <div class="col-md-6 form-floating mb-3">
-                    <input asp-for="Price" type="number" step="0.01" class="form-control" placeholder="0.00" />
+                <div class="col-md-4 form-floating mb-3">
+                    <input asp-for="Price" type="number" step="0.01" class="form-control" />
                     <label asp-for="Price" class="ms-2">Ticket Price (€)</label>
                     <span asp-validation-for="Price" class="text-danger"></span>
                 </div>
 
-                <div class="col-12 form-floating mb-3">
+                <div class="col-md-4 form-floating mb-3">
+                    <input asp-for="BookingEndDate" type="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    <label asp-for="BookingEndDate" class="ms-2">Booking End Date</label>
+                    <span asp-validation-for="BookingEndDate" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4 form-floating mb-3">
                     <input asp-for="Location" class="form-control" placeholder="Location" />
                     <label asp-for="Location" class="ms-2">Location / Venue</label>
                     <span asp-validation-for="Location" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4 form-floating mb-3">
+                    <input asp-for="Organizer" class="form-control" placeholder="Organizer Name" value="Vitinerario®" />
+                    <label asp-for="Organizer" class="ms-2">Organizer</label>
+                    <span asp-validation-for="Organizer" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4 form-floating mb-3">
+                    <input asp-for="ContactInfo" class="form-control" placeholder="Email / Phone" />
+                    <label asp-for="ContactInfo" class="ms-2">Contact Info</label>
+                    <span asp-validation-for="ContactInfo" class="text-danger"></span>
+                </div>
+
+                <div class="col-12 form-floating mb-3">
+                    <input asp-for="Subtitle" class="form-control" placeholder="Subtitle" />
+                    <label asp-for="Subtitle" class="ms-2">Subtitle</label>
+                    <span asp-validation-for="Subtitle" class="text-danger"></span>
+                </div>
+
+                <div class="col-12 form-floating mb-3">
+                    <input asp-for="Coordinates" class="form-control" placeholder="45.0, 9.0" />
+                    <label asp-for="Coordinates" class="ms-2">Coordinates (Lat, Long)</label>
+                    <span asp-validation-for="Coordinates" class="text-danger"></span>
                 </div>
 
                 <div class="col-12 form-floating mb-3">
@@ -91,18 +146,17 @@
                     </div>
                 </div>
 
-                <div class="col-md-12 form-floating mb-3">
-                    <input asp-for="ProgramPdf" class="form-control" placeholder="Program PDF URL" />
-                    <label asp-for="ProgramPdf" class="ms-2">Program PDF URL</label>
-                    <span asp-validation-for="ProgramPdf" class="text-danger"></span>
-                </div>
-
                 <div class="col-md-6 form-floating mb-3">
                     <select asp-for="CategoryId" class="form-select" id="categorySelect">
                         <option value="">-- Select Category --</option>
                     </select>
                     <label asp-for="CategoryId" class="ms-2">Category (Optional)</label>
                     <span asp-validation-for="CategoryId" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3" id="programPdfSection" style="display:none;">
+                    <label asp-for="ProgramPdfFile" class="form-label">Program PDF</label>
+                    <input asp-for="ProgramPdfFile" type="file" class="form-control" accept="application/pdf" />
                 </div>
 
                 <div class="col-12 mt-4 d-flex justify-content-between">
@@ -124,15 +178,23 @@
                     $.each(data, function (i, category) {
                         items += "<option value='" + category.id + "'>" + category.name + " (#" + category.id + ")</option>";
                     });
-                    $('#categorySelect').html(items);
+                    $('#categorySelect').html(items).trigger('change');
                 });
             }
+
+            $('#categorySelect').change(function() {
+                const catId = $(this).val();
+                if (catId == 3 || catId == 4) {
+                    $('#programPdfSection').show();
+                } else {
+                    $('#programPdfSection').hide();
+                }
+            });
 
             $('#langSelect').change(function () {
                 loadCategories($(this).val());
             });
 
-            // Initial load
             loadCategories($('#langSelect').val());
         });
     </script>

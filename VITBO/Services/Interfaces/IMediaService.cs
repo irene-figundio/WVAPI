@@ -31,5 +31,10 @@ namespace VITBO.Services.Interfaces
         Task<List<ContentLinkDto>> GetContentLinksAsync(int? contentId, string token, string userAgent);
         Task<bool> CreateContentLinkAsync(ContentLinkDto model, string token, string userAgent);
         Task<bool> DeleteContentLinkAsync(int id, string token, string userAgent);
+
+        // New methods for File Upload
+        Task<UploadResponseDto> UploadFileAsync(MultipartFormDataContent content, string token, string userAgent);
+        Task<List<HeroImageDto>> GetHeroImagesAsync(string token, string userAgent);
+        Task<bool> DeleteHeroImageAsync(int id, string token, string userAgent);
     }
 }

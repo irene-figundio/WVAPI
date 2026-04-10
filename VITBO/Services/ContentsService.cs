@@ -17,11 +17,19 @@ namespace VITBO.Services
             _apiBase = _configuration["ApiBaseAddress"] ?? "https://localhost:7275";
         }
 
-        public async Task<bool> CreateContent(CreateContentRequest request,string token,string userAgent)
+        public async Task<int?> CreateContent(CreateContentRequest request, string token, string userAgent)
         {
             var endpoint = $"{_apiBase}/api/Contents";
-            return await _httpService.SendHttpRequestAsync(HttpMethod.Post, endpoint, token,request, userAgent) is HttpResponseMessage response && response.IsSuccessStatusCode;
-            //return await _apiService.PostVoidAsync("api/Contents", request);
+            var response = await _httpService.SendHttpRequestAsync(HttpMethod.Post, endpoint, token, request, userAgent);
+            if (response != null && response.IsSuccessStatusCode)
+            {
+                var body = await _httpService.GetBodyFromHttpResponseAsync<dynamic>(response);
+                if (body != null && body.GetProperty("id").ValueKind != System.Text.Json.JsonValueKind.Null)
+                {
+                    return body.GetProperty("id").GetInt32();
+                }
+            }
+            return null;
         }
 
         public async Task<List<ContentDto>> GetContentsByTypeAsync(string contentType, int langId,string token, string userAgent)

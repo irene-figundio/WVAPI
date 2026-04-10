@@ -91,8 +91,8 @@ namespace AI_Integration.Controllers
                 if (experts == null || experts.Count == 0)
                 {
                     sw.Stop();
-                    await WebApiLogHelper.LogNotFoundAsync(_unitOfWork, log, "{ success = false, message = 'Experts not found.' }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                    return NotFound();
+                    await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true, count = 0 }", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                    return Ok(new List<Expert>());
                 }
                 var expertIds = experts.Select(e => e.ExpertId).ToList();
                 var expertDetails = await _unitOfWork.Query<Expert>().Where(e => expertIds.Contains(e.Id)).ToListAsync();
@@ -121,8 +121,8 @@ namespace AI_Integration.Controllers
                 if (experts == null || experts.Count == 0)
                 {
                     sw.Stop();
-                    await WebApiLogHelper.LogNotFoundAsync(_unitOfWork, log, "{ success = false, message = 'Experts not found.' }", $"ElapsedMs={sw.ElapsedMilliseconds}");
-                    return NotFound();
+                    await WebApiLogHelper.LogOkAsync(_unitOfWork, log, "{ success = true, count = 0 }", $"ElapsedMs={sw.ElapsedMilliseconds}");
+                    return Ok(new List<Expert>());
                 }
                 var expertIds = experts.Select(e => e.ExpertId).ToList();
                 var expertDetails = await _unitOfWork.Query<Expert>().Where(e => expertIds.Contains(e.Id)).ToListAsync();

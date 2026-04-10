@@ -1,6 +1,8 @@
+using AI_Integration.DataAccess.Database.Models;
+
 namespace AI_Integration.DataAccess.Database.Repositories.interfaces
 {
-    public interface IEventRepository
+    public interface IEventRepository : IRepository<Event>
     {
     }
 }
