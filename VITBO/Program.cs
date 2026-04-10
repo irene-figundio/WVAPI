@@ -70,9 +70,20 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 // Serve images from the shared folder
-var basePhysicalPath = builder.Configuration["FileStorage:BasePhysicalPath"] ?? Path.Combine(builder.Environment.ContentRootPath, "..", "VitinerarioImages");
+string? configuredPath = builder.Configuration["FileStorage:BasePhysicalPath"];
+string basePhysicalPath;
 
-if (!Path.IsPathRooted(basePhysicalPath)) {
+if (string.IsNullOrEmpty(configuredPath) || configuredPath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+{
+    basePhysicalPath = Path.Combine(builder.Environment.ContentRootPath, "..", "VitinerarioImages");
+}
+else
+{
+    basePhysicalPath = configuredPath;
+}
+
+if (!Path.IsPathRooted(basePhysicalPath))
+{
     basePhysicalPath = Path.GetFullPath(basePhysicalPath);
 }
 

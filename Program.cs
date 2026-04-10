@@ -157,19 +157,37 @@ webEnvironment.WebRootPath = Path.Combine(webEnvironment.ContentRootPath, "wwwro
 app.UseStaticFiles(); // wwwroot
 
 // Serve images from external folder
-var basePhysicalPath = builder.Configuration["FileStorage:BasePhysicalPath"] ?? Path.Combine(builder.Environment.ContentRootPath, "VitinerarioImages");
+string? configuredPath = builder.Configuration["FileStorage:BasePhysicalPath"];
+string basePhysicalPath;
+
+// Fallback logic if path is missing or looks like a URL
+if (string.IsNullOrEmpty(configuredPath) || configuredPath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+{
+    basePhysicalPath = Path.Combine(builder.Environment.ContentRootPath, "VitinerarioImages");
+}
+else
+{
+    basePhysicalPath = configuredPath;
+}
 
 // Ensure directory exists with absolute path
-if (!Path.IsPathRooted(basePhysicalPath)) {
+if (!Path.IsPathRooted(basePhysicalPath))
+{
     basePhysicalPath = Path.GetFullPath(basePhysicalPath);
 }
 
 if (!Directory.Exists(basePhysicalPath))
 {
-    try {
+    try
+    {
         Directory.CreateDirectory(basePhysicalPath);
-    } catch (Exception ex) {
+    }
+    catch (Exception ex)
+    {
         Console.WriteLine($"WARNING: Could not create images directory {basePhysicalPath}: {ex.Message}");
+        // Ultimate fallback to wwwroot if creation failed
+        basePhysicalPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "Images");
+        if (!Directory.Exists(basePhysicalPath)) Directory.CreateDirectory(basePhysicalPath);
     }
 }
 
